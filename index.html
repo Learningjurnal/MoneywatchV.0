@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>IHSG Pro Master — Jurnal & Analisa Big Money</title>
+<title>Money Watch — Jurnal & Analisa Investasi</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -232,8 +232,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',
      ══════════════════════════════════════════════ -->
 <div id="auth-overlay">
   <div class="auth-box">
-    <div class="auth-logo">IHSG<span>PRO</span></div>
-    <div class="auth-sub">Jurnal &amp; Analisa Investasi · v4</div>
+    <div class="auth-logo" style="display:flex;align-items:center;justify-content:center;gap:10px">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#00c8ff" stroke-width="1.5"/>
+        <path d="M7 14 L10 10 L13 13 L17 8" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="17" cy="8" r="1.5" fill="#00e5a0"/>
+        <path d="M7 17 H17" stroke="#00c8ff" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.5"/>
+      </svg>
+      Money<span>Watch</span>
+    </div>
+    <div class="auth-sub">Portofolio &amp; Analisa Investasi · v5</div>
 
     <!-- Lockout notice -->
     <div class="auth-lock" id="auth-lock-msg"></div>
@@ -307,7 +315,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',
 <!-- TOPBAR -->
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:14px">
-  <div class="logo">IHSG<span>PRO</span> <span style="font-size:9px;color:var(--text3);font-weight:400">v4</span></div>
+  <div class="logo" style="display:flex;align-items:center;gap:7px">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" stroke="#00c8ff" stroke-width="1.5"/>
+      <path d="M7 14 L10 10 L13 13 L17 8" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="17" cy="8" r="1.5" fill="#00e5a0"/>
+      <path d="M7 17 H17" stroke="#00c8ff" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.5"/>
+    </svg>
+    Money<span>Watch</span> <span style="font-size:9px;color:var(--text3);font-weight:400">v5</span>
+  </div>
   <div class="nav-wrap">
     <div class="nav" id="nav">
       <button class="on" onclick="goPage('dashboard',this)">Dashboard</button>
@@ -3660,37 +3676,42 @@ function buildModalPosisiChart(porto){
   kc('modalposisi');
   var cv=el('modalPosisiChart'); if(!cv||!porto.length) return;
   var labels=porto.map(function(p){return p.ticker});
-  var modal=porto.map(function(p){return Math.round(p.cost)});
-  var mv=porto.map(function(p){return Math.round(p.mv)});
-  var glColors=porto.map(function(p){return p.unreal>=0?'rgba(255,193,7,.75)':'rgba(255,61,90,.75)'});
-  var glVals=porto.map(function(p){return Math.round(Math.abs(p.unreal))});
+  // Stacked: bottom=retained(min), top-red=loss, top-green=gain
+  var retained=porto.map(function(p){return Math.round(Math.min(p.cost,p.mv))});
+  var loss=porto.map(function(p){return p.unreal<0?Math.round(Math.abs(p.unreal)):0});
+  var gain=porto.map(function(p){return p.unreal>=0?Math.round(p.unreal):0});
   var ctx=cv.getContext('2d');
   charts['modalposisi']=new Chart(ctx,{
     type:'bar',
     data:{
       labels:labels,
       datasets:[
-        {label:'Modal',data:modal,backgroundColor:'rgba(0,200,255,.55)',borderColor:'#00c8ff',borderWidth:1,borderRadius:3,order:2},
-        {label:'Nilai Pasar',data:mv,backgroundColor:'rgba(0,229,160,.55)',borderColor:'#00e5a0',borderWidth:1,borderRadius:3,order:1},
-        {label:'Gain/Loss',data:glVals,backgroundColor:glColors,borderWidth:0,borderRadius:3,order:0}
+        {label:'Nilai Pasar',data:retained,backgroundColor:'rgba(45,212,191,.6)',borderColor:'#2dd4bf',borderWidth:1,stack:'s'},
+        {label:'Rugi',      data:loss,    backgroundColor:'rgba(255,61,90,.7)',  borderColor:'#ff3d5a',borderWidth:1,stack:'s'},
+        {label:'Untung',    data:gain,    backgroundColor:'rgba(0,229,160,.7)',  borderColor:'#00e5a0',borderWidth:1,stack:'s'}
       ]
     },
     options:{
       responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{display:false},
+        legend:{
+          display:true,
+          labels:{color:'#8fa3c8',font:{size:10},boxWidth:12,padding:16}
+        },
         tooltip:Object.assign({},TT,{mode:'index',intersect:false,callbacks:{
           label:function(c){
             var pf=porto[c.dataIndex];
-            if(c.datasetIndex===0) return 'Modal: Rp '+fmtK(c.parsed.y);
-            if(c.datasetIndex===1) return 'Nilai Pasar: Rp '+fmtK(c.parsed.y);
-            var gl=pf.unreal; return (gl>=0?'Untung +':'Rugi -')+'Rp '+fmtK(Math.abs(gl))+' ('+pf.ret.toFixed(2)+'%)';
-          }
+            if(c.datasetIndex===0) return 'Nilai Pasar: Rp '+fmtK(pf.mv)+' (Modal: Rp '+fmtK(pf.cost)+')';
+            if(c.datasetIndex===1&&pf.unreal<0) return 'Rugi: -Rp '+fmtK(Math.abs(pf.unreal))+' ('+pf.ret.toFixed(2)+'%)';
+            if(c.datasetIndex===2&&pf.unreal>=0) return 'Untung: +Rp '+fmtK(pf.unreal)+' (+'+pf.ret.toFixed(2)+'%)';
+            return null;
+          },
+          filter:function(item){ return item.parsed.y>0; }
         }})
       },
       scales:{
-        x:{grid:{color:GC},ticks:Object.assign({},TC,{maxRotation:45,font:{size:9}})},
-        y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp'+fmtK(v)}}),position:'right'}
+        x:{stacked:true,grid:{color:GC},ticks:Object.assign({},TC,{maxRotation:45,font:{size:9}})},
+        y:{stacked:true,grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp'+fmtK(v)}}),position:'right'}
       }
     }
   });
@@ -3990,12 +4011,14 @@ function renderDashboard(){
   }).join('')||'<div style="color:var(--text3);text-align:center;padding:12px;font-size:11px">Belum ada transaksi</div>';
 
   // ── Kas & Likuiditas (semua akun) ──
-  var totalCashAll = Object.values(CASH_ACCOUNTS).reduce(function(a,c){
-    return a + (c.isUsd ? c.balance*usdIdr : c.balance);
+  // Saham/RDN = calcRdnBalance(), CASH_ACCOUNTS.saham dikecualikan agar tidak double count
+  var totalCashAll = Object.entries(CASH_ACCOUNTS).reduce(function(a,e){
+    if(e[0]==='saham') return a; // RDN sudah dihitung lewat rdn
+    return a + (e[1].isUsd ? e[1].balance*usdIdr : e[1].balance);
   }, 0) + Math.max(0,rdn);
   el('d-kas-detail').innerHTML=
-    '<div class="taxrow" style="padding:3px 0"><span style="color:var(--text2);font-size:11px">Kas Saham (RDN)</span><span class="mono up" style="font-size:11px">'+fmtK(Math.max(0,rdn))+'</span></div>'+
-    Object.entries(CASH_ACCOUNTS).map(function(e){
+    '<div class="taxrow" style="padding:3px 0"><span style="color:var(--green);font-size:11px">💰 Kas Saham (RDN)</span><span class="mono up" style="font-size:11px">'+fmtK(Math.max(0,rdn))+'</span></div>'+
+    Object.entries(CASH_ACCOUNTS).filter(function(e){return e[0]!=='saham';}).map(function(e){
       var k=e[0],c=e[1]; var val=c.isUsd?c.balance*usdIdr:c.balance;
       return '<div class="taxrow" style="padding:3px 0"><span style="color:'+c.color+';font-size:11px">'+c.label+'</span><span class="mono" style="color:'+c.color+';font-size:11px">'+fmtK(val)+'</span></div>';
     }).join('')+
@@ -4712,7 +4735,9 @@ function openModal(type){
     var isBuy=type==='buy';
     el('m-title').textContent=isBuy?'Input Pembelian Saham':'Input Penjualan Saham';
     el('m-title').style.color=isBuy?'var(--green)':'var(--red)';
-    el('m-body').innerHTML='<div class="fgrid"><div class="fg ffull"><label class="flabel">Tanggal</label><input class="finput" type="date" id="mf-date" value="'+today()+'"></div><div class="fg"><label class="flabel">Sekuritas</label><select class="finput fsel" id="mf-sec" onchange="onSecChange()">'+secOpts+'</select></div><div class="fg"><label class="flabel">Kode Saham</label><select class="finput fsel" id="mf-ticker" onchange="prefillPrice()">'+tkrOpts+'</select></div><div class="fg"><label class="flabel">Jumlah Lot</label><input class="finput" type="number" id="mf-lot" placeholder="1" min="1" oninput="txCalcLive()"></div><div class="fg"><label class="flabel">Harga/Lembar (Rp)</label><input class="finput" type="number" id="mf-price" placeholder="Harga pasar" oninput="txCalcLive()"></div><div class="fg ffull"><label class="flabel">Catatan (opsional)</label><input class="finput" type="text" id="mf-notes" placeholder="Alasan entry / catatan (opsional)"></div></div><div class="taxbox"><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-bottom:7px">RINCIAN '+(isBuy?'PEMBELIAN':'PENJUALAN')+'</div><div class="taxrow"><span>Nilai Kotor</span><span class="mono" id="mc-g">Rp 0</span></div><div class="taxrow"><span id="mc-k-lbl">Komisi</span><span class="mono amb" id="mc-k">Rp 0</span></div>'+(isBuy?'':'<div class="taxrow"><span>PPh Final 0,1%</span><span class="mono dn" id="mc-t">Rp 0</span></div>')+'<div class="taxrow tot"><span>Total '+(isBuy?'Dibayar':'Diterima')+'</span><span class="mono '+(isBuy?'amb':'up')+'" id="mc-tot">Rp 0</span></div></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn '+(isBuy?'btn-green':'btn-red')+'" onclick="submitTxModal()">Konfirmasi '+(isBuy?'Beli':'Jual')+'</button></div>';
+    var _pphB=(pphBeliFor(activeSekuritas)*100).toFixed(2);
+    var _pphJ=(pphJualFor(activeSekuritas)*100).toFixed(2);
+    el('m-body').innerHTML='<div class="fgrid"><div class="fg ffull"><label class="flabel">Tanggal</label><input class="finput" type="date" id="mf-date" value="'+today()+'"></div><div class="fg"><label class="flabel">Sekuritas</label><select class="finput fsel" id="mf-sec" onchange="onSecChange()">'+secOpts+'</select></div><div class="fg"><label class="flabel">Kode Saham</label><select class="finput fsel" id="mf-ticker" onchange="prefillPrice()">'+tkrOpts+'</select></div><div class="fg"><label class="flabel">Jumlah Lot</label><input class="finput" type="number" id="mf-lot" placeholder="1" min="1" oninput="txCalcLive()"></div><div class="fg"><label class="flabel">Harga/Lembar (Rp)</label><input class="finput" type="number" id="mf-price" placeholder="Harga pasar" oninput="txCalcLive()"></div><div class="fg ffull"><label class="flabel">Catatan (opsional)</label><input class="finput" type="text" id="mf-notes" placeholder="Alasan entry / catatan (opsional)"></div></div><div class="taxbox"><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-bottom:7px">RINCIAN '+(isBuy?'PEMBELIAN':'PENJUALAN')+'</div><div class="taxrow"><span>Nilai Kotor</span><span class="mono" id="mc-g">Rp 0</span></div><div class="taxrow"><span id="mc-k-lbl">Komisi '+(isBuy?'Beli':'Jual')+'</span><span class="mono amb" id="mc-k">Rp 0</span></div><div class="taxrow"><span id="mc-t-lbl">PPh '+(isBuy?'Beli '+_pphB+'%':'Jual '+_pphJ+'%')+'</span><span class="mono dn" id="mc-t">Rp 0</span></div><div class="taxrow tot"><span>Total '+(isBuy?'Dibayar':'Diterima')+'</span><span class="mono '+(isBuy?'amb':'up')+'" id="mc-tot">Rp 0</span></div></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn '+(isBuy?'btn-green':'btn-red')+'" onclick="submitTxModal()">Konfirmasi '+(isBuy?'Beli':'Jual')+'</button></div>';
     setTimeout(function(){var t=el('mf-ticker').value;if(t&&(prices[t]||DB[t])){el('mf-price').value=prices[t]||DB[t].base;}txCalcLive();},50);
   } else if(type==='div'){
     el('m-title').textContent='Catat Penerimaan Dividen';
@@ -5437,12 +5462,14 @@ function txCalcLive(){
   var lot=parseFloat(el('mf-lot')&&el('mf-lot').value||0);
   var price=parseFloat(el('mf-price')&&el('mf-price').value||0);
   var gross=lot*100*price;
+  var pphRate=isBuy?pphBeliFor(secName):pphJualFor(secName);
   var komisi=isBuy?gross*sec.buyFee:gross*sec.sellFee;
-  var tax=isBuy?gross*getPphBeli():gross*getPphJual();
+  var tax=gross*pphRate;
   var total=isBuy?gross+komisi+tax:gross-komisi-tax;
   if(el('mc-g'))el('mc-g').textContent='Rp '+fmt(gross);
-  if(el('mc-k-lbl'))el('mc-k-lbl').textContent='Komisi '+(isBuy?'Beli':'Jual')+' ('+(isBuy?sec.buyFee:sec.sellFee)*100+'%)';
+  if(el('mc-k-lbl'))el('mc-k-lbl').textContent='Komisi '+(isBuy?'Beli':'Jual')+' ('+((isBuy?sec.buyFee:sec.sellFee)*100).toFixed(2)+'%)';
   if(el('mc-k'))el('mc-k').textContent='Rp '+fmt(komisi);
+  if(el('mc-t-lbl'))el('mc-t-lbl').textContent='PPh '+(isBuy?'Beli':'Jual')+' ('+(pphRate*100).toFixed(2)+'%)';
   if(el('mc-t'))el('mc-t').textContent='Rp '+fmt(tax);
   if(el('mc-tot'))el('mc-tot').textContent='Rp '+fmt(total);
 }
@@ -7115,6 +7142,19 @@ function saveCashInput(account){
   var input = el('cash-'+account+'-input');
   if(!input) return;
   var val = parseFloat(input.value)||0;
+  if(account==='saham'){
+    // Saldo RDN bersumber dari mutasi — tambah entri penyesuaian
+    var current = calcRdnBalance();
+    var diff = val - current;
+    if(Math.abs(diff) > 0){
+      addRdn(today(),'SETOR', diff>=0?'Penyesuaian saldo masuk':'Penyesuaian saldo keluar', diff, activeSekuritas, null);
+      saveData();
+    }
+    renderCashWidgets();
+    updateTopbar();
+    showSaveStatus('✓ Saldo RDN disesuaikan ke Rp '+fmtK(val));
+    return;
+  }
   CASH_ACCOUNTS[account].balance = val;
   saveCashAccounts();
   var disp = el('cash-'+account+'-disp');
@@ -7123,12 +7163,14 @@ function saveCashInput(account){
   showSaveStatus('✓ Kas '+account+' disimpan');
 }
 function renderCashWidgets(){
+  // Kas Saham (RDN) selalu sinkron dengan saldo RDN dari mutasi transaksi
+  CASH_ACCOUNTS.saham.balance = calcRdnBalance();
   Object.keys(CASH_ACCOUNTS).forEach(function(k){
     var disp = el('cash-'+k+'-disp');
     var input = el('cash-'+k+'-input');
     var ca = CASH_ACCOUNTS[k];
     if(disp){ var isUsd=ca.isUsd; disp.textContent=(isUsd?'$':'Rp ')+fmt(ca.balance); }
-    if(input && !input._loaded){ input.value=ca.balance; input._loaded=true; }
+    if(input){ input.value=Math.round(ca.balance); }
   });
 }
 
