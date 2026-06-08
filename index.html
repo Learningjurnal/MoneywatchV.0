@@ -678,9 +678,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',
       <div class="ptitle">Rekening Dana Nasabah (RDN)</div>
       <div class="psub">Kelola arus kas masuk &amp; keluar ke rekening RDN sekuritas Anda</div>
     </div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-green" id="btn-setor">↑ Setor Dana</button>
       <button class="btn btn-red" id="btn-tarik">↓ Tarik Dana</button>
+      <button class="btn btn-ghost" id="btn-fee" style="border-color:rgba(255,193,7,.4);color:var(--amber)">📋 Catat Biaya</button>
     </div>
   </div>
   <div class="row4" style="margin-bottom:12px">
@@ -721,13 +722,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Syne',
   <div class="card">
     <div class="cheader">
       <span class="ctitle">Riwayat Mutasi RDN</span>
-      <select class="finput fsel" id="rdn-filter" style="width:130px;padding:4px 9px;font-size:10px">
+      <select class="finput fsel" id="rdn-filter" style="width:150px;padding:4px 9px;font-size:10px">
         <option value="all">Semua Mutasi</option>
         <option value="SETOR">Setoran</option>
         <option value="TARIK">Penarikan</option>
         <option value="BUY">Pembelian Saham</option>
         <option value="SELL">Penjualan Saham</option>
         <option value="DIVIDEN">Penerimaan Dividen</option>
+        <option value="FEE">Biaya & Fee</option>
       </select>
     </div>
     <div style="overflow-x:auto">
@@ -3385,6 +3387,41 @@ function loadSample(){
 }
 
 
+// ── Deteksi sekuritas aktif dari transaksi portofolio ──
+// Returns sekuritas yang paling sering dipakai pada transaksi BUY terbaru (30 hari terakhir),
+// atau jika tidak ada, sekuritas dengan total lot terbanyak.
+function detectActiveSekuritas(){
+  if(transactions.length === 0) return activeSekuritas;
+  // Cek 30 hari terakhir
+  var cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
+  var cutoffStr = cutoff.toISOString().slice(0,10);
+  var recent = transactions.filter(function(t){ return t.date >= cutoffStr && t.type==='BUY'; });
+  var pool = recent.length > 0 ? recent : transactions.filter(function(t){ return t.type==='BUY'; });
+  if(pool.length === 0) return activeSekuritas;
+  // Hitung frekuensi per sekuritas
+  var freq = {};
+  pool.forEach(function(t){
+    var s = t.sekuritas||''; if(!s) return;
+    freq[s] = (freq[s]||0) + 1;
+  });
+  // Pilih yang terbanyak, tie-break: transaksi terbaru
+  var sorted = Object.keys(freq).sort(function(a,b){
+    return freq[b] - freq[a] || 0;
+  });
+  return sorted[0] || activeSekuritas;
+}
+
+// Jenis biaya RDN non-saham (fee, materai, dll)
+var FEE_TYPES = [
+  { value:'DATA_FEE',  label:'Data Fee / Subscription',   hint:'Biaya langganan data pasar real-time' },
+  { value:'MATERAI',   label:'Bea Materai',                hint:'Bea materai dokumen (Rp 10.000/dok)' },
+  { value:'MIGRASI',   label:'Biaya Migrasi',              hint:'Biaya pindah rekening antar sekuritas' },
+  { value:'ADMIN',     label:'Biaya Administrasi',         hint:'Biaya bulanan rekening atau kartu saham' },
+  { value:'TRANSFER',  label:'Biaya Transfer Bank',        hint:'Biaya transfer RDN ke bank lain' },
+  { value:'PENALTY',   label:'Denda / Penalti',            hint:'Denda gagal bayar atau pelanggaran' },
+  { value:'LAINNYA',   label:'Biaya Lainnya',              hint:'Biaya operasional lainnya' },
+];
+
 function addRdn(date, type, ket, amount, sekuritas, linkedTxId){
   rdnBalance += amount;
   rdnMutations.push({
@@ -4340,25 +4377,79 @@ function renderRdn(){
   el('rdn-out-cnt').textContent=tariks.length+' kali tarik';
   el('rdn-used').textContent='Rp '+fmtK(usedBuy);
 
-  el('rdn-summary').innerHTML='<div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Total Setoran</span><span class="mono up">+ Rp '+fmtK(totalIn)+'</span></div><div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Total Penarikan</span><span class="mono dn">- Rp '+fmtK(totalOut)+'</span></div><div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Dana Untuk Beli</span><span class="mono dn">- Rp '+fmtK(usedBuy)+'</span></div><div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Hasil Jual Saham</span><span class="mono up">+ Rp '+fmtK(transactions.filter(function(t){return t.type==='SELL'}).reduce(function(a,t){return a+t.net},0))+'</span></div><div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Penerimaan Dividen</span><span class="mono up">+ Rp '+fmtK(dividends.filter(function(d){return d._src!=='lampiran'}).reduce(function(a,d){return a+d.net},0))+'</span></div><div style="border-top:1px solid var(--border2);margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;font-family:\'IBM Plex Mono\',monospace;font-weight:600;font-size:13px"><span>Saldo Aktif</span><span class="up">Rp '+fmtK(rdn)+'</span></div>';
+  var feeMuts=rdnMutations.filter(function(r){
+    return ['DATA_FEE','MATERAI','MIGRASI','ADMIN','TRANSFER','PENALTY','LAINNYA','FEE'].indexOf(r.type)>=0;
+  });
+  var totalFee=Math.abs(feeMuts.reduce(function(a,r){return a+r.amount;},0));
+  el('rdn-summary').innerHTML=
+    '<div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Total Setoran</span><span class="mono up">+ Rp '+fmtK(totalIn)+'</span></div>'
+    +'<div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Total Penarikan</span><span class="mono dn">- Rp '+fmtK(totalOut)+'</span></div>'
+    +'<div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Dana Untuk Beli</span><span class="mono dn">- Rp '+fmtK(usedBuy)+'</span></div>'
+    +'<div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Hasil Jual Saham</span><span class="mono up">+ Rp '+fmtK(transactions.filter(function(t){return t.type==='SELL'}).reduce(function(a,t){return a+t.net},0))+'</span></div>'
+    +'<div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Penerimaan Dividen</span><span class="mono up">+ Rp '+fmtK(dividends.filter(function(d){return d._src!=='lampiran'}).reduce(function(a,d){return a+d.net},0))+'</span></div>'
+    +(totalFee>0?'<div class="taxrow" style="padding:5px 0"><span style="color:var(--text2)">Biaya & Fee ('+(feeMuts.length+' catatan')+')</span><span class="mono dn">- Rp '+fmtK(totalFee)+'</span></div>':'')
+    +'<div style="border-top:1px solid var(--border2);margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;font-family:\'IBM Plex Mono\',monospace;font-weight:600;font-size:13px"><span>Saldo Aktif</span><span class="up">Rp '+fmtK(rdn)+'</span></div>';
 
-  var sec=SEKURITAS[activeSekuritas];
-  el('rdn-sec-info').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:13px;font-weight:600">'+activeSekuritas+'</span><button class="btn btn-ghost btn-xs" onclick="openModal(\'sec\')">Ganti</button></div><div class="taxrow"><span>Komisi Beli</span><span class="mono amb">'+(sec.buyFee*100).toFixed(2)+'%</span></div><div class="taxrow"><span>Komisi Jual</span><span class="mono amb">'+(sec.sellFee*100).toFixed(2)+'%</span></div><div class="taxrow"><span>PPh Penjualan</span><span class="mono dn">0,10%</span></div>';
+  // Deteksi sekuritas dari portofolio
+  var detectedSek = detectActiveSekuritas();
+  var sec=SEKURITAS[detectedSek]||SEKURITAS[activeSekuritas];
+  var ovr=sekTaxOverride[detectedSek]||{};
+  var bFee=(ovr.beli!=null?ovr.beli:sec.buyFee)*100;
+  var jFee=(ovr.jual!=null?ovr.jual:sec.sellFee)*100;
+
+  // Hitung distribusi transaksi per sekuritas
+  var bySekTx={};
+  transactions.forEach(function(t){
+    var s=t.sekuritas||'(tidak ada)';
+    if(!bySekTx[s]) bySekTx[s]={cnt:0,lot:0,lastDate:''};
+    bySekTx[s].cnt++;
+    bySekTx[s].lot+=(t.lot||0);
+    if(t.date>bySekTx[s].lastDate) bySekTx[s].lastDate=t.date;
+  });
+  var sekRows=Object.keys(bySekTx).sort(function(a,b){return bySekTx[b].cnt-bySekTx[a].cnt;}).map(function(s){
+    var isActive=(s===detectedSek);
+    var sf=SEKURITAS[s];
+    return '<div class="taxrow" style="padding:4px 0'+(isActive?';border-left:2px solid var(--accent);padding-left:6px':'')+'">'
+      +'<span style="font-size:11px'+(isActive?';color:var(--accent);font-weight:600':'')+'">'+(isActive?'★ ':'')+s+'</span>'
+      +'<span class="mono" style="font-size:10px;color:var(--text2)">'+bySekTx[s].cnt+' tx · '+bySekTx[s].lot+' lot</span>'
+      +'</div>';
+  }).join('') || '<div style="color:var(--text3);font-size:11px">Belum ada transaksi</div>';
+
+  el('rdn-sec-info').innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<div><span style="font-size:13px;font-weight:600;color:var(--accent)">'+detectedSek+'</span>'
+    +'<span style="font-size:9px;color:var(--text3);margin-left:6px;font-family:\'IBM Plex Mono\',monospace">auto-detect dari portofolio</span></div>'
+    +'<button class="btn btn-ghost btn-xs" onclick="openModal(\'sec\')">Ganti</button></div>'
+    +'<div class="taxrow"><span>Komisi Beli</span><span class="mono amb">'+bFee.toFixed(3)+'%</span></div>'
+    +'<div class="taxrow"><span>Komisi Jual</span><span class="mono amb">'+jFee.toFixed(3)+'%</span></div>'
+    +'<div class="taxrow"><span>PPh Final Jual</span><span class="mono dn">'+(TAX_SETTINGS.pphJual*100).toFixed(1)+'%</span></div>'
+    +'<div class="taxrow"><span>PPN × Komisi</span><span class="mono dn">'+(TAX_SETTINGS.ppn*100).toFixed(0)+'%</span></div>'
+    +'<div class="taxrow"><span>Levy BEI+KPEI+KSEI</span><span class="mono dn">'+(TAX_SETTINGS.levy*100).toFixed(3)+'%</span></div>'
+    +'<div style="border-top:1px solid var(--border2);margin-top:8px;padding-top:8px;font-size:9px;color:var(--text3);letter-spacing:.6px;font-family:\'IBM Plex Mono\',monospace;margin-bottom:5px">DISTRIBUSI SEKURITAS</div>'
+    +sekRows;
 
   var filter=el('rdn-filter')?el('rdn-filter').value:'all';
-  var list=rdnMutations.slice().reverse().filter(function(r){return filter==='all'||r.type===filter});
+  var FEE_SUBTYPES=['DATA_FEE','MATERAI','MIGRASI','ADMIN','TRANSFER','PENALTY','LAINNYA','FEE'];
+  var list=rdnMutations.slice().reverse().filter(function(r){
+    if(filter==='all') return true;
+    if(filter==='FEE') return FEE_SUBTYPES.indexOf(r.type)>=0;
+    return r.type===filter;
+  });
   el('rdn-tbody').innerHTML=list.map(function(r){
     var isin=r.amount>0;
-    var typeColors={'SETOR':'b-up','TARIK':'b-dn','BUY':'b-dn','SELL':'b-up','DIVIDEN':'b-pur'};
-    // Hanya SETOR & TARIK manual yang bisa dihapus langsung
-    // BUY/SELL/DIVIDEN dihapus via hapus transaksi aslinya
-    var canDel = (r.type==='SETOR'||r.type==='TARIK');
+    var typeColors={'SETOR':'b-up','TARIK':'b-dn','BUY':'b-dn','SELL':'b-up','DIVIDEN':'b-pur','FEE':'b-amb',
+      'DATA_FEE':'b-amb','MATERAI':'b-amb','MIGRASI':'b-amb','ADMIN':'b-amb','TRANSFER':'b-amb','PENALTY':'b-dn','LAINNYA':'b-amb'};
+    var typeLabels={'SETOR':'SETOR','TARIK':'TARIK','BUY':'BELI','SELL':'JUAL','DIVIDEN':'DIVIDEN','FEE':'FEE',
+      'DATA_FEE':'DATA FEE','MATERAI':'MATERAI','MIGRASI':'MIGRASI','ADMIN':'ADMIN','TRANSFER':'TRANSFER','PENALTY':'DENDA','LAINNYA':'BIAYA'};
+    // SETOR, TARIK, FEE dan sub-jenisnya bisa dihapus langsung
+    var canDel = (r.type==='SETOR'||r.type==='TARIK'||r.type==='FEE'||
+      ['DATA_FEE','MATERAI','MIGRASI','ADMIN','TRANSFER','PENALTY','LAINNYA'].indexOf(r.type)>=0);
     var delBtn = canDel
       ? '<button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delRdnManual('+r.id+')" title="Hapus mutasi ini">✕</button>'
       : '<span class="badge b-gray" style="font-size:9px;cursor:default" title="Hapus via tab '+r.type+'">auto</span>';
     return '<tr>'
       +'<td class="mono" style="color:var(--text2);font-size:11px">'+r.date+'</td>'
-      +'<td><span class="badge '+(typeColors[r.type]||'b-gray')+'">'+r.type+'</span></td>'
+      +'<td><span class="badge '+(typeColors[r.type]||'b-gray')+'">'+(typeLabels[r.type]||r.type)+'</span></td>'
       +'<td style="max-width:200px;color:var(--text2);font-size:11px">'+r.ket+'</td>'
       +'<td class="mono up">'+(isin?'Rp '+fmtK(r.amount):'—')+'</td>'
       +'<td class="mono dn">'+(!isin?'Rp '+fmtK(Math.abs(r.amount)):'—')+'</td>'
@@ -4961,6 +5052,31 @@ function openModal(type){
     el('m-title').textContent=isIn?'Setor Dana ke RDN':'Tarik Dana dari RDN';
     el('m-title').style.color=isIn?'var(--green)':'var(--red)';
     el('m-body').innerHTML='<div class="fgrid"><div class="fg ffull"><label class="flabel">Tanggal</label><input class="finput" type="date" id="mf-date" value="'+today()+'"></div><div class="fg ffull"><label class="flabel">Jumlah Dana (Rp)</label><input class="finput" type="number" id="mf-amount" placeholder="Contoh: 50000000" oninput="updateAmtPreview()"></div><div class="fg ffull"><label class="flabel">Keterangan</label><input class="finput" type="text" id="mf-ket" placeholder="'+(isIn?'Setoran rutin, top-up, dll':'Penarikan profit, kebutuhan mendesak, dll')+'"></div></div><div class="taxbox"><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-bottom:7px">'+(isIn?'DANA MASUK RDN':'DANA KELUAR RDN')+'</div><div class="taxrow tot"><span>Jumlah</span><span class="mono '+(isIn?'up':'dn')+'" id="amt-preview">Rp 0</span></div></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn '+(isIn?'btn-green':'btn-red')+'" onclick="submitRdn()">Konfirmasi '+(isIn?'Setor':'Tarik')+'</button></div>';
+  } else if(type==='fee'){
+    el('m-title').textContent='Catat Biaya & Fee Sekuritas';
+    el('m-title').style.color='var(--amber)';
+    var feeOpts=FEE_TYPES.map(function(f){return '<option value="'+f.value+'">'+f.label+'</option>';}).join('');
+    el('m-body').innerHTML=
+      '<div class="fgrid">'
+      +'<div class="fg ffull"><label class="flabel">Tanggal</label><input class="finput" type="date" id="mf-date" value="'+today()+'"></div>'
+      +'<div class="fg"><label class="flabel">Jenis Biaya</label><select class="finput fsel" id="mf-fee-type" onchange="onFeeTypeChange()">'+feeOpts+'</select></div>'
+      +'<div class="fg"><label class="flabel">Sekuritas</label><select class="finput fsel" id="mf-fee-sec">'+secOpts+'</select></div>'
+      +'<div class="fg ffull"><label class="flabel">Jumlah Biaya (Rp)</label><input class="finput" type="number" id="mf-amount" placeholder="Contoh: 10000" min="1" oninput="updateAmtPreview()"></div>'
+      +'<div class="fg ffull"><label class="flabel">Keterangan Tambahan</label><input class="finput" type="text" id="mf-ket" placeholder="Opsional — mis: bulan Januari 2026"></div>'
+      +'</div>'
+      +'<div class="taxbox" style="margin-top:8px">'
+        +'<div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-bottom:6px">INFO JENIS BIAYA</div>'
+        +'<div id="fee-hint" style="font-size:11px;color:var(--text2);margin-bottom:8px">'+FEE_TYPES[0].hint+'</div>'
+        +'<div class="taxrow tot"><span>Jumlah Biaya (keluar RDN)</span><span class="mono dn" id="amt-preview">Rp 0</span></div>'
+      +'</div>'
+      +'<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
+        +'<button class="btn btn-ghost" onclick="closeModal()">Batal</button>'
+        +'<button class="btn btn-amber" onclick="submitFee()">💾 Simpan Biaya</button>'
+      +'</div>';
+    setTimeout(function(){
+      var sel=el('mf-fee-sec');
+      if(sel) sel.value=detectActiveSekuritas();
+    },30);
   } else if(type==='buy'||type==='sell'){
     var isBuy=type==='buy';
     el('m-title').textContent=isBuy?'Input Pembelian Saham':'Input Penjualan Saham';
@@ -5752,6 +5868,28 @@ function divCalcLive(){
   if(el('dc-g'))el('dc-g').textContent='Rp '+fmt(gross);
   if(el('dc-t'))el('dc-t').textContent='-Rp '+fmt(tax);
   if(el('dc-n'))el('dc-n').textContent='Rp '+fmt(net);
+}
+
+function onFeeTypeChange(){
+  var sel=el('mf-fee-type'); if(!sel) return;
+  var ft=FEE_TYPES.find(function(f){return f.value===sel.value;});
+  if(ft&&el('fee-hint')) el('fee-hint').textContent=ft.hint;
+}
+
+function submitFee(){
+  var date=el('mf-date').value;
+  var amount=parseFloat(el('mf-amount')&&el('mf-amount').value||0);
+  var feeType=(el('mf-fee-type')&&el('mf-fee-type').value)||'LAINNYA';
+  var sek=(el('mf-fee-sec')&&el('mf-fee-sec').value)||activeSekuritas;
+  var ket=el('mf-ket')&&el('mf-ket').value||'';
+  if(!date||amount<=0){alert('Lengkapi tanggal dan jumlah biaya!');return;}
+  var ft=FEE_TYPES.find(function(f){return f.value===feeType;})||{label:'Biaya Lainnya'};
+  var keterangan=ft.label+(ket?' — '+ket:'');
+  // Catat sebagai mutasi RDN keluar dengan type = feeType
+  addRdn(date, feeType, keterangan, -amount, sek, null);
+  saveData();
+  showSaveStatus('✓ '+ft.label+' Rp '+fmt(amount)+' dicatat');
+  closeModal(); renderPage(currentPage);
 }
 
 function submitRdn(){
@@ -6690,6 +6828,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // Wire buttons
   el('btn-setor').onclick=function(){openModal('setor')};
   el('btn-tarik').onclick=function(){openModal('tarik')};
+  el('btn-fee').onclick=function(){openModal('fee')};
   el('btn-beli').onclick=function(){openModal('buy')};
   el('btn-jual').onclick=function(){openModal('sell')};
   el('btn-beli2').onclick=function(){openModal('buy')};
