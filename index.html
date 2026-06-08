@@ -3466,7 +3466,7 @@ function getPortfolio(){
   transactions.slice().sort(function(a,b){return a.date.localeCompare(b.date)}).forEach(function(tx){
     if(!pos[tx.ticker])pos[tx.ticker]={ticker:tx.ticker,lot:0,cost:0,shares:0};
     var p=pos[tx.ticker];
-    if(tx.type==='BUY'){p.lot+=tx.lot;p.shares+=tx.lot*100;p.cost+=tx.net;}
+    if(tx.type==='BUY'){p.lot+=tx.lot;p.shares+=tx.lot*100;p.cost+=tx.gross;}
     else if(tx.type==='SELL'){
       var avg=p.shares>0?p.cost/p.shares:0;
       var sold=tx.lot*100;
@@ -3489,10 +3489,10 @@ function getRealizedPnl(){
   transactions.slice().sort(function(a,b){return a.date.localeCompare(b.date)}).forEach(function(tx){
     if(!pos[tx.ticker])pos[tx.ticker]={lot:0,cost:0};
     var p=pos[tx.ticker];
-    if(tx.type==='BUY'){p.lot+=tx.lot;p.cost+=tx.net;}
+    if(tx.type==='BUY'){p.lot+=tx.lot;p.cost+=tx.gross;}
     else if(tx.type==='SELL'&&p.lot>0){
       var avg=p.cost/(p.lot*100);var sold=tx.lot*100;
-      real+=(tx.net-avg*sold);p.lot-=tx.lot;p.cost=Math.max(0,p.cost-avg*sold);
+      real+=(tx.gross-avg*sold);p.lot-=tx.lot;p.cost=Math.max(0,p.cost-avg*sold);
     }
   });
   return real;
@@ -3678,6 +3678,12 @@ function fhFetchIHSGFallback(){
   })
   .catch(function(){
     fhSetBadge('error','No Data');
+    ihsgCur += (Math.random()-.48)*25;
+    ihsgCur = Math.max(5900, Math.min(6500, ihsgCur));
+    ihsgHist.push(Math.round(ihsgCur*100)/100);
+    if(ihsgHist.length>120) ihsgHist.shift();
+    updateTopbar();
+    if(currentPage==='dashboard') buildIhsgChart(24);
   });
 }
 
@@ -4012,9 +4018,9 @@ function buildPnlChart(){
   transactions.slice().sort(function(a,b){return a.date.localeCompare(b.date)}).forEach(function(tx){
     if(!pos[tx.ticker])pos[tx.ticker]={lot:0,cost:0};
     var p=pos[tx.ticker];
-    if(tx.type==='BUY'){p.lot+=tx.lot;p.cost+=tx.net;}
+    if(tx.type==='BUY'){p.lot+=tx.lot;p.cost+=tx.gross;}
     if(tx.type==='SELL'&&p.lot>0){
-      var avg=p.cost/(p.lot*100);cum+=(tx.net-avg*tx.lot*100);
+      var avg=p.cost/(p.lot*100);cum+=(tx.gross-avg*tx.lot*100);
       data.push(Math.round(cum));labels.push(tx.date.slice(5));
       p.lot-=tx.lot;p.cost=Math.max(0,p.cost-avg*tx.lot*100);
     }
@@ -5099,6 +5105,8 @@ function openModal(type){
         +'<div class="taxrow"><span>Levy BEI+KPEI+KSEI ('+(TAX_SETTINGS.levy*100).toFixed(3)+'%)</span><span class="mono dn" id="mc-levy">Rp 0</span></div>'
         +(isBuy?'':'<div class="taxrow"><span>PPh Final Jual ('+(TAX_SETTINGS.pphJual*100).toFixed(1)+'% — hanya jual)</span><span class="mono dn" id="mc-pph">Rp 0</span></div>')
         +'<div class="taxrow tot"><span>Total '+(isBuy?'Dibayar':'Diterima')+'</span><span class="mono '+(isBuy?'amb':'up')+'" id="mc-tot">Rp 0</span></div>'
+        +'<div class="taxrow" style="border-top:1px solid var(--border2);margin-top:6px;padding-top:7px"><span>Avg Beli Saat Ini</span><span class="mono neu" id="mc-avg-cur">—</span></div>'
+        +(isBuy?'<div class="taxrow"><span style="color:var(--amber)">Avg Beli Baru (setelah transaksi)</span><span class="mono amb" id="mc-avg-new">—</span></div>':'')
       +'</div>'
       +'<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
         +'<button class="btn btn-ghost" onclick="closeModal()">Batal</button>'
@@ -5859,6 +5867,22 @@ function txCalcLive(){
   if(el('mc-levy'))    el('mc-levy').textContent = 'Rp '+fmt(c.levy);
   if(el('mc-pph'))     el('mc-pph').textContent = 'Rp '+fmt(c.pph);
   if(el('mc-tot'))     el('mc-tot').textContent = 'Rp '+fmt(c.net);
+  // Avg beli saat ini & avg baru setelah transaksi
+  var tkr = el('mf-ticker')&&el('mf-ticker').value;
+  var pos0 = getPortfolio().find(function(p){return p.ticker===tkr;});
+  var curShares = pos0 ? pos0.shares : 0;
+  var curCost   = pos0 ? pos0.cost   : 0;
+  var curAvg    = curShares > 0 ? curCost/curShares : 0;
+  if(el('mc-avg-cur')) el('mc-avg-cur').textContent = curAvg>0 ? 'Rp '+fmt(Math.round(curAvg)) : '—';
+  if(isBuy && el('mc-avg-new')){
+    if(lot>0 && price>0){
+      var newShares = curShares + lot*100;
+      var newAvg    = (curCost + gross) / newShares;
+      el('mc-avg-new').textContent = 'Rp '+fmt(Math.round(newAvg));
+    } else {
+      el('mc-avg-new').textContent = '—';
+    }
+  }
 }
 
 function divCalcLive(){
