@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6093,9 +6094,9 @@ function updateTx(id){
 
   // Re-add RDN mutation with linkedTxId
   if(isBuy){
-    addRdn(date,'BUY','Beli '+lot+' lot '+ticker+' @ Rp '+fmt(price),-net, sec, id);
+    addRdn(date,'BUY','Beli '+lot+' lot '+ticker+' @ Rp '+fmt(price),-c.net, sec, id);
   } else {
-    addRdn(date,'SELL','Jual '+lot+' lot '+ticker+' @ Rp '+fmt(price), net, sec, id);
+    addRdn(date,'SELL','Jual '+lot+' lot '+ticker+' @ Rp '+fmt(price), c.net, sec, id);
   }
   rebuildRdnBalance();
   saveData();
