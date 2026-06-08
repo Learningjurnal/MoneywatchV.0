@@ -3337,8 +3337,9 @@ var FH = {
 };
 
 // ── Load / Save key ──
+var FH_DEFAULT_KEY = 'd8io6hhr01qmfrvi40c0d8io6hhr01qmfrvi40cg';
 function fhLoadKey(){
-  try{ FH.key = localStorage.getItem('fh_api_key')||''; }catch(e){}
+  try{ FH.key = localStorage.getItem('fh_api_key')||FH_DEFAULT_KEY; }catch(e){ FH.key = FH_DEFAULT_KEY; }
 }
 function fhSaveKey(k){
   FH.key = k.trim();
