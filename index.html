@@ -3443,9 +3443,9 @@ function addTx(date,type,ticker,lot,price,sekuritas){
     tax:c.ppn+c.levy+c.pph, net:c.net, sekuritas:sekuritas});
   // Update RDN — tag dengan linkedTxId agar bisa dihapus bersama
   if(isBuy){
-    addRdn(date,'BUY','Beli '+lot+' lot '+ticker+' @ Rp '+fmt(price),-net,sekuritas, txId);
+    addRdn(date,'BUY','Beli '+lot+' lot '+ticker+' @ Rp '+fmt(price),-c.net,sekuritas, txId);
   } else {
-    addRdn(date,'SELL','Jual '+lot+' lot '+ticker+' @ Rp '+fmt(price),net,sekuritas, txId);
+    addRdn(date,'SELL','Jual '+lot+' lot '+ticker+' @ Rp '+fmt(price),c.net,sekuritas, txId);
   }
   saveData();
 }
@@ -5904,7 +5904,7 @@ function submitRdn(){
 
 function submitTxModal(){
   var date=el('mf-date').value;var sec=el('mf-sec').value;var ticker=el('mf-ticker').value;
-  var lot=parseFloat(el('mf-lot').value||0);var price=parseFloat(el('mf-price').value||0);
+  var lot=parseFloat(el('mf-lot').value||0);var price=parsePrice(el('mf-price')&&el('mf-price').value||'0');
   if(!date||!ticker||lot<=0||price<=0){alert('Lengkapi semua data!');return;}
   addTx(date,modalType==='buy'?'BUY':'SELL',ticker,lot,price,sec);
   showSaveStatus('✓ Transaksi '+(modalType==='buy'?'Beli':'Jual')+' '+ticker+' tersimpan');
