@@ -4875,10 +4875,8 @@ function openModal(type){
   modalType=type;
   var secOpts=Object.keys(SEKURITAS).map(function(s){
     var sf=SEKURITAS[s];
-    var totalBeli=((sf.buyFee+pphBeliFor(s))*100).toFixed(2);
-    var totalJual=((sf.sellFee+pphJualFor(s))*100).toFixed(2);
     return '<option value="'+s+'"'+(s===activeSekuritas?' selected':'')+'>'+s
-      +' (Beli:'+totalBeli+'% Jual:'+totalJual+'%)</option>';
+      +' (Komisi B:'+(sf.buyFee*100).toFixed(2)+'% J:'+(sf.sellFee*100).toFixed(2)+'%)</option>';
   }).join('');
   var tkrOpts=Object.keys(DB).map(function(t){return '<option value="'+t+'">'+t+' — '+DB[t].name+'</option>'}).join('');
 
@@ -5775,8 +5773,9 @@ function editTx(id){
     '<div class="taxbox">'+
       '<div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-bottom:7px">PREVIEW SETELAH EDIT</div>'+
       '<div class="taxrow"><span>Nilai Kotor</span><span class="mono" id="ef-gross">Rp 0</span></div>'+
-      '<div class="taxrow"><span>Komisi</span><span class="mono amb" id="ef-komisi">Rp 0</span></div>'+
-      '<div class="taxrow tot"><span>Total Nett</span><span class="mono" id="ef-net">Rp 0</span></div>'+
+      '<div class="taxrow"><span id="ef-k-lbl">Komisi</span><span class="mono amb" id="ef-komisi">Rp 0</span></div>'+
+      '<div class="taxrow"><span id="ef-t-lbl">PPh</span><span class="mono dn" id="ef-tax">Rp 0</span></div>'+
+      '<div class="taxrow tot"><span id="ef-net-lbl">Total Dibayar</span><span class="mono" id="ef-net">Rp 0</span></div>'+
     '</div>'+
     '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'+
       '<button class="btn btn-ghost" onclick="closeModal()">Batal</button>'+
@@ -5790,16 +5789,22 @@ function editTx(id){
 function efCalcLive(){
   var lot   = parseFloat(el('ef-lot')&&el('ef-lot').value||0);
   var price = parseFloat(el('ef-price')&&el('ef-price').value||0);
-  var secNm = el('ef-sec')&&el('ef-sec').value;
-  var type  = el('ef-type')&&el('ef-type').value;
+  var secNm = el('ef-sec')&&el('ef-sec').value||activeSekuritas;
+  var type  = el('ef-type')&&el('ef-type').value||'BUY';
   var sec   = SEKURITAS[secNm]||SEKURITAS['Mirae Asset'];
   var isBuy = type==='BUY';
   var gross  = lot*100*price;
-  var komisi = isBuy ? gross*sec.buyFee : gross*sec.sellFee;
-  var tax    = isBuy ? gross*getPphBeli() : gross*getPphJual();
+  var pphRate = isBuy ? pphBeliFor(secNm) : pphJualFor(secNm);
+  var feeRate = isBuy ? sec.buyFee : sec.sellFee;
+  var komisi = gross*feeRate;
+  var tax    = gross*pphRate;
   var net    = isBuy ? gross+komisi+tax : gross-komisi-tax;
   if(el('ef-gross'))  el('ef-gross').textContent  = 'Rp '+fmt(gross);
+  if(el('ef-k-lbl'))  el('ef-k-lbl').textContent  = 'Komisi '+(isBuy?'Beli':'Jual')+' ('+(feeRate*100).toFixed(2)+'%)';
   if(el('ef-komisi')) el('ef-komisi').textContent = 'Rp '+fmt(komisi);
+  if(el('ef-t-lbl'))  el('ef-t-lbl').textContent  = 'PPh '+(isBuy?'Beli':'Jual')+' ('+(pphRate*100).toFixed(2)+'%)';
+  if(el('ef-tax'))    el('ef-tax').textContent    = 'Rp '+fmt(tax);
+  if(el('ef-net-lbl'))el('ef-net-lbl').textContent= isBuy?'Total Dibayar':'Total Diterima';
   if(el('ef-net'))    el('ef-net').textContent    = 'Rp '+fmt(net);
 }
 
@@ -5815,13 +5820,13 @@ function updateTx(id){
   // Remove old RDN linked mutations
   rdnMutations = rdnMutations.filter(function(r){ return r.linkedTxId !== id; });
 
-  // Recalculate
+  // Recalculate — gunakan pphBeliFor/pphJualFor sesuai setting Pajak
   var secObj  = SEKURITAS[sec]||SEKURITAS['Mirae Asset'];
   var isBuy   = type==='BUY';
   var gross   = lot*100*price;
   var komisi  = isBuy ? gross*secObj.buyFee : gross*secObj.sellFee;
-  var tax     = isBuy ? 0 : gross*secObj.pph;
-  var net     = isBuy ? gross+komisi : gross-komisi-tax;
+  var tax     = isBuy ? gross*pphBeliFor(sec) : gross*pphJualFor(sec);
+  var net     = isBuy ? gross+komisi+tax : gross-komisi-tax;
 
   // Update the transaction in place
   var idx = transactions.findIndex(function(t){ return t.id === id; });
