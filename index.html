@@ -6228,8 +6228,8 @@ function fsRenderProb(a){
 // ============================================================
 // IMPOR DIVIDEN LAMPIRAN + PAJAK PER-SEKURITAS + RINGKASAN ASET
 // ============================================================
-// Default PPh per sekuritas: Stockbit = 0.10%/0.10% PPh (komisi 0.08%/0.18% → total 0.18%/0.28%)
-var sekTaxOverride = {'Stockbit':{beli:0.001,jual:0.001}};
+// PPh per sekuritas mengikuti tarif global (tab Pajak). Override khusus jika tarif berbeda dari global.
+var sekTaxOverride = {};
 function pphBeliFor(sek){ var o=sekTaxOverride[sek]; return (o&&o.beli!=null)?o.beli:getPphBeli(); }
 function pphJualFor(sek){ var o=sekTaxOverride[sek]; return (o&&o.jual!=null)?o.jual:getPphJual(); }
 
