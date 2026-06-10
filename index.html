@@ -1894,8 +1894,16 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 
       <!-- Historical chart -->
       <div class="card" id="hw-chart-card" style="display:none">
-        <div class="cheader"><span class="ctitle">📈 TREND HISTORIS</span></div>
-        <canvas id="hw-history-chart" height="140"></canvas>
+        <div class="cheader">
+          <span class="ctitle">📈 TREND HISTORIS</span>
+          <div style="display:flex;gap:4px">
+            <button id="hw-chart-btn-eps" onclick="hw_switchChart('eps')" class="btn" style="font-size:9px;padding:2px 7px;border-color:rgba(255,102,0,.5);color:var(--bb-orange);background:rgba(255,102,0,.12)">EPS &amp; PER</button>
+            <button id="hw-chart-btn-eq" onclick="hw_switchChart('eq')" class="btn" style="font-size:9px;padding:2px 7px">Equity &amp; NI</button>
+          </div>
+        </div>
+        <div style="position:relative;height:160px;width:100%">
+          <canvas id="hw-history-chart"></canvas>
+        </div>
       </div>
     </div>
 
@@ -9122,28 +9130,48 @@ function hw_recalc() {
   var irr = eps0 / price0; // expressed as decimal
 
   // === Step 2: Average ROE ===
+  // ROE = Net Income / Total Equity (both in same unit: Miliar Rp)
+  // Fallback: compute Net Income from EPS * Shares if Net Income column empty
+  //   EPS (Rp/saham) * Shares (juta lembar) / 1000 = Net Income in Miliar Rp
   var roeList = rows.map(function(r) {
-    return r.netIncome && r.equity ? (r.netIncome / r.equity) : (r.eps && r.shares && r.equity ? (r.eps * r.shares / r.equity) : null);
-  }).filter(function(v){ return v !== null && !isNaN(v) && v > 0; });
+    var eq = parseFloat(r.equity);
+    if (!eq || eq <= 0) return null;
+    var ni = parseFloat(r.netIncome);
+    if (!ni || ni <= 0) {
+      // derive Net Income: EPS(Rp) * Shares(juta) / 1000 = Miliar Rp
+      var eps_ = parseFloat(r.eps);
+      var sh_ = parseFloat(r.shares);
+      if (eps_ > 0 && sh_ > 0) ni = eps_ * sh_ / 1000;
+      else return null;
+    }
+    var roe = ni / eq; // both Miliar → pure ratio
+    return (roe > 0 && roe < 5) ? roe : null; // sanity: ROE > 500% = bad data
+  }).filter(function(v){ return v !== null; });
   var avgROE = hw_avg(roeList);
 
-  // === Average DPR ===
+  // === Average DPR (Dividend Payout Ratio) ===
+  // DPR = DPS / EPS, both in Rp/saham
+  // Cap at 1.0: DPR > 100% (bayar dari retained earnings) distorts growth model
+  var dprWarning = false;
   var dprList = rows.map(function(r) {
-    if (!r.dps || !r.eps) return null;
-    var v = parseFloat(r.dps) / parseFloat(r.eps);
-    return (v >= 0 && v <= 1.5) ? v : null;
+    var dps_ = parseFloat(r.dps);
+    var eps_ = parseFloat(r.eps);
+    if (!eps_ || eps_ <= 0) return null;
+    if (!dps_ || dps_ < 0) return 0;
+    var v = dps_ / eps_;
+    if (v > 1.0) { dprWarning = true; v = 1.0; } // cap: DPR > 100% = special dividend
+    return (v >= 0) ? v : null;
   }).filter(function(v){ return v !== null; });
   var avgDPR = hw_avg(dprList);
 
   // === ROE after payout ===
   var roeAfterPayout = avgROE * (1 - avgDPR);
 
-  // === Step 3: Current Equity/Share ===
-  var equityPerShare = (parseFloat(latestRow.equity) * 1e6) / (parseFloat(latestRow.shares) * 1e6); // both in millions of units
-  // Actually equity in M (miliar), shares in juta
-  // equity (M Rp) * 1,000,000 / shares (juta) * 1,000,000 = equity(M) / shares(juta) * 1000 if M=miliar & shares=juta... let's interpret as:
-  // equity column = total equity in Miliar Rp; shares column = shares in Juta lembar
-  equityPerShare = (parseFloat(latestRow.equity) * 1e9) / (parseFloat(latestRow.shares) * 1e6);
+  // === Step 3: Current Equity/Share (Rp per saham) ===
+  // equity column = Total Equity in Miliar Rp (×1e9 for Rp)
+  // shares column = Shares in Juta lembar (×1e6 for lembar)
+  // Result: Rp per saham
+  var equityPerShare = (parseFloat(latestRow.equity) * 1e9) / (parseFloat(latestRow.shares) * 1e6);
 
   // === Step 3: Future Equity per Share ===
   var N = hwData.projYears;
@@ -9232,7 +9260,7 @@ function hw_recalc() {
     var steps = [
       { label: 'Step 1: IRR Awal', val: fmtPct(irr*100) + (irrPass ? ' ✅' : ' ❌'), desc: 'EPS / Harga Saham', ok: irrPass },
       { label: 'Step 2: Avg ROE', val: fmtPct(avgROE*100), desc: avgROE > 0 ? 'dari ' + roeList.length + ' tahun data' : 'Perlu Net Income', ok: avgROE > 0 },
-      { label: 'Step 2b: Avg DPR', val: fmtPct(avgDPR*100), desc: dprList.length + ' tahun data', ok: true },
+      { label: 'Step 2b: Avg DPR', val: fmtPct(avgDPR*100), desc: dprList.length + ' tahun data' + (dprWarning ? ' ⚠️ ada DPS>EPS, di-cap 100%' : ''), ok: true },
       { label: 'Step 2c: ROE after payout', val: fmtPct(roeAfterPayout*100), desc: 'ROE × (1 - DPR)', ok: roeAfterPayout > 0 },
       { label: 'Step 3: Equity/Share kini', val: 'Rp '+fmt(equityPerShare), desc: 'Equity ÷ Saham', ok: equityPerShare > 0 },
       { label: 'Step 3b: Future Eq/Share', val: 'Rp '+fmt(futureEquityPerShare), desc: 'Proyeksi ' + N + ' thn', ok: futureEquityPerShare > 0 },
@@ -9291,7 +9319,22 @@ function hw_recalc() {
   conclusionEl.style.borderLeftColor = verdictColor;
 }
 
+var hwChartMode = 'eps';
+function hw_switchChart(mode) {
+  hwChartMode = mode;
+  var btnEps = document.getElementById('hw-chart-btn-eps');
+  var btnEq  = document.getElementById('hw-chart-btn-eq');
+  if (btnEps && btnEq) {
+    var onStyle  = 'font-size:9px;padding:2px 7px;border-color:rgba(255,102,0,.5);color:var(--bb-orange);background:rgba(255,102,0,.12)';
+    var offStyle = 'font-size:9px;padding:2px 7px';
+    btnEps.style.cssText = mode==='eps' ? onStyle : offStyle;
+    btnEq.style.cssText  = mode==='eq'  ? onStyle : offStyle;
+  }
+  if (hwData._lastRows) hw_renderChart(hwData._lastRows);
+}
+
 function hw_renderChart(rows) {
+  hwData._lastRows = rows;
   var chartCard = document.getElementById('hw-chart-card');
   if (!chartCard) return;
   chartCard.style.display = 'block';
@@ -9299,25 +9342,64 @@ function hw_renderChart(rows) {
   if (!ctx) return;
   if (hwHistChart) { hwHistChart.destroy(); hwHistChart = null; }
   var labels = rows.map(function(r){ return r.year; });
-  var epsData = rows.map(function(r){ return parseFloat(r.eps)||null; });
-  var perData = rows.map(function(r){ return parseFloat(r.per)||null; });
+  var tickStyle = { color: '#8888aa', font: { size: 9, family: 'IBM Plex Mono' } };
+  var gridStyle = { color: 'rgba(255,255,255,.05)' };
+  var legendOpts = { labels: { color: '#8888aa', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 10, padding: 10 } };
+
+  var datasets, scales;
+  if (hwChartMode === 'eps') {
+    var epsData = rows.map(function(r){ return parseFloat(r.eps)||null; });
+    var perData = rows.map(function(r){ return parseFloat(r.per)||null; });
+    datasets = [
+      { label: 'EPS (Rp)', data: epsData, backgroundColor: 'rgba(255,102,0,.55)', borderColor: 'rgba(255,102,0,.8)', borderWidth: 1, yAxisID: 'y', borderRadius: 2 },
+      { label: 'PER (x)', data: perData, type: 'line', borderColor: '#0088ff', backgroundColor: 'transparent', yAxisID: 'y2', tension: .35, pointRadius: 4, pointBackgroundColor: '#0088ff', pointBorderColor: '#0a0a0f', pointBorderWidth: 1.5, borderWidth: 1.5 }
+    ];
+    scales = {
+      x: { ticks: tickStyle, grid: gridStyle },
+      y: { position: 'left', ticks: Object.assign({}, tickStyle, { callback: function(v){ return v >= 1000 ? (v/1000).toFixed(1)+'k' : v; } }), grid: gridStyle, title: { display: true, text: 'EPS (Rp)', color: '#ff6600', font: { size: 8 } } },
+      y2: { position: 'right', ticks: tickStyle, grid: { display: false }, title: { display: true, text: 'PER (x)', color: '#0088ff', font: { size: 8 } } }
+    };
+  } else {
+    var eqData = rows.map(function(r){ return parseFloat(r.equity)||null; });
+    var niData = rows.map(function(r){ return parseFloat(r.netIncome)||null; });
+    datasets = [
+      { label: 'Total Equity (M Rp)', data: eqData, backgroundColor: 'rgba(0,212,170,.45)', borderColor: 'rgba(0,212,170,.8)', borderWidth: 1, yAxisID: 'y', borderRadius: 2 },
+      { label: 'Net Income (M Rp)', data: niData, type: 'line', borderColor: '#ffc107', backgroundColor: 'transparent', yAxisID: 'y2', tension: .35, pointRadius: 4, pointBackgroundColor: '#ffc107', pointBorderColor: '#0a0a0f', pointBorderWidth: 1.5, borderWidth: 1.5 }
+    ];
+    scales = {
+      x: { ticks: tickStyle, grid: gridStyle },
+      y: { position: 'left', ticks: Object.assign({}, tickStyle, { callback: function(v){ return v >= 1000 ? (v/1000).toFixed(0)+'k' : v; } }), grid: gridStyle, title: { display: true, text: 'Equity (M)', color: '#00d4aa', font: { size: 8 } } },
+      y2: { position: 'right', ticks: Object.assign({}, tickStyle, { callback: function(v){ return v >= 1000 ? (v/1000).toFixed(0)+'k' : v; } }), grid: { display: false }, title: { display: true, text: 'Net Inc (M)', color: '#ffc107', font: { size: 8 } } }
+    };
+  }
+
   hwHistChart = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        { label: 'EPS (Rp)', data: epsData, backgroundColor: 'rgba(255,102,0,.5)', yAxisID: 'y' },
-        { label: 'PER (x)', data: perData, type: 'line', borderColor: 'var(--blue)', backgroundColor: 'transparent', yAxisID: 'y2', tension: .3, pointRadius: 3, pointBackgroundColor: 'var(--blue)' },
-      ]
-    },
+    data: { labels: labels, datasets: datasets },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { labels: { color: '#8888aa', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 10 } } },
-      scales: {
-        x: { ticks: { color: '#8888aa', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
-        y: { position: 'left', ticks: { color: '#8888aa', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' }, title: { display: true, text: 'EPS', color: '#ff6600', font: { size: 8 } } },
-        y2: { position: 'right', ticks: { color: '#0088ff', font: { size: 9 } }, grid: { display: false }, title: { display: true, text: 'PER', color: '#0088ff', font: { size: 8 } } }
-      }
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 300 },
+      plugins: {
+        legend: legendOpts,
+        tooltip: {
+          backgroundColor: 'rgba(10,10,20,.92)',
+          titleColor: '#ff6600',
+          bodyColor: '#c0c0d8',
+          borderColor: 'rgba(255,102,0,.3)',
+          borderWidth: 1,
+          titleFont: { family: 'IBM Plex Mono', size: 10 },
+          bodyFont: { family: 'IBM Plex Mono', size: 9 },
+          callbacks: {
+            label: function(ctx) {
+              var v = ctx.parsed.y;
+              if (v === null) return ctx.dataset.label + ': N/A';
+              return ctx.dataset.label + ': ' + (v >= 1000 ? v.toLocaleString('id-ID') : v);
+            }
+          }
+        }
+      },
+      scales: scales
     }
   });
 }
@@ -9331,6 +9413,7 @@ function hw_clearResults() {
   if (badge) { badge.textContent = 'BELUM DIHITUNG'; badge.style.background='var(--bg4)'; badge.style.color='var(--text3)'; badge.style.borderColor='var(--border)'; }
   if (document.getElementById('hw-steps-card')) document.getElementById('hw-steps-card').style.display = 'none';
   if (document.getElementById('hw-chart-card')) document.getElementById('hw-chart-card').style.display = 'none';
+  hwChartMode = 'eps'; hwData._lastRows = null;
   if (document.getElementById('hw-mos-bar')) document.getElementById('hw-mos-bar').style.width = '50%';
   if (document.getElementById('hw-conclusion')) document.getElementById('hw-conclusion').style.display = 'none';
   if (document.getElementById('hw-verdict-card')) document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--text3)';
