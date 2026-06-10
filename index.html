@@ -1875,21 +1875,30 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
           <table class="tbl" id="hw-data-table">
             <thead>
               <tr>
-                <th>Tahun</th>
-                <th>EPS (Rp)</th>
-                <th>Total Equity (M Rp)</th>
-                <th>Shares (juta lbr)</th>
-                <th>DPS (Rp)</th>
-                <th>PER</th>
-                <th>Net Income (M Rp)</th>
+                <th style="white-space:nowrap">Tahun</th>
+                <th style="white-space:nowrap">EPS <span style="color:var(--bb-orange);font-weight:400">(Rp/saham)</span></th>
+                <th style="white-space:nowrap">Total Equity <span style="color:var(--bb-orange);font-weight:400">(Miliar Rp)</span></th>
+                <th style="white-space:nowrap">Shares <span style="color:var(--bb-orange);font-weight:400">(Juta lembar)</span></th>
+                <th style="white-space:nowrap">DPS <span style="color:var(--bb-orange);font-weight:400">(Rp/saham)</span></th>
+                <th style="white-space:nowrap">PER <span style="color:var(--bb-orange);font-weight:400">(kali)</span></th>
+                <th style="white-space:nowrap">Net Income <span style="color:var(--bb-orange);font-weight:400">(Miliar Rp)</span></th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="hw-data-body"></tbody>
           </table>
         </div>
-        <div style="margin-top:8px;font-size:9px;color:var(--text3);line-height:1.6">
-          💡 Isi data minimal 3 tahun untuk hasil kalkulasi yang akurat. EPS &amp; DPS dalam Rupiah per saham. Equity &amp; Net Income dalam Miliar Rupiah.
+        <!-- Panduan unit -->
+        <div style="margin-top:10px;background:var(--bg3);border-radius:2px;padding:10px 12px;border-left:3px solid rgba(255,102,0,.5)">
+          <div style="font-size:9px;color:var(--bb-orange);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-weight:700">📌 PANDUAN INPUT — SATUAN WAJIB</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;font-size:9px;font-family:'IBM Plex Mono',monospace">
+            <div><span style="color:var(--text3)">EPS &amp; DPS</span><br><b style="color:var(--text)">Rupiah per saham</b><br><span style="color:var(--text3)">contoh: 179 = Rp 179/saham</span></div>
+            <div><span style="color:var(--text3)">Total Equity &amp; Net Income</span><br><b style="color:var(--text)">Miliar Rupiah</b><br><span style="color:var(--text3)">contoh: 150537 = Rp 150,5 Triliun</span></div>
+            <div><span style="color:var(--text3)">Shares</span><br><b style="color:var(--text)">Juta lembar saham</b><br><span style="color:var(--text3)">contoh: 99062 = 99,06 miliar lembar</span></div>
+            <div><span style="color:var(--text3)">PER</span><br><b style="color:var(--text)">Kali (x) — tanpa satuan</b><br><span style="color:var(--text3)">contoh: 16.5 = PER 16,5x</span></div>
+            <div><span style="color:var(--text3)">Harga Saham</span><br><b style="color:var(--text)">Rupiah per saham</b><br><span style="color:var(--text3)">contoh: 2810 = Rp 2.810/saham</span></div>
+            <div><span style="color:var(--amber)">⚠️ Sel oranye</span><br><b style="color:var(--amber)">= nilai perlu dicek</b><br><span style="color:var(--text3)">hover sel untuk petunjuk</span></div>
+          </div>
         </div>
       </div>
 
@@ -9051,7 +9060,12 @@ function hw_init() {
     var saved = localStorage.getItem('hw_state');
     if (saved) {
       var s = JSON.parse(saved);
-      hwData = s;
+      // Validate: must have rows array
+      if (s && Array.isArray(s.rows) && s.rows.length > 0) {
+        hwData = s;
+      } else {
+        hwData.rows = hw_defaultRows();
+      }
     } else {
       hwData.rows = hw_defaultRows();
     }
@@ -9066,8 +9080,20 @@ function hw_renderTable() {
   // Use DOM API to avoid any attribute escaping issues
   tbody.innerHTML = '';
   var inpStyle = 'background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:"IBM Plex Mono",monospace;font-size:11px;padding:3px 5px;border-radius:1px;box-sizing:border-box;width:100%';
-  var placeholders = {year:'Tahun',eps:'e.g. 350',equity:'e.g. 50000',shares:'e.g. 12000',dps:'e.g. 100',per:'e.g. 15',netIncome:'e.g. 4200'};
-  var widths = {year:'58px',eps:'90px',equity:'110px',shares:'100px',dps:'90px',per:'70px',netIncome:'110px'};
+  var placeholders = {year:'e.g. 2024',eps:'e.g. 350',equity:'e.g. 150537',shares:'e.g. 99062',dps:'e.g. 168',per:'e.g. 16.5',netIncome:'e.g. 33948'};
+  var widths = {year:'70px',eps:'100px',equity:'130px',shares:'120px',dps:'100px',per:'80px',netIncome:'130px'};
+  // Validation rules: warn if value seems wrong unit
+  function hw_cellWarn(field, val) {
+    if (!val || val === '') return false;
+    var v = parseFloat(val);
+    if (isNaN(v)) return true;
+    if (field === 'shares' && v < 100) return true;   // shares < 100 juta = sangat kecil, mungkin salah unit
+    if (field === 'equity' && v < 1) return true;      // equity < 1 Miliar = mungkin salah unit
+    if (field === 'netIncome' && v < 0) return true;
+    if (field === 'per' && (v < 1 || v > 150)) return true;
+    if (field === 'eps' && v <= 0) return true;
+    return false;
+  }
   hwData.rows.forEach(function(row, i) {
     var tr = document.createElement('tr');
     var allFields = ['year','eps','equity','shares','dps','per','netIncome'];
@@ -9075,10 +9101,17 @@ function hw_renderTable() {
       var td = document.createElement('td');
       var inp = document.createElement('input');
       inp.type = 'number';
-      inp.value = (row[field] !== '' && row[field] !== undefined && row[field] !== null) ? row[field] : '';
+      var v = (row[field] !== '' && row[field] !== undefined && row[field] !== null) ? row[field] : '';
+      inp.value = v;
       inp.placeholder = placeholders[field] || '';
       inp.setAttribute('style', inpStyle);
       inp.style.width = widths[field] || '80px';
+      // Highlight cell if value looks wrong
+      if (hw_cellWarn(field, v)) {
+        inp.style.borderColor = 'var(--amber)';
+        inp.style.background = 'rgba(255,187,0,.08)';
+        inp.title = 'Periksa unit: ' + ({shares:'Juta lembar (contoh: 99062 = 99 miliar lembar)',equity:'Miliar Rp (contoh: 150537 = Rp 150,5 Triliun)',per:'Antara 1–150x',eps:'Harus positif',netIncome:'Miliar Rp'}[field] || '');
+      }
       inp.setAttribute('data-hw-row', String(i));
       inp.setAttribute('data-hw-field', field);
       td.appendChild(inp);
@@ -9117,7 +9150,8 @@ function hw_removeRow(i) {
 }
 
 function hw_resetAll() {
-  if (!confirm('Reset semua data?')) return;
+  if (!confirm('Reset semua data dan hapus data tersimpan?')) return;
+  try { localStorage.removeItem('hw_state'); } catch(e) {}
   hwData = { rows: hw_defaultRows(), ticker: '', currentPrice: 0, minReturn: 6, projYears: 5 };
   hw_renderTable();
   hw_clearResults();
@@ -9128,14 +9162,18 @@ function hw_syncInputs() {
   hwData.currentPrice = parseFloat((document.getElementById('hw-current-price')||{}).value) || 0;
   hwData.minReturn = parseFloat((document.getElementById('hw-min-return')||{}).value) || 6;
   hwData.projYears = parseInt((document.getElementById('hw-proj-years')||{}).value) || 5;
-  // sync table values from DOM
-  document.querySelectorAll('#hw-data-body input[data-hw-row]').forEach(function(inp) {
-    var r = parseInt(inp.getAttribute('data-hw-row'));
-    var f = inp.getAttribute('data-hw-field');
-    if (f && hwData.rows[r] !== undefined) {
-      var val = parseFloat(inp.value);
-      hwData.rows[r][f] = isNaN(val) ? '' : val;
-    }
+  // Read ALL inputs from tbody rows in order: year, eps, equity, shares, dps, per, netIncome
+  var fields = ['year','eps','equity','shares','dps','per','netIncome'];
+  var trows = document.querySelectorAll('#hw-data-body tr');
+  trows.forEach(function(tr, ri) {
+    if (!hwData.rows[ri]) return;
+    var inputs = tr.querySelectorAll('input[type="number"]');
+    inputs.forEach(function(inp, ci) {
+      if (ci < fields.length) {
+        var val = parseFloat(inp.value);
+        hwData.rows[ri][fields[ci]] = isNaN(val) ? '' : val;
+      }
+    });
   });
 }
 
@@ -9152,6 +9190,12 @@ function hw_recalc() {
   if (btn) { btn.textContent = '\u23f3 Menghitung...'; btn.style.opacity = '.7'; btn.disabled = true; }
 
   function done() { if (btn) { btn.textContent = '\u26a1 HITUNG'; btn.style.opacity = '1'; btn.disabled = false; } }
+
+  // Debug: show what was read from DOM
+  console.log('[HW] hwData after sync:', JSON.stringify({
+    ticker: hwData.ticker, price: hwData.currentPrice, minRet: hwData.minReturn, N: hwData.projYears,
+    rows: hwData.rows.map(function(r){ return {yr:r.year,eps:r.eps,eq:r.equity,sh:r.shares,ni:r.netIncome}; })
+  }));
   function fmt(n, dec) { return (n === null || n === undefined || isNaN(n)) ? '\u2014' : Math.round(n).toLocaleString('id-ID'); }
   function fmtD(n, dec) { return (n === null || n === undefined || isNaN(n)) ? '\u2014' : n.toFixed(dec !== undefined ? dec : 1); }
   function fmtPct(n) { if (n === null || n === undefined || isNaN(n)) return '\u2014'; return (n >= 0 ? '+' : '') + n.toFixed(1) + '%'; }
@@ -9177,6 +9221,37 @@ function hw_recalc() {
 
   // Sort rows by year ascending
   rows = rows.slice().sort(function(a, b) { return a.year - b.year; });
+
+  // === Sanity check: warn if data looks wrong ===
+  var warnings = [];
+  rows.forEach(function(r) {
+    var eq = parseFloat(r.equity), sh = parseFloat(r.shares), ni = parseFloat(r.netIncome), eps = parseFloat(r.eps);
+    // If equity >> shares in raw numbers, shares probably entered as lembar not juta
+    if (sh > 0 && eq > 0 && sh > eq * 10000) warnings.push('Tahun ' + r.year + ': Shares (' + sh.toLocaleString('id-ID') + ') tampak terlalu besar — pastikan dalam Juta lembar, bukan lembar penuh');
+    // If shares looks like it's in lembar (very large number > 1 billion = >1000 juta)
+    if (sh > 100000000) warnings.push('Tahun ' + r.year + ': Shares ' + sh.toLocaleString('id-ID') + ' terlalu besar — masukkan dalam JUTA lembar (bagi dengan 1.000.000)');
+    // If NI given but ROE would be > 200% → likely NI in Rupiah not Miliar
+    if (ni > 0 && eq > 0 && (ni / eq) > 2) warnings.push('Tahun ' + r.year + ': Net Income / Equity > 200% — pastikan Net Income dalam Miliar Rp, bukan Rp');
+    // If equity seems to be in Rp not Miliar (< 1 for any reasonable company)
+    if (eq > 0 && eq < 100) warnings.push('Tahun ' + r.year + ': Total Equity = ' + eq + ' — terlalu kecil, pastikan dalam Miliar Rp');
+  });
+
+  if (warnings.length) {
+    // Show warnings but don't block calculation
+    var wEl = document.getElementById('hw-data-warnings');
+    if (!wEl) {
+      wEl = document.createElement('div');
+      wEl.id = 'hw-data-warnings';
+      wEl.style.cssText = 'margin-top:8px;padding:8px 12px;background:rgba(255,34,68,.08);border-left:3px solid var(--red);border-radius:2px;font-size:9px;font-family:"IBM Plex Mono",monospace';
+      var tableCard = document.querySelector('#page-hargawajar .card:nth-child(2)');
+      if (tableCard) tableCard.appendChild(wEl);
+    }
+    wEl.innerHTML = '<b style="color:var(--red)">⚠️ PERINGATAN DATA:</b><br>' + warnings.map(function(w){ return '• ' + w; }).join('<br>');
+    wEl.style.display = 'block';
+  } else {
+    var wEl2 = document.getElementById('hw-data-warnings');
+    if (wEl2) wEl2.style.display = 'none';
+  }
   var latest = rows[rows.length - 1];
   var ticker = hwData.ticker.toUpperCase();
   var price0 = hwData.currentPrice;
