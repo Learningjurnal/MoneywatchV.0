@@ -13,9 +13,9 @@
 :root{
   /* Bloomberg Terminal palette — deep charcoal + electric orange accent */
   --bg:#0a0a0f;--bg2:#0f0f17;--bg3:#141420;--bg4:#1a1a2a;--bg5:#1e1e30;
-  --accent:#ff6600;--accent2:#ff8833;--green:#00d4aa;--red:#ff4466;--amber:#ffcc00;--purple:#a889f0;--coral:#ff6677;--teal:#00c4d8;--blue:#2299ff;
-  --text:#eeeef5;--text2:#9898b8;--text3:#707090;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --accent:#ff6600;--accent2:#ff8833;--green:#00d4aa;--red:#ff2244;--amber:#ffbb00;--purple:#9b7fe8;--coral:#ff5566;--teal:#00b4c8;--blue:#0088ff;
+  --text:#e8e8f0;--text2:#8888aa;--text3:#44445a;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
   --bb-orange:#ff6600;--bb-grid:rgba(255,102,0,0.08);
   --scanline:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
 }
@@ -35,7 +35,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .ticker-inner:hover{animation-play-state:paused}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .tick-item{display:inline-flex;align-items:center;gap:6px;padding:0 18px;font-family:'IBM Plex Mono',monospace;font-size:10px;border-right:1px solid rgba(255,255,255,.05)}
-.tick-sym{color:var(--text);font-weight:700;letter-spacing:.5px}
+.tick-sym{color:var(--text2);font-weight:700;letter-spacing:.5px}
 .tick-val{color:var(--text);font-weight:600}
 .tick-chg{font-weight:600}
 .app{display:flex;flex-direction:column;height:100vh}
@@ -49,7 +49,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .nav-wrap::-webkit-scrollbar{height:2px}
 .nav-wrap::-webkit-scrollbar-thumb{background:var(--bg5)}
 .nav{display:flex;gap:1px;background:transparent;padding:2px;overflow-x:auto;overflow-y:visible}
-.nav button{padding:4px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text2);background:none;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.nav button{padding:4px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text3);background:none;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
 .nav button:hover{color:var(--text2);background:rgba(255,102,0,.08);border-color:rgba(255,102,0,.3)}
 .nav button.on{background:rgba(255,102,0,.15);color:var(--bb-orange);border-color:rgba(255,102,0,.5)}
 .topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
@@ -62,14 +62,14 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .rdn-bar{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.25);border-radius:2px;padding:3px 10px}
 .rdn-label{font-size:8px;color:var(--green);font-family:'IBM Plex Mono',monospace;letter-spacing:1.5px;text-transform:uppercase}
 .rdn-val{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--green)}
-.clock{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:1px}
+.clock{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px}
 
 /* PAGES */
 .pages{flex:1;overflow:hidden;position:relative}
 .page{display:none;height:100%;overflow-y:auto;padding:12px 16px;position:absolute;inset:0}
 .page.on{display:block}
 .ptitle{font-size:14px;font-weight:700;margin-bottom:2px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--bb-orange)}
-.psub{font-size:10px;color:var(--text);font-family:'IBM Plex Mono',monospace;margin-bottom:12px;letter-spacing:.3px}
+.psub{font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-bottom:12px;letter-spacing:.3px}
 
 /* GRID */
 .row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
@@ -83,15 +83,15 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 /* METRIC — Bloomberg data terminal card */
 .metric{background:var(--bg2);border:1px solid var(--border);border-top:2px solid rgba(255,102,0,.4);border-radius:2px;padding:10px 12px;position:relative}
 .metric::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,102,0,.3),transparent)}
-.mlabel{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;margin-bottom:4px}
+.mlabel{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;margin-bottom:4px}
 .mval{font-size:17px;font-weight:700;font-family:'IBM Plex Mono',monospace;line-height:1}
 .mval.lg{font-size:21px}
-.msub{font-size:10px;margin-top:4px;font-family:'IBM Plex Mono',monospace;color:var(--text2)}
+.msub{font-size:9px;margin-top:4px;font-family:'IBM Plex Mono',monospace}
 .up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--text2)}.amb{color:var(--amber)}
 
 /* CARD — Bloomberg panel */
 .card{background:var(--bg2);border:1px solid var(--border);border-top:1px solid rgba(255,102,0,.25);border-radius:2px;padding:12px}
-.ctitle{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;font-family:'IBM Plex Mono',monospace;font-weight:600}
+.ctitle{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-family:'IBM Plex Mono',monospace;font-weight:600}
 .cheader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 
 /* BTN */
@@ -114,7 +114,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .badge{display:inline-block;padding:1px 6px;border-radius:1px;font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:600;line-height:1.5;letter-spacing:.5px;text-transform:uppercase}
 .b-up{background:rgba(0,212,170,.12);color:var(--green);border:1px solid rgba(0,212,170,.25)}
 .b-dn{background:rgba(255,34,68,.12);color:var(--red);border:1px solid rgba(255,34,68,.25)}
-.b-neu{background:rgba(0,136,255,.1);color:#2299ff;border:1px solid rgba(0,136,255,.2)}
+.b-neu{background:rgba(0,136,255,.1);color:#4da6ff;border:1px solid rgba(0,136,255,.2)}
 .b-amb{background:rgba(255,187,0,.1);color:var(--amber);border:1px solid rgba(255,187,0,.2)}
 .b-pur{background:rgba(155,127,232,.12);color:var(--purple);border:1px solid rgba(155,127,232,.2)}
 .b-teal{background:rgba(0,180,200,.12);color:var(--teal);border:1px solid rgba(0,180,200,.2)}
@@ -128,8 +128,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 
 /* TABLE */
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border-bottom:1px solid rgba(255,102,0,.25);text-align:left;font-weight:600;white-space:nowrap;background:rgba(255,102,0,.04)}
-.tbl td{padding:7px 8px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
+.tbl th{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border-bottom:1px solid rgba(255,102,0,.25);text-align:left;font-weight:600;white-space:nowrap;background:rgba(255,102,0,.04)}
+.tbl td{padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;vertical-align:middle;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:rgba(255,102,0,.04)}
 .mono{font-family:'IBM Plex Mono',monospace}
@@ -137,7 +137,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 /* FORM */
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fg{display:flex;flex-direction:column;gap:3px}
-.flabel{font-size:10px;color:var(--text);font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase}
+.flabel{font-size:9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase}
 .finput{background:var(--bg3);border:1px solid var(--border2);border-radius:2px;padding:7px 10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;outline:none;transition:border .15s;width:100%}
 .finput:focus{border-color:var(--bb-orange);box-shadow:0 0 0 2px rgba(255,102,0,.1)}
 .finput option{background:var(--bg3);color:var(--text)}
@@ -156,7 +156,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 
 /* TAX BOX */
 .taxbox{background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:10px;margin-top:10px}
-.taxrow{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 0;color:var(--text)}
+.taxrow{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 0;color:var(--text2)}
 .taxrow.tot{border-top:1px solid var(--border2);margin-top:5px;padding-top:7px;font-weight:700;font-size:11px;color:var(--text)}
 
 /* TP */
@@ -171,13 +171,13 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .cdset{display:flex;flex-direction:column;gap:3px}.cdset span{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-family:'IBM Plex Mono',monospace}.cdset input{background:var(--bg3);border:1px solid var(--border2);border-radius:2px;padding:5px 8px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;outline:none}.cdset input:focus{border-color:var(--bb-orange)}
 
 /* PBTN */
-.pbtn{padding:2px 8px;border-radius:1px;font-size:9px;cursor:pointer;color:var(--text2);border:1px solid var(--border);background:transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .12s}
+.pbtn{padding:2px 8px;border-radius:1px;font-size:9px;cursor:pointer;color:var(--text3);border:1px solid var(--border);background:transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .12s}
 .pbtn:hover{color:var(--text);border-color:var(--border2)}
 .pbtn.on{background:rgba(255,102,0,.2);color:var(--bb-orange);border-color:rgba(255,102,0,.5)}
 
 /* ALERT */
 .alert{padding:8px 12px;border-radius:2px;font-size:10px;margin-bottom:10px;border:1px solid;font-family:'IBM Plex Mono',monospace}
-.alert-info{background:rgba(0,136,255,.06);border-color:rgba(0,136,255,.2);color:#2299ff}
+.alert-info{background:rgba(0,136,255,.06);border-color:rgba(0,136,255,.2);color:#4da6ff}
 .alert-warn{background:rgba(255,187,0,.06);border-color:rgba(255,187,0,.2);color:var(--amber)}
 .alert-ok{background:rgba(0,212,170,.06);border-color:rgba(0,212,170,.2);color:var(--green)}
 
@@ -196,7 +196,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .sep{height:1px;background:var(--border);margin:10px 0}
 /* Nav Dropdown */
 .nav-dropdown{position:relative;display:inline-flex;align-items:center}
-.nav-dd-btn{padding:4px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text2);background:none;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.nav-dd-btn{padding:4px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text3);background:none;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
 .nav-dd-btn:hover{color:var(--bb-orange);background:rgba(255,102,0,.08);border-color:rgba(255,102,0,.3)}
 .nav-dd-btn.on{background:rgba(255,102,0,.15);color:var(--bb-orange);border-color:rgba(255,102,0,.5)}
 .nav-dd-menu{display:none;position:fixed;top:52px;background:var(--bg2);border:1px solid rgba(255,102,0,.35);border-top:2px solid var(--bb-orange);border-radius:2px;padding:4px;min-width:165px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.8)}
@@ -204,7 +204,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .nav-dd-menu button{padding:7px 12px;border-radius:1px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text2);background:none;border:none;font-family:'IBM Plex Mono',monospace;text-align:left;transition:all .12s;white-space:nowrap;width:100%;text-transform:uppercase;letter-spacing:.5px}
 .nav-dd-menu button:hover{background:rgba(255,102,0,.12);color:var(--bb-orange)}
 
-.tab{padding:5px 12px;font-size:9px;font-weight:700;cursor:pointer;color:var(--text2);border:none;border-bottom:2px solid transparent;background:none;font-family:'IBM Plex Mono',monospace;white-space:nowrap;transition:all .12s;text-transform:uppercase;letter-spacing:.8px}
+.tab{padding:5px 12px;font-size:9px;font-weight:700;cursor:pointer;color:var(--text3);border:none;border-bottom:2px solid transparent;background:none;font-family:'IBM Plex Mono',monospace;white-space:nowrap;transition:all .12s;text-transform:uppercase;letter-spacing:.8px}
 .tab:hover:not(.on){color:var(--text2)}
 .tab.on{color:var(--bb-orange);border-bottom-color:var(--bb-orange)}
 /* FlowScan heatmap cell */
@@ -220,7 +220,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .al-d{background:rgba(255,34,68,.12);color:var(--red)}
 .al-n{background:rgba(0,136,255,.12);color:var(--blue)}
 /* WL item */
-.wl-chip{padding:3px 9px;border-radius:1px;font-size:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .12px;text-transform:uppercase;letter-spacing:.5px}
+.wl-chip{padding:3px 9px;border-radius:1px;font-size:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .12px;text-transform:uppercase;letter-spacing:.5px}
 .wl-chip:hover{border-color:rgba(255,102,0,.4);color:var(--bb-orange)}
 
 /* ══════════════ AUTH SYSTEM ══════════════ */
@@ -229,16 +229,16 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 .auth-box{background:var(--bg2);border:1px solid rgba(255,102,0,.4);border-top:3px solid var(--bb-orange);border-radius:2px;padding:36px 40px;width:380px;max-width:92vw;box-shadow:0 0 60px rgba(255,102,0,.1)}
 .auth-logo{font-size:22px;font-weight:700;color:var(--bb-orange);letter-spacing:4px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:4px;text-transform:uppercase}
 .auth-logo span{color:var(--text3)}
-.auth-sub{text-align:center;font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-bottom:28px;letter-spacing:1px;text-transform:uppercase}
+.auth-sub{text-align:center;font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:28px;letter-spacing:1px;text-transform:uppercase}
 .auth-field{margin-bottom:14px}
-.auth-field label{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px;font-family:'IBM Plex Mono',monospace}
+.auth-field label{display:block;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px;font-family:'IBM Plex Mono',monospace}
 .auth-field input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:10px 13px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;outline:none;box-sizing:border-box;transition:border-color .15s}
 .auth-field input:focus{border-color:var(--bb-orange);box-shadow:0 0 0 2px rgba(255,102,0,.1)}
 .auth-btn{width:100%;padding:11px;background:rgba(255,102,0,.15);border:1px solid rgba(255,102,0,.5);border-radius:2px;color:var(--bb-orange);font-weight:700;font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;transition:all .15s;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase}
 .auth-btn:hover{background:rgba(255,102,0,.25)}
 .auth-btn:disabled{opacity:.4;cursor:not-allowed}
 .auth-err{background:rgba(255,34,68,.1);border:1px solid rgba(255,34,68,.25);border-radius:2px;padding:8px 11px;font-size:10px;color:#ff6688;margin-bottom:12px;display:none;font-family:'IBM Plex Mono',monospace}
-.auth-info{text-align:center;font-size:11px;color:var(--text2);margin-top:16px;line-height:1.6;font-family:'IBM Plex Mono',monospace}
+.auth-info{text-align:center;font-size:10px;color:var(--text3);margin-top:16px;line-height:1.6;font-family:'IBM Plex Mono',monospace}
 .auth-lock{text-align:center;padding:12px;background:rgba(255,34,68,.08);border:1px solid rgba(255,34,68,.2);border-radius:2px;color:var(--red);font-size:11px;margin-bottom:14px;display:none;font-family:'IBM Plex Mono',monospace}
 /* Session info in topbar */
 #session-info{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace}
@@ -257,10 +257,10 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
   <div class="auth-box">
     <div class="auth-logo" style="display:flex;align-items:center;justify-content:center;gap:10px">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="#ff6600" stroke-width="1.5"/>
-        <path d="M7 14 L10 10 L13 13 L17 8" stroke="#00d4aa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="17" cy="8" r="1.5" fill="#00d4aa"/>
-        <path d="M7 17 H17" stroke="#ff6600" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.5"/>
+        <circle cx="12" cy="12" r="10" stroke="#00c8ff" stroke-width="1.5"/>
+        <path d="M7 14 L10 10 L13 13 L17 8" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="17" cy="8" r="1.5" fill="#00e5a0"/>
+        <path d="M7 17 H17" stroke="#00c8ff" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.5"/>
       </svg>
       Money<span>Watch</span>
     </div>
@@ -377,6 +377,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
           <button onclick="goPage('candle',this);closeDD()">🕯 Candle Analysis</button>
         </div>
       </div>
+      <button onclick="goPage('hargawajar',this)">💎 Harga Wajar</button>
       <button onclick="goPage('watchlist',this)">⭐ Watchlist</button>
     </div>
   </div>
@@ -429,8 +430,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
   <!-- ROW 1: Total AUM hero + 4 P&L cards -->
   <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:9px;margin-bottom:11px">
     <!-- Hero: Total AUM -->
-    <div class="metric" style="background:linear-gradient(135deg,#0c1e3a 0%,#0e2444 100%);border-color:rgba(255,102,0,.25);position:relative;overflow:hidden">
-      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(255,102,0,.07) 0%,transparent 60%);pointer-events:none"></div>
+    <div class="metric" style="background:linear-gradient(135deg,#0c1e3a 0%,#0e2444 100%);border-color:rgba(0,200,255,.25);position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(0,200,255,.07) 0%,transparent 60%);pointer-events:none"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <div class="mlabel" style="color:var(--accent);letter-spacing:1.5px">💼 TOTAL AUM DIKELOLA</div>
         <button onclick="toggleMetric('aum')" id="eye-aum" title="Sembunyikan nilai"
@@ -511,7 +512,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
   <!-- ROW 2: 4 Asset Class Cards dengan bobot -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:11px">
     <!-- Saham IDX -->
-    <div class="metric" style="border-color:rgba(0,212,170,.3);cursor:pointer" onclick="goPage('portofolio')">
+    <div class="metric" style="border-color:rgba(0,229,160,.3);cursor:pointer" onclick="goPage('portofolio')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
           <div style="font-size:10px;font-weight:700;color:var(--green);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">📈 SAHAM IDX</div>
@@ -547,7 +548,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
       </div>
     </div>
     <!-- ETF -->
-    <div class="metric" style="border-color:rgba(255,102,0,.3);cursor:pointer" onclick="goPage('etf')">
+    <div class="metric" style="border-color:rgba(0,200,255,.3);cursor:pointer" onclick="goPage('etf')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
           <div style="font-size:10px;font-weight:700;color:var(--accent);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">📊 ETF AMERIKA</div>
@@ -565,7 +566,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
       </div>
     </div>
     <!-- Reksa Dana -->
-    <div class="metric" style="border-color:rgba(168,137,240,.3);cursor:pointer" onclick="goPage('reksadana')">
+    <div class="metric" style="border-color:rgba(167,139,250,.3);cursor:pointer" onclick="goPage('reksadana')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
           <div style="font-size:10px;font-weight:700;color:var(--purple);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">🏦 REKSA DANA</div>
@@ -579,7 +580,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
       <div class="prog"><div class="progf" id="d-rd-bar" style="width:0%;background:var(--purple)"></div></div>
       <div style="margin-top:6px;display:flex;justify-content:space-between">
         <span class="msub" id="d-rd-sub" style="color:var(--text2)"></span>
-        <span class="badge" id="d-rd-cnt" style="background:rgba(168,137,240,.12);color:var(--purple)">0 produk</span>
+        <span class="badge" id="d-rd-cnt" style="background:rgba(167,139,250,.12);color:var(--purple)">0 produk</span>
       </div>
     </div>
   </div>
@@ -780,7 +781,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
     <div style="display:flex;gap:8px">
       <button class="btn btn-green" id="btn-beli">+ Beli Saham</button>
       <button class="btn btn-red" id="btn-jual">− Jual Saham</button>
-      <button class="btn btn-ghost" onclick="importMutasiUI()" style="border-color:rgba(255,102,0,.3);color:var(--accent)" title="Impor transaksi historis dari Mutasi_Final.xlsx">⬇ Impor Mutasi</button>
+      <button class="btn btn-ghost" onclick="importMutasiUI()" style="border-color:rgba(0,200,255,.3);color:var(--accent)" title="Impor transaksi historis dari Mutasi_Final.xlsx">⬇ Impor Mutasi</button>
     </div>
   </div>
   <div class="row4">
@@ -826,11 +827,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
     <button class="btn btn-blue" id="btn-beli2">+ Beli Saham</button>
   </div>
   <!-- Cash widget saham -->
-  <div style="background:rgba(0,0,0,.15);border:1px solid #00d4aa33;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="font-size:10px;font-weight:700;color:#00d4aa;letter-spacing:.8px;white-space:nowrap">💰 KAS AKUN SAHAM (RDN)</span>
-    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#00d4aa" id="cash-saham-disp">Rp 0</span>
+  <div style="background:rgba(0,0,0,.15);border:1px solid #00e5a033;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:10px;font-weight:700;color:#00e5a0;letter-spacing:.8px;white-space:nowrap">💰 KAS AKUN SAHAM (RDN)</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#00e5a0" id="cash-saham-disp">Rp 0</span>
     <input type="number" id="cash-saham-input" placeholder="Set kas..." class="finput" style="width:140px;padding:4px 9px;font-size:11px">
-    <button class="btn btn-ghost btn-xs" style="color:#00d4aa;border-color:#00d4aa44" onclick="saveCashInput('saham')">💾 Simpan</button>
+    <button class="btn btn-ghost btn-xs" style="color:#00e5a0;border-color:#00e5a044" onclick="saveCashInput('saham')">💾 Simpan</button>
     <span style="font-size:10px;color:var(--text3);flex:1">Dana tersedia di rekening sekuritas untuk trading saham IDX</span>
   </div>
   <div class="row4">
@@ -866,7 +867,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
       <button class="btn btn-red btn-xs" onclick="deleteSelectedDiv()" id="div-del-sel-btn" style="display:none">🗑 Hapus Terpilih</button>
       <button class="btn btn-red btn-xs" onclick="clearAllDiv()">🗑 Hapus Semua</button>
       <button class="btn btn-blue" id="btn-div">+ Catat Dividen</button>
-      <button class="btn btn-ghost" onclick="importDividendsUI()" style="border-color:rgba(168,137,240,.35);color:var(--purple)" title="Impor dividen historis dari lampiran (tidak menambah RDN)">⬇ Impor Dividen Lampiran</button>
+      <button class="btn btn-ghost" onclick="importDividendsUI()" style="border-color:rgba(167,139,250,.35);color:var(--purple)" title="Impor dividen historis dari lampiran (tidak menambah RDN)">⬇ Impor Dividen Lampiran</button>
     </div>
   </div>
   <div class="row4">
@@ -1372,11 +1373,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
     </div>
   </div>
     <!-- Cash widget etf -->
-  <div style="background:rgba(0,0,0,.15);border:1px solid #ff660033;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="font-size:10px;font-weight:700;color:#ff6600;letter-spacing:.8px;white-space:nowrap">💰 KAS ETF (USD ACCOUNT)</span>
-    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#ff6600" id="cash-etf-disp">$ 0</span>
+  <div style="background:rgba(0,0,0,.15);border:1px solid #00c8ff33;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:10px;font-weight:700;color:#00c8ff;letter-spacing:.8px;white-space:nowrap">💰 KAS ETF (USD ACCOUNT)</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#00c8ff" id="cash-etf-disp">$ 0</span>
     <input type="number" id="cash-etf-input" placeholder="Set kas..." class="finput" style="width:140px;padding:4px 9px;font-size:11px">
-    <button class="btn btn-ghost btn-xs" style="color:#ff6600;border-color:#ff660044" onclick="saveCashInput('etf')">💾 Simpan</button>
+    <button class="btn btn-ghost btn-xs" style="color:#00c8ff;border-color:#00c8ff44" onclick="saveCashInput('etf')">💾 Simpan</button>
     <span style="font-size:10px;color:var(--text3);flex:1">Saldo USD di broker internasional (IBKR, dll)</span>
   </div>
   <div class="row5">
@@ -1445,15 +1446,15 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 
   <!-- Summary metrics -->
     <!-- Cash widget reksadana -->
-  <div style="background:rgba(0,0,0,.15);border:1px solid #a889f033;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="font-size:10px;font-weight:700;color:#a889f0;letter-spacing:.8px;white-space:nowrap">💰 KAS REKSA DANA (BIBIT/IPOT)</span>
-    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#a889f0" id="cash-reksadana-disp">Rp 0</span>
+  <div style="background:rgba(0,0,0,.15);border:1px solid #a78bfa33;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:10px;font-weight:700;color:#a78bfa;letter-spacing:.8px;white-space:nowrap">💰 KAS REKSA DANA (BIBIT/IPOT)</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#a78bfa" id="cash-reksadana-disp">Rp 0</span>
     <input type="number" id="cash-reksadana-input" placeholder="Set kas..." class="finput" style="width:140px;padding:4px 9px;font-size:11px">
-    <button class="btn btn-ghost btn-xs" style="color:#a889f0;border-color:#a889f044" onclick="saveCashInput('reksadana')">💾 Simpan</button>
+    <button class="btn btn-ghost btn-xs" style="color:#a78bfa;border-color:#a78bfa44" onclick="saveCashInput('reksadana')">💾 Simpan</button>
     <span style="font-size:10px;color:var(--text3);flex:1">Saldo IDR di platform reksa dana (Bibit, IPOT, POEMS)</span>
   </div>
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:11px">
-    <div class="metric" style="border-color:rgba(0,212,170,.3)">
+    <div class="metric" style="border-color:rgba(0,229,160,.3)">
       <div class="mlabel">Total Gain Kumulatif</div>
       <div class="mval up" id="rd-total" style="font-size:18px">Rp 0</div>
       <div class="msub neu">realisasi 2018–2026</div>
@@ -1742,8 +1743,8 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
     </div>
     <div id="hm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:5px;margin-bottom:10px"></div>
     <div style="display:flex;gap:14px;font-size:11px;color:var(--text3);flex-wrap:wrap">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);border-radius:2px"></span>Akumulasi</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,68,102,.12);border:1px solid rgba(255,68,102,.3);border-radius:2px"></span>Distribusi</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.3);border-radius:2px"></span>Akumulasi</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,61,90,.12);border:1px solid rgba(255,61,90,.3);border-radius:2px"></span>Distribusi</span>
       <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--bg3);border:1px solid var(--border);border-radius:2px"></span>Netral</span>
     </div>
   </div>
@@ -1807,6 +1808,183 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
   </div>
 </div>
 
+
+<!-- ===== HARGA WAJAR (MoS Valuasi) ===== -->
+<div id="page-hargawajar" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+    <div>
+      <div class="ptitle">💎 Harga Wajar — Analisa Valuasi MoS</div>
+      <div class="psub">Upload laporan keuangan PDF → AI ekstrak data → hitung Margin of Safety otomatis · metodologi: EPS-based IRR + Future Stock Price (9-step)</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-blue" onclick="hw_resetAll()" style="font-size:10px">🔄 Reset</button>
+      <button class="btn" onclick="hw_saveToStorage()" style="font-size:10px;border-color:rgba(0,212,170,.35);color:var(--green)">💾 Simpan</button>
+    </div>
+  </div>
+
+  <!-- Upload + AI Parse Section -->
+  <div class="card" style="margin-bottom:10px;border-top-color:rgba(0,136,255,.4)">
+    <div class="cheader">
+      <span class="ctitle" style="color:var(--blue)">📄 UPLOAD LAPORAN KEUANGAN (PDF)</span>
+      <span id="hw-ai-status" style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--text3)">Siap upload</span>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase">Kode Saham</div>
+        <input id="hw-ticker-input" type="text" placeholder="e.g. BBCA" maxlength="6"
+          style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px;text-transform:uppercase"
+          oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div style="flex:2;min-width:240px">
+        <div style="font-size:9px;color:var(--text3);margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase">Upload PDF Laporan Keuangan (Annual/Tahunan)</div>
+        <label id="hw-dropzone" style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px dashed rgba(0,136,255,.4);border-radius:2px;padding:8px 12px;cursor:pointer;transition:all .2s"
+          onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='rgba(0,136,255,.4)'">
+          <span style="font-size:16px">📁</span>
+          <div>
+            <div id="hw-file-name" style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">Klik untuk pilih file PDF...</div>
+            <div style="font-size:9px;color:var(--text3)">Laporan keuangan tahunan IDX · max 15MB</div>
+          </div>
+          <input type="file" id="hw-pdf-input" accept=".pdf" style="display:none" onchange="hw_onFileSelect(this)">
+        </label>
+      </div>
+      <button id="hw-extract-btn" class="btn btn-blue" onclick="hw_extractWithAI()" style="height:38px;white-space:nowrap" disabled>🤖 Ekstrak dengan AI</button>
+    </div>
+    <!-- Multi-year upload info -->
+    <div style="margin-top:8px;font-size:9px;color:var(--text3);line-height:1.6;border-top:1px solid var(--border);padding-top:8px">
+      💡 <b style="color:var(--text2)">Tips:</b> Upload laporan keuangan tahunan. AI akan mengekstrak: EPS, Total Equity, Jumlah Saham, Dividen/Saham, PER, Net Income per tahun dari dalam PDF. Untuk akurasi optimal, upload laporan 3-5 tahun atau laporan yang mengandung data historis multi-tahun.
+    </div>
+  </div>
+
+  <!-- Main 2-column layout -->
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:10px">
+
+    <!-- LEFT: Input Data Keuangan -->
+    <div>
+      <!-- Inputs Section -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="cheader"><span class="ctitle">📊 DATA KEUANGAN (EDIT MANUAL / HASIL AI)</span>
+          <button class="btn" onclick="hw_addYear()" style="font-size:9px;padding:3px 8px;border-color:rgba(255,102,0,.3);color:var(--bb-orange)">+ Tambah Tahun</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl" id="hw-data-table">
+            <thead>
+              <tr>
+                <th>Tahun</th>
+                <th>EPS (Rp)</th>
+                <th>Total Equity (M)</th>
+                <th>Shares (juta)</th>
+                <th>DPS (Rp)</th>
+                <th>PER</th>
+                <th>Net Income (M)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="hw-data-body">
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <div style="flex:1;min-width:140px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Harga Saham Saat Ini (Rp)</div>
+            <input id="hw-current-price" type="number" placeholder="e.g. 9500" step="50"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
+              oninput="hw_recalc()">
+          </div>
+          <div style="flex:1;min-width:120px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Min Return (%/thn)</div>
+            <input id="hw-min-return" type="number" value="6" step="1" min="1" max="30"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
+              oninput="hw_recalc()">
+          </div>
+          <div style="flex:1;min-width:120px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Proyeksi (tahun)</div>
+            <input id="hw-proj-years" type="number" value="5" step="1" min="1" max="15"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
+              oninput="hw_recalc()">
+          </div>
+          <button class="btn btn-blue" onclick="hw_recalc()" style="height:34px;margin-top:14px">⚡ Hitung</button>
+        </div>
+      </div>
+
+      <!-- Calculation Steps Display -->
+      <div class="card" id="hw-steps-card" style="margin-bottom:10px;display:none">
+        <div class="cheader"><span class="ctitle">🔬 LANGKAH KALKULASI MoS</span></div>
+        <div id="hw-steps-body" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+      </div>
+
+      <!-- Historical chart -->
+      <div class="card" id="hw-chart-card" style="display:none">
+        <div class="cheader"><span class="ctitle">📈 TREND HISTORIS</span></div>
+        <canvas id="hw-history-chart" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT: Result Panel -->
+    <div>
+      <!-- Main verdict card -->
+      <div class="card" id="hw-verdict-card" style="margin-bottom:10px;border-top-width:2px;border-top-color:var(--text3)">
+        <div style="text-align:center;padding:10px 0">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">VALUASI</div>
+          <div id="hw-ticker-display" style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--bb-orange);margin-bottom:4px">—</div>
+          <div id="hw-verdict-badge" style="display:inline-block;padding:4px 14px;border-radius:2px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;background:var(--bg4);color:var(--text3);border:1px solid var(--border)">BELUM DIHITUNG</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
+            <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Harga Wajar</div>
+            <div id="hw-fair-price" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--amber)">—</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
+            <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Harga Saat Ini</div>
+            <div id="hw-current-display" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text)">—</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
+            <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Margin of Safety</div>
+            <div id="hw-mos-pct" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text3)">—</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
+            <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Initial IRR</div>
+            <div id="hw-irr-display" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text3)">—</div>
+          </div>
+        </div>
+        <!-- MoS gauge bar -->
+        <div style="margin-top:10px">
+          <div style="font-size:9px;color:var(--text3);margin-bottom:4px;display:flex;justify-content:space-between">
+            <span>Diskon</span><span id="hw-mos-label" style="color:var(--text2)">—</span><span>Premium</span>
+          </div>
+          <div style="background:var(--bg4);border-radius:1px;height:8px;overflow:hidden;position:relative">
+            <div id="hw-mos-bar" style="height:100%;width:50%;background:var(--text3);transition:all .5s;border-radius:1px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics grid -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="cheader"><span class="ctitle">📋 METRIC VALUASI</span></div>
+        <div id="hw-metrics-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+          <div class="metric" id="hw-m-roe"><div class="mlabel">Avg ROE</div><div class="mval" id="hw-v-roe">—</div></div>
+          <div class="metric" id="hw-m-dpr"><div class="mlabel">Avg DPR</div><div class="mval" id="hw-v-dpr">—</div></div>
+          <div class="metric" id="hw-m-per"><div class="mlabel">Avg PER</div><div class="mval" id="hw-v-per">—</div></div>
+          <div class="metric" id="hw-m-eps"><div class="mlabel">EPS Terkini</div><div class="mval" id="hw-v-eps">—</div></div>
+          <div class="metric" id="hw-m-eq"><div class="mlabel">Equity/Share</div><div class="mval" id="hw-v-eq">—</div></div>
+          <div class="metric" id="hw-m-feps"><div class="mlabel">Future EPS</div><div class="mval" id="hw-v-feps">—</div></div>
+          <div class="metric" id="hw-m-fsp"><div class="mlabel">Future Price</div><div class="mval" id="hw-v-fsp">—</div></div>
+          <div class="metric" id="hw-m-roe2"><div class="mlabel">ROE after Payout</div><div class="mval" id="hw-v-roe2">—</div></div>
+        </div>
+      </div>
+
+      <!-- Saved analyses list -->
+      <div class="card">
+        <div class="cheader"><span class="ctitle">📚 HISTORI ANALISA</span>
+          <button class="btn" onclick="hw_clearHistory()" style="font-size:9px;padding:2px 7px;border-color:rgba(255,34,68,.3);color:var(--red)">Hapus Semua</button>
+        </div>
+        <div id="hw-history-list" style="max-height:200px;overflow-y:auto">
+          <div style="font-size:10px;color:var(--text3);text-align:center;padding:16px">Belum ada analisa tersimpan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ===== CANDLE ANALYSIS ===== -->
 <div id="page-candle" class="page">
@@ -1919,11 +2097,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 // Komisi broker (murni, sebelum PPN & Levy)
 // Sumber: halaman resmi masing-masing sekuritas
 var SEKURITAS = {
-  'Mirae Asset':      {buyFee:0.0015, sellFee:0.0025, color:'#ff6600'},
-  'BCA Sekuritas':    {buyFee:0.0018, sellFee:0.0028, color:'#2299ff'},
-  'Mandiri Sekuritas':{buyFee:0.0017, sellFee:0.0027, color:'#ffcc00'},
-  'BRI Danareksa':    {buyFee:0.0015, sellFee:0.0025, color:'#00d4aa'},
-  'Phillip Sekuritas':{buyFee:0.0013, sellFee:0.0023, color:'#a889f0'},
+  'Mirae Asset':      {buyFee:0.0015, sellFee:0.0025, color:'#00c8ff'},
+  'BCA Sekuritas':    {buyFee:0.0018, sellFee:0.0028, color:'#4da6ff'},
+  'Mandiri Sekuritas':{buyFee:0.0017, sellFee:0.0027, color:'#ffc107'},
+  'BRI Danareksa':    {buyFee:0.0015, sellFee:0.0025, color:'#00e5a0'},
+  'Phillip Sekuritas':{buyFee:0.0013, sellFee:0.0023, color:'#a78bfa'},
   'Stockbit':         {buyFee:0.0015, sellFee:0.0025, color:'#ff6b6b'},  // resmi: 0.15%/0.25%
   'Indo Premier':     {buyFee:0.0019, sellFee:0.0029, color:'#2dd4bf'},
   'CGS-CIMB':         {buyFee:0.0018, sellFee:0.0028, color:'#fb923c'},
@@ -2002,10 +2180,10 @@ function parsePrice(val){
 
 // ── KAS PER AKUN PORTOFOLIO ──
 var CASH_ACCOUNTS = {
-  saham:     {label:'Kas Saham (RDN)',     color:'#00d4aa', balance:0},
+  saham:     {label:'Kas Saham (RDN)',     color:'#00e5a0', balance:0},
   crypto:    {label:'Kas Crypto (Wallet)', color:'#f7931a', balance:0},
-  etf:       {label:'Kas ETF (USD)',       color:'#ff6600', balance:0, isUsd:true},
-  reksadana: {label:'Kas Reksa Dana',      color:'#a889f0', balance:0},
+  etf:       {label:'Kas ETF (USD)',       color:'#00c8ff', balance:0, isUsd:true},
+  reksadana: {label:'Kas Reksa Dana',      color:'#a78bfa', balance:0},
 };
 function saveCashAccounts(){ try{ localStorage.setItem('ihsg_cash_v1', JSON.stringify(CASH_ACCOUNTS)); }catch(e){} }
 function setCash(account, amount){ if(!CASH_ACCOUNTS[account]) return; CASH_ACCOUNTS[account].balance=parseFloat(amount)||0; saveCashAccounts(); }
@@ -3198,7 +3376,7 @@ function openBackupModal(){
         <span style="font-size:20px">📊</span>
         <div style="text-align:left"><div style="font-weight:700">Download CSV Transaksi Saham</div><div style="font-size:11px;opacity:.7;font-weight:400">Bisa dibuka di Excel/Sheets — ${transactions.length} transaksi</div></div>
       </button>
-      <button class="btn btn-ghost" onclick="importData()" style="justify-content:flex-start;gap:10px;padding:12px 14px;font-size:13px;border-color:rgba(255,102,0,.3)">
+      <button class="btn btn-ghost" onclick="importData()" style="justify-content:flex-start;gap:10px;padding:12px 14px;font-size:13px;border-color:rgba(0,200,255,.3)">
         <span style="font-size:20px">📤</span>
         <div style="text-align:left"><div style="font-weight:700">Restore dari Backup</div><div style="font-size:11px;opacity:.7;font-weight:400">Upload file JSON backup — data saat ini akan diganti</div></div>
       </button>
@@ -3641,12 +3819,12 @@ function fhSetBadge(status, text){
   FH.status = status;
   var dot = el('fh-dot'), lbl = el('fh-label'), badge = el('fh-badge');
   if(!dot||!lbl) return;
-  var colors = { live:'#00d4aa', error:'#ff4466', off:'#707090', loading:'#ffcc00', limit:'#ffcc00' };
-  dot.style.background = colors[status]||'#707090';
+  var colors = { live:'#00e5a0', error:'#ff3d5a', off:'#4a5e82', loading:'#ffc107', limit:'#ffc107' };
+  dot.style.background = colors[status]||'#4a5e82';
   lbl.textContent = text;
   if(badge){
-    badge.style.borderColor = status==='live'  ? 'rgba(0,212,170,.3)' :
-                              status==='error'  ? 'rgba(255,68,102,.3)' :
+    badge.style.borderColor = status==='live'  ? 'rgba(0,229,160,.3)' :
+                              status==='error'  ? 'rgba(255,61,90,.3)' :
                               status==='limit'  ? 'rgba(255,193,7,.3)' : 'var(--border)';
   }
 }
@@ -3854,14 +4032,14 @@ function openFinnhubSettings(){
       '<button class="btn btn-ghost btn-sm" onclick="fhTestFromModal()">🔍 Test Koneksi</button>'+
       '<span id="fh-test-result" style="font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:var(--text3)"></span>'+
     '</div>'+
-    '<div style="background:rgba(255,102,0,.06);border:1px solid rgba(255,102,0,.15);border-radius:8px;padding:9px 12px;margin-bottom:11px;font-size:11px;color:var(--text2);line-height:1.65">'+
+    '<div style="background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.15);border-radius:8px;padding:9px 12px;margin-bottom:11px;font-size:11px;color:var(--text2);line-height:1.65">'+
       '<div style="font-weight:700;color:var(--accent);margin-bottom:3px">📊 Data realtime:</div>'+
       '• IHSG — Finnhub ^JKSE + Yahoo Finance fallback otomatis<br>'+
       '• Saham IDX portofolio — tiap 2 menit<br>'+
       '• USD/IDR — tiap 10 menit<br>'+
       '<span style="color:var(--amber)">⚡ IHSG tiap 15 detik</span>'+
     '</div>'+
-    '<div style="background:rgba(255,68,102,.06);border:1px solid rgba(255,68,102,.15);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.65">'+
+    '<div style="background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.15);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.65">'+
       '<div style="font-weight:700;color:var(--red);margin-bottom:3px">⚠️ Jika Error:</div>'+
       '1. Verify API key di <strong>finnhub.io/dashboard</strong><br>'+
       '2. IHSG tetap update via Yahoo Finance meski Finnhub gagal<br>'+
@@ -4005,8 +4183,8 @@ function buildModalPosisiChart(porto){
       labels:labels,
       datasets:[
         {label:'Nilai Pasar',data:retained,backgroundColor:'rgba(45,212,191,.6)',borderColor:'#2dd4bf',borderWidth:1,stack:'s'},
-        {label:'Rugi',      data:loss,    backgroundColor:'rgba(255,68,102,.7)',  borderColor:'#ff4466',borderWidth:1,stack:'s'},
-        {label:'Untung',    data:gain,    backgroundColor:'rgba(0,212,170,.7)',  borderColor:'#00d4aa',borderWidth:1,stack:'s'}
+        {label:'Rugi',      data:loss,    backgroundColor:'rgba(255,61,90,.7)',  borderColor:'#ff3d5a',borderWidth:1,stack:'s'},
+        {label:'Untung',    data:gain,    backgroundColor:'rgba(0,229,160,.7)',  borderColor:'#00e5a0',borderWidth:1,stack:'s'}
       ]
     },
     options:{
@@ -4014,7 +4192,7 @@ function buildModalPosisiChart(porto){
       plugins:{
         legend:{
           display:true,
-          labels:{color:'#9898b8',font:{size:10},boxWidth:12,padding:16}
+          labels:{color:'#8fa3c8',font:{size:10},boxWidth:12,padding:16}
         },
         tooltip:Object.assign({},TT,{mode:'index',intersect:false,callbacks:{
           label:function(c){
@@ -4122,7 +4300,7 @@ function buildSectorChart(porto){
   var byS={};var totalMV=porto.reduce(function(a,p){return a+p.mv},0)||1;
   porto.forEach(function(p){byS[p.info.sector]=(byS[p.info.sector]||0)+p.mv});
   var labels=Object.keys(byS);var vals=labels.map(function(s){return byS[s]});
-  var cols=labels.map(function(s){return IDX_SECTORS[s]?IDX_SECTORS[s].color:'#707090'});
+  var cols=labels.map(function(s){return IDX_SECTORS[s]?IDX_SECTORS[s].color:'#4a5e82'});
   charts['sector']=new Chart(cv,{type:'doughnut',data:{labels:labels,datasets:[{data:vals,backgroundColor:cols,borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.label+': '+(c.parsed/totalMV*100).toFixed(1)+'%'}}})}}});
 }
 
@@ -4135,7 +4313,7 @@ function buildRdnChart(){
     var m=dt.getMonth();
     if(r.amount>0)inM[m]+=r.amount;else outM[m]+=Math.abs(r.amount);
   });
-  charts['rdnf']=new Chart(cv,{type:'bar',data:{labels:months,datasets:[{label:'Masuk',data:inM,backgroundColor:'rgba(0,212,170,.6)',borderRadius:3},{label:'Keluar',data:outM,backgroundColor:'rgba(255,68,102,.5)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.dataset.label+': Rp '+fmtK(c.parsed.y)}}})},scales:{x:{grid:{color:GC},ticks:TC},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v)}}),position:'right'}}}});
+  charts['rdnf']=new Chart(cv,{type:'bar',data:{labels:months,datasets:[{label:'Masuk',data:inM,backgroundColor:'rgba(0,229,160,.6)',borderRadius:3},{label:'Keluar',data:outM,backgroundColor:'rgba(255,61,90,.5)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.dataset.label+': Rp '+fmtK(c.parsed.y)}}})},scales:{x:{grid:{color:GC},ticks:TC},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v)}}),position:'right'}}}});
 }
 
 function buildPnlChart(){
@@ -4152,9 +4330,9 @@ function buildPnlChart(){
       p.lot-=tx.lot;p.cost=Math.max(0,p.cost-avg*tx.lot*100);
     }
   });
-  var last=data[data.length-1];var col=last>=0?'#00d4aa':'#ff4466';
+  var last=data[data.length-1];var col=last>=0?'#00e5a0':'#ff3d5a';
   var ctx=cv.getContext('2d');var g=ctx.createLinearGradient(0,0,0,190);
-  g.addColorStop(0,last>=0?'rgba(0,212,170,.18)':'rgba(255,68,102,.18)');g.addColorStop(1,'rgba(0,0,0,0)');
+  g.addColorStop(0,last>=0?'rgba(0,229,160,.18)':'rgba(255,61,90,.18)');g.addColorStop(1,'rgba(0,0,0,0)');
   charts['pnl']=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{data:data,borderColor:col,borderWidth:2,backgroundColor:g,fill:true,tension:.4,pointRadius:3,pointBackgroundColor:col}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return 'P&L: Rp '+fmt(c.parsed.y)}}})},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:7})},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v)}}),position:'right'}}}});
 }
 
@@ -4167,7 +4345,7 @@ function buildRetDistChart(porto){
     for(var i=0;i<bins.length-1;i++){if(r>=bins[i]&&r<bins[i+1]){counts[i]++;break;}}
   });
   var labels=bins.slice(0,-1).map(function(b,i){return b+'% to '+bins[i+1]+'%'});
-  var bkgs=bins.slice(0,-1).map(function(b){return b>=0?'rgba(0,212,170,.65)':'rgba(255,68,102,.55)'});
+  var bkgs=bins.slice(0,-1).map(function(b){return b>=0?'rgba(0,229,160,.65)':'rgba(255,61,90,.55)'});
   charts['retdist']=new Chart(cv,{type:'bar',data:{labels:labels,datasets:[{data:counts,backgroundColor:bkgs,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.parsed.y+' saham'}}})},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxRotation:35})},y:{grid:{color:GC},ticks:Object.assign({},TC,{stepSize:1}),position:'right'}}}});
 }
 
@@ -4274,7 +4452,7 @@ function renderDashboard(){
         labels:['Saham IDX','Crypto','ETF AS','Reksa Dana','Kas RDN'],
         datasets:[{
           data:[sahamMV,crMV,etfMV,rdMV,Math.max(0,rdn)],
-          backgroundColor:['#00d4aa','#f7931a','#ff6600','#a889f0','#ffcc00'],
+          backgroundColor:['#00e5a0','#f7931a','#00c8ff','#a78bfa','#ffc107'],
           borderWidth:0,hoverOffset:5
         }]
       },
@@ -4291,11 +4469,11 @@ function renderDashboard(){
   }
   // Legend AUM
   var aumItems=[
-    {label:'Saham IDX', val:sahamMV, pct:wSaham,  color:'#00d4aa'},
+    {label:'Saham IDX', val:sahamMV, pct:wSaham,  color:'#00e5a0'},
     {label:'Crypto',    val:crMV,    pct:wCrypto,  color:'#f7931a'},
-    {label:'ETF AS',    val:etfMV,   pct:wEtf,     color:'#ff6600'},
-    {label:'Reksa Dana',val:rdMV,    pct:wRd,      color:'#a889f0'},
-    {label:'Kas RDN',   val:Math.max(0,rdn), pct:wKas, color:'#ffcc00'},
+    {label:'ETF AS',    val:etfMV,   pct:wEtf,     color:'#00c8ff'},
+    {label:'Reksa Dana',val:rdMV,    pct:wRd,      color:'#a78bfa'},
+    {label:'Kas RDN',   val:Math.max(0,rdn), pct:wKas, color:'#ffc107'},
   ];
   el('aum-leg').innerHTML=aumItems.map(function(it){
     return '<div style="display:flex;align-items:center;gap:6px">'+
@@ -4325,16 +4503,16 @@ function renderDashboard(){
   // ── Tabel ringkasan semua aset ──
   var allRows=[];
   porto.forEach(function(p){
-    allRows.push({name:p.ticker,desc:p.info.name,kelas:'Saham IDX',lot:p.lot||0,mv:p.mv,cost:p.cost,pnl:p.unreal,ret:p.ret,color:'#00d4aa'});
+    allRows.push({name:p.ticker,desc:p.info.name,kelas:'Saham IDX',lot:p.lot||0,mv:p.mv,cost:p.cost,pnl:p.unreal,ret:p.ret,color:'#00e5a0'});
   });
   cryptoPorto.forEach(function(p){
     allRows.push({name:p.coin,desc:p.info.name,kelas:'Crypto',lot:p.qty||0,mv:p.mv,cost:p.cost,pnl:p.unreal,ret:p.ret,color:'#f7931a'});
   });
   etfPorto.forEach(function(p){
-    allRows.push({name:p.ticker,desc:p.info.name,kelas:'ETF AS',lot:p.qty||0,mv:p.mvIdr,cost:p.costIdr,pnl:p.unrIdr,ret:p.ret,color:'#ff6600'});
+    allRows.push({name:p.ticker,desc:p.info.name,kelas:'ETF AS',lot:p.qty||0,mv:p.mvIdr,cost:p.costIdr,pnl:p.unrIdr,ret:p.ret,color:'#00c8ff'});
   });
   rdPorto.forEach(function(p){
-    allRows.push({name:p.code,desc:p.info.name,kelas:'Reksa Dana',lot:0,mv:p.mv,cost:p.cost,pnl:p.unreal,ret:p.ret,color:'#a889f0'});
+    allRows.push({name:p.code,desc:p.info.name,kelas:'Reksa Dana',lot:0,mv:p.mv,cost:p.cost,pnl:p.unreal,ret:p.ret,color:'#a78bfa'});
   });
   // apply sort
   (function(){
@@ -4418,8 +4596,8 @@ function renderDashboard(){
     'Keuangan':'#3b82f6','Energi':'#f97316','Infrastruktur':'#f43f5e',
     'Konsumer Primer':'#10b981','Barang Baku':'#eab308','Konsumer Non-Primer':'#22c55e',
     'Kesehatan':'#14b8a6','Transportasi':'#2dd4bf','Properti':'#8b5cf6',
-    'Teknologi':'#a889f0','Perbankan':'#60a5fa','Tambang':'#fb923c',
-    'Lainnya':'#707090'
+    'Teknologi':'#a78bfa','Perbankan':'#60a5fa','Tambang':'#fb923c',
+    'Lainnya':'#4a5e82'
   };
   var sectByMV = {};
   porto.forEach(function(p){
@@ -4432,7 +4610,7 @@ function renderDashboard(){
   el('d-sectoral-detail').innerHTML = sectItems.length > 0
     ? sectItems.map(function(e){
         var pct = e[1]/sectTotalMV*100;
-        var col = sectColors[e[0]]||'#707090';
+        var col = sectColors[e[0]]||'#4a5e82';
         return '<div style="margin-bottom:7px">'+
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">'+
             '<span style="font-size:11px;display:flex;align-items:center;gap:5px">'+
@@ -4629,7 +4807,7 @@ function renderTransaksi(){
       pnlHtml='<span class="'+(pnl>=0?'up':'dn')+'">'+(pnl>=0?'+':'')+'Rp '+fmtK(pnl)+'</span>';
     }
     if(isBuy){pos2[tx.ticker].lot+=tx.lot;pos2[tx.ticker].cost+=tx.net;}
-    return '<tr style="'+(_txSelected.has(tx.id)?'background:rgba(255,102,0,.05)':'')+'">'
+    return '<tr style="'+(_txSelected.has(tx.id)?'background:rgba(0,200,255,.05)':'')+'">'
       +'<td><input type="checkbox" '+ (_txSelected.has(tx.id)?'checked':'')+' onchange="txToggleSel('+tx.id+',this.checked)" style="cursor:pointer"></td>'
       +'<td class="mono" style="color:var(--text2);font-size:11px">'+tx.date+'</td>'
       +'<td><span class="badge '+(isBuy?'b-up':'b-dn')+'">'+tx.type+'</span></td>'
@@ -4672,7 +4850,7 @@ function renderPortofolio(){
     var alloc=totalMV>0?(p.mv/totalMV*100):0;
     var sig=p.ret>5?'BUY':p.ret<-5?'SELL':'HOLD';
     var sigCls=sig==='BUY'?'sig-buy':sig==='SELL'?'sig-sell':'sig-hold';
-    var secColor=IDX_SECTORS[p.info.sector]?IDX_SECTORS[p.info.sector].color:'#707090';
+    var secColor=IDX_SECTORS[p.info.sector]?IDX_SECTORS[p.info.sector].color:'#4a5e82';
     return '<tr><td><span class="tp" style="border-color:'+COLORS[i%12]+'">'+p.ticker+'</span></td><td style="font-size:11px;color:var(--text2)">'+p.info.name+'</td><td><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:\'IBM Plex Mono\',monospace;color:var(--text2)"><span class="sec-dot" style="background:'+secColor+'"></span>'+p.info.sector+'</span></td><td class="mono">'+p.lot+'</td><td class="mono">'+p.shares+'</td><td class="mono">Rp '+fmt(p.avg)+'</td><td class="mono" style="color:var(--accent)">Rp '+fmt(p.mp)+'</td><td class="mono">Rp '+fmtK(p.mv)+'</td><td class="mono" style="color:var(--text2)">Rp '+fmtK(p.cost)+'</td><td class="mono '+(p.unreal>=0?'up':'dn')+'">'+(p.unreal>=0?'+':'')+'Rp '+fmtK(p.unreal)+'</td><td class="mono '+(p.ret>=0?'up':'dn')+'">'+(p.ret>=0?'+':'')+p.ret.toFixed(2)+'%</td><td><div class="prog" style="width:70px"><div class="progf" style="width:'+alloc.toFixed(1)+'%;background:'+COLORS[i%12]+'"></div></div><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-top:2px">'+alloc.toFixed(1)+'%</div></td><td><span class="sig '+sigCls+'">'+sig+'</span></td></tr>';
   }).join('')||'<tr><td colspan="13" style="text-align:center;color:var(--text3);padding:16px;font-family:\'IBM Plex Mono\',monospace">Belum ada posisi aktif</td></tr>';
 }
@@ -4712,7 +4890,7 @@ function renderDividen(){
   if(cvY && years.length){
     charts['divYC'] = new Chart(cvY, {type:'bar',
       data:{labels:years, datasets:[{data:years.map(function(y){return byYr[y]}),
-        backgroundColor:'rgba(0,212,170,.65)', borderRadius:4}]},
+        backgroundColor:'rgba(0,229,160,.65)', borderRadius:4}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return 'Rp '+fmtK(c.parsed.y)}}})},
         scales:{x:{grid:{color:GC},ticks:TC},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v)}}),position:'right'}}}
@@ -4742,7 +4920,7 @@ function renderDividen(){
   var cards = el('div-proj-cards');
   if(cards) cards.innerHTML = projYears.map(function(y,i){
     var val=projVals[i]; var pct=((val-baseYr)/baseYr*100).toFixed(0);
-    return '<div style="background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:9px;padding:10px;text-align:center">'+
+    return '<div style="background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);border-radius:9px;padding:10px;text-align:center">'+
       '<div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:4px">'+y+'</div>'+
       '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;font-weight:600">Rp '+fmtK(val)+'</div>'+
       '<div style="font-size:10px;color:var(--text3);margin-top:2px">+'+pct+'% vs base</div>'+
@@ -4753,8 +4931,8 @@ function renderDividen(){
   if(cvP){
     charts['divProj'] = new Chart(cvP, {type:'line',
       data:{labels:projYears.map(String),datasets:[
-        {data:projVals, borderColor:'#00d4aa', borderWidth:2, fill:true, tension:.4, pointRadius:4,
-         backgroundColor:'rgba(0,212,170,.08)'},
+        {data:projVals, borderColor:'#00e5a0', borderWidth:2, fill:true, tension:.4, pointRadius:4,
+         backgroundColor:'rgba(0,229,160,.08)'},
         {data:projYears.map(function(){return baseYr}), borderColor:'rgba(255,255,255,.15)',
          borderWidth:1, borderDash:[4,3], fill:false, pointRadius:0}
       ]},
@@ -4775,7 +4953,7 @@ function renderDividen(){
     var sharesDisp = (d.shares||0).toLocaleString('id-ID') || '<span style="color:var(--red)">?</span>';
     var dpsDisp   = d.dps ? 'Rp '+fmt(d.dps) : '<span style="color:var(--red)">?</span>';
     var taxDisp   = d.tax!=null ? 'Rp '+fmtK(d.tax) : '<span style="color:var(--red)">?</span>';
-    return '<tr style="'+(isSel?'background:rgba(255,102,0,.05)':'')+'">'
+    return '<tr style="'+(isSel?'background:rgba(0,200,255,.05)':'')+'">'
       +'<td><input type="checkbox" '+(isSel?'checked':'')+' onchange="divToggleSel('+d.id+',this.checked)" style="cursor:pointer"></td>'
       +'<td class="mono" style="color:var(--text2);font-size:11px">'+d.date+'</td>'
       +'<td><span class="tp">'+d.ticker+'</span></td>'
@@ -4913,12 +5091,12 @@ function renderSektoral(){
 
   el('sector-detail').innerHTML=sectors.map(function(s){
     var sv=byS[s];var alloc=(sv.mv/totalMV*100);
-    var sInfo=IDX_SECTORS[s]||{color:'#707090',desc:''};
+    var sInfo=IDX_SECTORS[s]||{color:'#4a5e82',desc:''};
     return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><div style="display:flex;align-items:center;gap:6px"><span class="sec-dot" style="background:'+sInfo.color+'"></span><span style="font-size:12px;font-weight:600">'+s+'</span></div><div style="text-align:right"><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+alloc.toFixed(1)+'%</span></div></div><div class="prog"><div class="progf" style="width:'+alloc+'%;background:'+sInfo.color+'"></div></div><div style="font-size:10px;color:var(--text3);margin-top:2px">'+sv.stocks.length+' saham · Rp '+fmtK(sv.mv)+'</div></div>';
   }).join('')||'<div style="color:var(--text3);text-align:center;padding:20px">Belum ada portofolio</div>';
 
   el('sector-stocks').innerHTML=sectors.map(function(s){
-    var sv=byS[s];var sInfo=IDX_SECTORS[s]||{color:'#707090',desc:''};
+    var sv=byS[s];var sInfo=IDX_SECTORS[s]||{color:'#4a5e82',desc:''};
     return '<div style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:7px"><span class="sec-dot" style="background:'+sInfo.color+'"></span><span style="font-size:12px;font-weight:600">'+s+'</span><span class="badge b-gray" style="margin-left:auto">'+sInfo.desc+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px">'+sv.stocks.map(function(p){return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 10px;min-width:120px"><div style="display:flex;justify-content:space-between;align-items:center"><span class="tp" style="border-color:'+sInfo.color+'">'+p.ticker+'</span><span class="badge '+(p.ret>=0?'b-up':'b-dn')+'">'+(p.ret>=0?'+':'')+p.ret.toFixed(1)+'%</span></div><div style="font-size:10px;color:var(--text2);margin-top:3px">'+p.lot+' lot · Rp '+fmtK(p.mv)+'</div></div>'}).join('')+'</div></div>';
   }).join('')||'<div style="color:var(--text3);text-align:center;padding:20px">Belum ada portofolio</div>';
 
@@ -5060,17 +5238,17 @@ function renderPajak(){
     bySec[tx.sekuritas].cnt++;bySec[tx.sekuritas].komisi+=tx.komisi;bySec[tx.sekuritas].pph+=tx.tax;
   });
   el('pj-by-sec').innerHTML=Object.entries(bySec).map(function(e){
-    var s=e[0],d=e[1];var sInfo=SEKURITAS[s]||{buyFee:0.0015,sellFee:0.0025,color:'#707090'};
+    var s=e[0],d=e[1];var sInfo=SEKURITAS[s]||{buyFee:0.0015,sellFee:0.0025,color:'#4a5e82'};
     return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'+
         '<span style="font-weight:600;font-size:12px;display:flex;align-items:center;gap:6px">'+
-          '<span style="width:7px;height:7px;border-radius:50%;background:'+(sInfo.color||'#707090')+';display:inline-block"></span>'+s+
+          '<span style="width:7px;height:7px;border-radius:50%;background:'+(sInfo.color||'#4a5e82')+';display:inline-block"></span>'+s+
         '</span><span class="badge b-gray">'+d.cnt+' tx</span></div>'+
       '<div class="taxrow"><span>Komisi</span><span class="mono amb">Rp '+fmtK(d.komisi)+'</span></div>'+
       '<div class="taxrow"><span>PPh (Beli+Jual)</span><span class="mono dn">Rp '+fmtK(d.pph)+'</span></div>'+
       '<div style="display:flex;gap:6px;margin-top:4px">'+
-        '<span class="badge" style="font-size:9px;background:rgba(0,212,170,.1);color:var(--green)">Beli '+(sInfo.buyFee*100).toFixed(2)+'%</span>'+
-        '<span class="badge" style="font-size:9px;background:rgba(255,68,102,.1);color:var(--red)">Jual '+(sInfo.sellFee*100).toFixed(2)+'%</span>'+
+        '<span class="badge" style="font-size:9px;background:rgba(0,229,160,.1);color:var(--green)">Beli '+(sInfo.buyFee*100).toFixed(2)+'%</span>'+
+        '<span class="badge" style="font-size:9px;background:rgba(255,61,90,.1);color:var(--red)">Jual '+(sInfo.sellFee*100).toFixed(2)+'%</span>'+
       '</div></div>';
   }).join('')||'<div style="color:var(--text3);text-align:center;padding:16px">Belum ada transaksi</div>';
 
@@ -5302,10 +5480,10 @@ var CRYPTO_DB = {
 };
 
 var CRYPTO_CATEGORIES = {
-  'Layer 1':   '#ff6600',
-  'Layer 2':   '#a889f0',
-  'Layer 0':   '#ffcc00',
-  'DeFi':      '#00d4aa',
+  'Layer 1':   '#00c8ff',
+  'Layer 2':   '#a78bfa',
+  'Layer 0':   '#ffc107',
+  'DeFi':      '#00e5a0',
   'Oracle':    '#ff6b6b',
   'Payments':  '#2dd4bf',
   'Meme':      '#fb923c',
@@ -5313,11 +5491,11 @@ var CRYPTO_CATEGORIES = {
 
 // ETF AMERIKA DATABASE (harga USD)
 var ETF_DB = {
-  'SPY':  {name:'SPDR S&P 500 ETF',          category:'Broad Market',  baseUSD:520,   color:'#ff6600', expense:0.0945},
-  'QQQ':  {name:'Invesco Nasdaq-100',         category:'Tech',          baseUSD:445,   color:'#a889f0', expense:0.20},
-  'VTI':  {name:'Vanguard Total Stock Mkt',   category:'Broad Market',  baseUSD:248,   color:'#00d4aa', expense:0.03},
-  'VOO':  {name:'Vanguard S&P 500',           category:'Broad Market',  baseUSD:489,   color:'#2299ff', expense:0.03},
-  'IWM':  {name:'iShares Russell 2000',       category:'Small Cap',     baseUSD:198,   color:'#ffcc00', expense:0.19},
+  'SPY':  {name:'SPDR S&P 500 ETF',          category:'Broad Market',  baseUSD:520,   color:'#00c8ff', expense:0.0945},
+  'QQQ':  {name:'Invesco Nasdaq-100',         category:'Tech',          baseUSD:445,   color:'#a78bfa', expense:0.20},
+  'VTI':  {name:'Vanguard Total Stock Mkt',   category:'Broad Market',  baseUSD:248,   color:'#00e5a0', expense:0.03},
+  'VOO':  {name:'Vanguard S&P 500',           category:'Broad Market',  baseUSD:489,   color:'#4da6ff', expense:0.03},
+  'IWM':  {name:'iShares Russell 2000',       category:'Small Cap',     baseUSD:198,   color:'#ffc107', expense:0.19},
   'GLD':  {name:'SPDR Gold Shares',           category:'Komoditas',     baseUSD:218,   color:'#f59e0b', expense:0.40},
   'TLT':  {name:'iShares 20+ Yr Treasury',    category:'Bond',          baseUSD:88,    color:'#34d399', expense:0.15},
   'XLK':  {name:'Technology Select SPDR',     category:'Tech',          baseUSD:210,   color:'#c084fc', expense:0.10},
@@ -5331,9 +5509,9 @@ var ETF_DB = {
 };
 
 var ETF_CATEGORIES = {
-  'Broad Market':  '#ff6600',
-  'Tech':          '#a889f0',
-  'Small Cap':     '#ffcc00',
+  'Broad Market':  '#00c8ff',
+  'Tech':          '#a78bfa',
+  'Small Cap':     '#ffc107',
   'Komoditas':     '#f59e0b',
   'Bond':          '#34d399',
   'Financial':     '#60a5fa',
@@ -5345,11 +5523,11 @@ var ETF_CATEGORIES = {
 
 // REKSA DANA DATABASE
 var RD_DB = {
-  'BIBIT-SAHAM':   {name:'Bibit Saham Indonesia',        mi:'PT Bibit Investasi Digital', type:'Saham',         baseNAB:2850,  risk:'Tinggi',   color:'#00d4aa'},
-  'MITRA-SAHAM':   {name:'Mitra Dana Saham Perdana',     mi:'PT Mitra Asset Management',  type:'Saham',         baseNAB:4120,  risk:'Tinggi',   color:'#ff6600'},
-  'SCHRODER':      {name:'Schroder Dana Istimewa',       mi:'PT Schroder Investment Mgmt',type:'Saham',         baseNAB:6780,  risk:'Tinggi',   color:'#a889f0'},
-  'BNI-SAHAM':     {name:'BNI Dana Saham',               mi:'PT BNI Asset Management',    type:'Saham',         baseNAB:3450,  risk:'Tinggi',   color:'#2299ff'},
-  'MANULIFE-PT':   {name:'Manulife Pendapatan Tetap',    mi:'PT Manulife Aset Manajemen', type:'Pendapatan Tetap',baseNAB:1890, risk:'Sedang',  color:'#ffcc00'},
+  'BIBIT-SAHAM':   {name:'Bibit Saham Indonesia',        mi:'PT Bibit Investasi Digital', type:'Saham',         baseNAB:2850,  risk:'Tinggi',   color:'#00e5a0'},
+  'MITRA-SAHAM':   {name:'Mitra Dana Saham Perdana',     mi:'PT Mitra Asset Management',  type:'Saham',         baseNAB:4120,  risk:'Tinggi',   color:'#00c8ff'},
+  'SCHRODER':      {name:'Schroder Dana Istimewa',       mi:'PT Schroder Investment Mgmt',type:'Saham',         baseNAB:6780,  risk:'Tinggi',   color:'#a78bfa'},
+  'BNI-SAHAM':     {name:'BNI Dana Saham',               mi:'PT BNI Asset Management',    type:'Saham',         baseNAB:3450,  risk:'Tinggi',   color:'#4da6ff'},
+  'MANULIFE-PT':   {name:'Manulife Pendapatan Tetap',    mi:'PT Manulife Aset Manajemen', type:'Pendapatan Tetap',baseNAB:1890, risk:'Sedang',  color:'#ffc107'},
   'BNI-PT':        {name:'BNI Dana Premium Plus',        mi:'PT BNI Asset Management',    type:'Pendapatan Tetap',baseNAB:2340, risk:'Sedang',  color:'#fb923c'},
   'MANDIRI-PT':    {name:'Mandiri Investa Dana Syariah', mi:'PT Mandiri Investasi',       type:'Pendapatan Tetap',baseNAB:1650, risk:'Sedang',  color:'#34d399'},
   'BIBIT-PU':      {name:'Bibit Pasar Uang',             mi:'PT Bibit Investasi Digital', type:'Pasar Uang',    baseNAB:1245,  risk:'Rendah',   color:'#2dd4bf'},
@@ -5360,10 +5538,10 @@ var RD_DB = {
 };
 
 var RD_TYPES = {
-  'Saham':           {color:'#ff6600', desc:'Risiko tinggi, return tertinggi, > 80% saham'},
-  'Pendapatan Tetap':{color:'#00d4aa', desc:'Risiko sedang, obligasi & surat utang'},
-  'Pasar Uang':      {color:'#ffcc00', desc:'Risiko rendah, deposito & SBI, aman'},
-  'Campuran':        {color:'#a889f0', desc:'Kombinasi saham, obligasi & pasar uang'},
+  'Saham':           {color:'#00c8ff', desc:'Risiko tinggi, return tertinggi, > 80% saham'},
+  'Pendapatan Tetap':{color:'#00e5a0', desc:'Risiko sedang, obligasi & surat utang'},
+  'Pasar Uang':      {color:'#ffc107', desc:'Risiko rendah, deposito & SBI, aman'},
+  'Campuran':        {color:'#a78bfa', desc:'Kombinasi saham, obligasi & pasar uang'},
 };
 
 // ============================================================
@@ -5410,7 +5588,7 @@ function loadSampleEtf(){
 function loadSampleRd(){
   // Semua reksa dana SUDAH DICAIRKAN — tidak ada posisi aktif
   // Hanya daftarkan ke RD_DB untuk tampilan di tab Reksa Dana (mode riwayat)
-  var rdColorMap = {'Saham':'#ff6600','Pendapatan Tetap':'#00d4aa','Pasar Uang':'#ffcc00','Campuran':'#a889f0'};
+  var rdColorMap = {'Saham':'#00c8ff','Pendapatan Tetap':'#00e5a0','Pasar Uang':'#ffc107','Campuran':'#a78bfa'};
   var rdRiskMap  = {'Saham':'Tinggi','Campuran':'Sedang','Pendapatan Tetap':'Sedang','Pasar Uang':'Rendah'};
   XLSX_DATA.funds.forEach(function(f, i){
     var key = 'RD-'+i;
@@ -5420,7 +5598,7 @@ function loadSampleRd(){
       type: f.category==='Pasar Uang'?'Pasar Uang':f.category==='Pendapatan Tetap'?'Pendapatan Tetap':f.category==='Saham'?'Saham':'Campuran',
       baseNAB: 1000,
       risk: rdRiskMap[f.category]||'Sedang',
-      color: rdColorMap[f.category]||'#a889f0',
+      color: rdColorMap[f.category]||'#a78bfa',
       isHistory: true,
       gl: f.gl||0,
       gl_pct: f.gl_pct||0,
@@ -5460,7 +5638,7 @@ function getCryptoPortfolio(){
     }
   });
   return Object.values(pos).filter(function(p){return p.qty>0.000001}).map(function(p){
-    var info = CRYPTO_DB[p.coin] || {name:p.coin, category:'Lainnya', baseUSD:0, color:'#707090'};
+    var info = CRYPTO_DB[p.coin] || {name:p.coin, category:'Lainnya', baseUSD:0, color:'#4a5e82'};
     var priceUSD = cryptoPrices[p.coin] || info.baseUSD;
     var priceIdr = priceUSD * usdIdr;
     var mv = p.qty * priceIdr;
@@ -5496,11 +5674,11 @@ function renderCrypto(){
   kc('cryptoDonut');
   var cvD = el('cryptoDonut');
   if(cvD && porto.length){
-    var cols = porto.map(function(p){return p.info.color||'#707090'});
+    var cols = porto.map(function(p){return p.info.color||'#4a5e82'});
     charts['cryptoDonut'] = new Chart(cvD,{type:'doughnut',data:{labels:porto.map(function(p){return p.coin}),datasets:[{data:porto.map(function(p){return p.mv}),backgroundColor:cols,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.label+': Rp '+fmtK(c.parsed)}}})}}});
   }
   var totV = totalMV||1;
-  el('crypto-leg').innerHTML = porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:2px;background:'+(p.info.color||'#707090')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.coin+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mv/totV)*100).toFixed(1)+'%</span></div>'}).join('');
+  el('crypto-leg').innerHTML = porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:2px;background:'+(p.info.color||'#4a5e82')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.coin+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mv/totV)*100).toFixed(1)+'%</span></div>'}).join('');
 
   // Price chart (BTC + ETH combined)
   kc('cryptoPrice');
@@ -5511,7 +5689,7 @@ function renderCrypto(){
     var btcData = labels.map(function(){return +(btcBase*(1+(Math.random()*0.04-0.02))).toFixed(0)});
     var ethBase = (cryptoPrices['ETH']||3200)*usdIdr/1e6;
     var ethData = labels.map(function(){return +(ethBase*(1+(Math.random()*0.04-0.02))).toFixed(0)});
-    charts['cryptoPrice'] = new Chart(cvP,{type:'line',data:{labels:labels,datasets:[{label:'BTC (jt)',data:btcData,borderColor:'#f7931a',borderWidth:2,fill:false,tension:.4,pointRadius:0},{label:'ETH (jt)',data:ethData,borderColor:'#627eea',borderWidth:2,fill:false,tension:.4,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#9898b8',font:{size:9}}},tooltip:Object.assign({},TT)},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:8})},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v*1e6)}}),position:'right'}}}});
+    charts['cryptoPrice'] = new Chart(cvP,{type:'line',data:{labels:labels,datasets:[{label:'BTC (jt)',data:btcData,borderColor:'#f7931a',borderWidth:2,fill:false,tension:.4,pointRadius:0},{label:'ETH (jt)',data:ethData,borderColor:'#627eea',borderWidth:2,fill:false,tension:.4,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8fa3c8',font:{size:9}}},tooltip:Object.assign({},TT)},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:8})},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v*1e6)}}),position:'right'}}}});
   }
 
   // Table
@@ -5519,9 +5697,9 @@ function renderCrypto(){
     var alloc = totalMV>0 ? (p.mv/totalMV*100) : 0;
     var sig = p.ret>10?'BUY':p.ret<-10?'SELL':'HOLD';
     var sigCls = sig==='BUY'?'sig-buy':sig==='SELL'?'sig-sell':'sig-hold';
-    var catColor = CRYPTO_CATEGORIES[p.info.category]||'#707090';
+    var catColor = CRYPTO_CATEGORIES[p.info.category]||'#4a5e82';
     var qtyDisp = p.qty < 0.001 ? p.qty.toFixed(6) : p.qty < 1 ? p.qty.toFixed(4) : p.qty.toFixed(2);
-    return '<tr><td><span class="tp" style="border-color:'+(p.info.color||'#707090')+'">'+p.coin+'</span></td><td style="font-size:11px;color:var(--text2)">'+p.info.name+'</td><td><span class="badge" style="background:rgba(255,255,255,.06);color:'+catColor+'">'+p.info.category+'</span></td><td class="mono">'+qtyDisp+'</td><td class="mono">Rp '+fmt(Math.round(p.avg))+'</td><td class="mono" style="color:var(--accent)">Rp '+fmt(Math.round(p.priceIdr))+'</td><td class="mono" style="color:var(--text2)">$'+p.priceUSD.toFixed(2)+'</td><td class="mono">Rp '+fmtK(p.mv)+'</td><td class="mono" style="color:var(--text2)">Rp '+fmtK(p.cost)+'</td><td class="mono '+(p.unreal>=0?'up':'dn')+'">'+(p.unreal>=0?'+':'')+'Rp '+fmtK(p.unreal)+'</td><td class="mono '+(p.ret>=0?'up':'dn')+'">'+(p.ret>=0?'+':'')+p.ret.toFixed(2)+'%</td><td><div class="prog" style="width:70px"><div class="progf" style="width:'+Math.min(alloc,100).toFixed(1)+'%;background:'+(p.info.color||'#707090')+'"></div></div><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-top:2px">'+alloc.toFixed(1)+'%</div></td><td><span class="sig '+sigCls+'">'+sig+'</span></td></tr>';
+    return '<tr><td><span class="tp" style="border-color:'+(p.info.color||'#4a5e82')+'">'+p.coin+'</span></td><td style="font-size:11px;color:var(--text2)">'+p.info.name+'</td><td><span class="badge" style="background:rgba(255,255,255,.06);color:'+catColor+'">'+p.info.category+'</span></td><td class="mono">'+qtyDisp+'</td><td class="mono">Rp '+fmt(Math.round(p.avg))+'</td><td class="mono" style="color:var(--accent)">Rp '+fmt(Math.round(p.priceIdr))+'</td><td class="mono" style="color:var(--text2)">$'+p.priceUSD.toFixed(2)+'</td><td class="mono">Rp '+fmtK(p.mv)+'</td><td class="mono" style="color:var(--text2)">Rp '+fmtK(p.cost)+'</td><td class="mono '+(p.unreal>=0?'up':'dn')+'">'+(p.unreal>=0?'+':'')+'Rp '+fmtK(p.unreal)+'</td><td class="mono '+(p.ret>=0?'up':'dn')+'">'+(p.ret>=0?'+':'')+p.ret.toFixed(2)+'%</td><td><div class="prog" style="width:70px"><div class="progf" style="width:'+Math.min(alloc,100).toFixed(1)+'%;background:'+(p.info.color||'#4a5e82')+'"></div></div><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-top:2px">'+alloc.toFixed(1)+'%</div></td><td><span class="sig '+sigCls+'">'+sig+'</span></td></tr>';
   }).join('')||'<tr><td colspan="13" style="text-align:center;color:var(--text3);padding:16px">Belum ada posisi crypto</td></tr>';
 
   // Tx history
@@ -5606,7 +5784,7 @@ function getEtfPortfolio(){
     }
   });
   return Object.values(pos).filter(function(p){return p.shares>0}).map(function(p){
-    var info=ETF_DB[p.ticker]||{name:p.ticker,category:'Lainnya',baseUSD:0,color:'#707090'};
+    var info=ETF_DB[p.ticker]||{name:p.ticker,category:'Lainnya',baseUSD:0,color:'#4a5e82'};
     var priceUSD=etfPrices[p.ticker]||info.baseUSD;
     var mvUSD=p.shares*priceUSD;
     var mvIdr=mvUSD*usdIdr;
@@ -5643,16 +5821,16 @@ function renderEtf(){
   kc('etfDonut');
   var cvE=el('etfDonut');
   if(cvE&&porto.length){
-    var cols=porto.map(function(p){return p.info.color||'#707090'});
+    var cols=porto.map(function(p){return p.info.color||'#4a5e82'});
     charts['etfDonut']=new Chart(cvE,{type:'doughnut',data:{labels:porto.map(function(p){return p.ticker}),datasets:[{data:porto.map(function(p){return p.mvIdr}),backgroundColor:cols,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.label+': Rp '+fmtK(c.parsed)}}})}}});
   }
   var totV2=totalMVIdr||1;
-  el('etf-leg').innerHTML=porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:2px;background:'+(p.info.color||'#707090')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.ticker+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mvIdr/totV2)*100).toFixed(1)+'%</span></div>'}).join('');
+  el('etf-leg').innerHTML=porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:2px;background:'+(p.info.color||'#4a5e82')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.ticker+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mvIdr/totV2)*100).toFixed(1)+'%</span></div>'}).join('');
 
   // Category breakdown
   var byCat={};porto.forEach(function(p){var cat=p.info.category;if(!byCat[cat])byCat[cat]={mv:0,cnt:0};byCat[cat].mv+=p.mvIdr;byCat[cat].cnt++;});
   el('etf-category').innerHTML=Object.entries(byCat).sort(function(a,b){return b[1].mv-a[1].mv}).map(function(e){
-    var cat=e[0],d=e[1];var col=ETF_CATEGORIES[cat]||'#707090';var pctCat=(d.mv/totalMVIdr*100);
+    var cat=e[0],d=e[1];var col=ETF_CATEGORIES[cat]||'#4a5e82';var pctCat=(d.mv/totalMVIdr*100);
     return '<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><div style="display:flex;align-items:center;gap:6px"><span class="sec-dot" style="background:'+col+'"></span><span style="font-size:11px;font-weight:600">'+cat+'</span></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px">'+pctCat.toFixed(1)+'%</span></div><div class="prog"><div class="progf" style="width:'+pctCat.toFixed(1)+'%;background:'+col+'"></div></div><div style="font-size:9px;color:var(--text3);margin-top:2px">'+d.cnt+' ETF · Rp '+fmtK(d.mv)+'</div></div>';
   }).join('')||'<div style="color:var(--text3);text-align:center;padding:16px">Belum ada ETF</div>';
 
@@ -5661,8 +5839,8 @@ function renderEtf(){
     var alloc=totalMVIdr>0?(p.mvIdr/totalMVIdr*100):0;
     var sig=p.ret>8?'BUY':p.ret<-8?'SELL':'HOLD';
     var sigCls=sig==='BUY'?'sig-buy':sig==='SELL'?'sig-sell':'sig-hold';
-    var catCol=ETF_CATEGORIES[p.info.category]||'#707090';
-    return '<tr><td><span class="tp" style="border-color:'+(p.info.color||'#707090')+'">'+p.ticker+'</span></td><td style="font-size:11px;color:var(--text2)">'+p.info.name+'</td><td><span class="badge" style="background:rgba(255,255,255,.06);color:'+catCol+'">'+p.info.category+'</span></td><td class="mono">'+p.shares+'</td><td class="mono">$'+p.avgUSD.toFixed(2)+'</td><td class="mono" style="color:var(--accent)">$'+p.priceUSD.toFixed(2)+'</td><td class="mono">Rp '+fmtK(p.mvIdr)+'</td><td class="mono" style="color:var(--text2)">Rp '+fmtK(p.costIdr)+'</td><td class="mono '+(p.unrIdr>=0?'up':'dn')+'">'+(p.unrIdr>=0?'+':'')+'Rp '+fmtK(p.unrIdr)+'</td><td class="mono '+(p.unrUSD>=0?'up':'dn')+'">'+(p.unrUSD>=0?'+':'')+'$'+Math.abs(p.unrUSD).toFixed(2)+'</td><td class="mono '+(p.ret>=0?'up':'dn')+'">'+(p.ret>=0?'+':'')+p.ret.toFixed(2)+'%</td><td><div class="prog" style="width:70px"><div class="progf" style="width:'+Math.min(alloc,100).toFixed(1)+'%;background:'+(p.info.color||'#707090')+'"></div></div><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-top:2px">'+alloc.toFixed(1)+'%</div></td><td><span class="sig '+sigCls+'">'+sig+'</span></td></tr>';
+    var catCol=ETF_CATEGORIES[p.info.category]||'#4a5e82';
+    return '<tr><td><span class="tp" style="border-color:'+(p.info.color||'#4a5e82')+'">'+p.ticker+'</span></td><td style="font-size:11px;color:var(--text2)">'+p.info.name+'</td><td><span class="badge" style="background:rgba(255,255,255,.06);color:'+catCol+'">'+p.info.category+'</span></td><td class="mono">'+p.shares+'</td><td class="mono">$'+p.avgUSD.toFixed(2)+'</td><td class="mono" style="color:var(--accent)">$'+p.priceUSD.toFixed(2)+'</td><td class="mono">Rp '+fmtK(p.mvIdr)+'</td><td class="mono" style="color:var(--text2)">Rp '+fmtK(p.costIdr)+'</td><td class="mono '+(p.unrIdr>=0?'up':'dn')+'">'+(p.unrIdr>=0?'+':'')+'Rp '+fmtK(p.unrIdr)+'</td><td class="mono '+(p.unrUSD>=0?'up':'dn')+'">'+(p.unrUSD>=0?'+':'')+'$'+Math.abs(p.unrUSD).toFixed(2)+'</td><td class="mono '+(p.ret>=0?'up':'dn')+'">'+(p.ret>=0?'+':'')+p.ret.toFixed(2)+'%</td><td><div class="prog" style="width:70px"><div class="progf" style="width:'+Math.min(alloc,100).toFixed(1)+'%;background:'+(p.info.color||'#4a5e82')+'"></div></div><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-top:2px">'+alloc.toFixed(1)+'%</div></td><td><span class="sig '+sigCls+'">'+sig+'</span></td></tr>';
   }).join('')||'<tr><td colspan="13" style="text-align:center;color:var(--text3);padding:16px">Belum ada posisi ETF</td></tr>';
 
   // Tx history
@@ -5754,7 +5932,7 @@ function getRdPortfolio(){
     }
   });
   return Object.values(pos).filter(function(p){return p.units>0.001}).map(function(p){
-    var info=RD_DB[p.code]||{name:p.code,type:'Lainnya',mi:'',baseNAB:1000,risk:'Sedang',color:'#707090'};
+    var info=RD_DB[p.code]||{name:p.code,type:'Lainnya',mi:'',baseNAB:1000,risk:'Sedang',color:'#4a5e82'};
     var nab=rdNAB[p.code]||info.baseNAB;
     var mv=p.units*nab;
     var avgNAB=p.units>0?p.cost/p.units:0;
@@ -5804,13 +5982,13 @@ function renderReksaDana(){
   var catGain = {};
   funds.forEach(function(f){ catGain[f.category] = (catGain[f.category]||0) + (f.gl||0); });
   var catKeys = Object.keys(catGain).sort(function(a,b){return catGain[b]-catGain[a]});
-  var catColors = {'Pasar Uang':'#ffcc00','Pendapatan Tetap':'#00d4aa','Saham':'#ff6600','Campuran':'#a889f0'};
+  var catColors = {'Pasar Uang':'#ffc107','Pendapatan Tetap':'#00e5a0','Saham':'#00c8ff','Campuran':'#a78bfa'};
   var cvP = el('rdPerfChart');
   if(cvP) charts['rdPerf'] = new Chart(cvP,{
     type:'bar',
     data:{labels:catKeys,datasets:[{
       data:catKeys.map(function(c){return catGain[c]}),
-      backgroundColor:catKeys.map(function(c){return (catGain[c]>=0?'rgba(0,212,170,.7)':'rgba(255,68,102,.6)')}),
+      backgroundColor:catKeys.map(function(c){return (catGain[c]>=0?'rgba(0,229,160,.7)':'rgba(255,61,90,.6)')}),
       borderRadius:4
     }]},
     options:{responsive:true,maintainAspectRatio:false,
@@ -5821,9 +5999,9 @@ function renderReksaDana(){
   // ── Chart: donut per platform ──
   kc('rdDonut');
   var platData = [
-    {label:'BIBIT',  val:gainBIBIT,  color:'#ff6600'},
-    {label:'IPOT',   val:gainIPOT,   color:'#a889f0'},
-    {label:'POEMS',  val:gainPOEMS,  color:'#ffcc00'},
+    {label:'BIBIT',  val:gainBIBIT,  color:'#00c8ff'},
+    {label:'IPOT',   val:gainIPOT,   color:'#a78bfa'},
+    {label:'POEMS',  val:gainPOEMS,  color:'#ffc107'},
   ].filter(function(p){return p.val>0});
   var cvD = el('rdDonut');
   if(cvD && platData.length) charts['rdDonut'] = new Chart(cvD,{
@@ -5848,8 +6026,8 @@ function renderReksaDana(){
   el('rd-tbody').innerHTML = porto.length===0
     ? '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:16px">Belum ada posisi aktif — gunakan + Beli RD untuk menambahkan</td></tr>'
     : porto.map(function(p){
-        var info = RD_DB[p.code]||{name:p.code,type:'?',mi:'',color:'#707090',risk:'?'};
-        var col  = (RD_TYPES[info.type]||{color:'#707090'}).color;
+        var info = RD_DB[p.code]||{name:p.code,type:'?',mi:'',color:'#4a5e82',risk:'?'};
+        var col  = (RD_TYPES[info.type]||{color:'#4a5e82'}).color;
         var riskCls = info.risk==='Tinggi'?'b-dn':info.risk==='Sedang'?'b-amb':'b-up';
         return '<tr>'
           +'<td style="font-size:11px">'+info.name+'</td>'
@@ -5869,7 +6047,7 @@ function renderReksaDana(){
   // ── History table dari XLSX ──
   var filtered = _rdHistoryFilter==='all' ? funds : funds.filter(function(f){return f.account===_rdHistoryFilter});
   el('rd-history-tbody').innerHTML = filtered.map(function(f){
-    var col = {'Pasar Uang':'#ffcc00','Pendapatan Tetap':'#00d4aa','Saham':'#ff6600','Campuran':'#a889f0'}[f.category]||'#707090';
+    var col = {'Pasar Uang':'#ffc107','Pendapatan Tetap':'#00e5a0','Saham':'#00c8ff','Campuran':'#a78bfa'}[f.category]||'#4a5e82';
     var gl = f.gl||0;
     var pct = f.gl_pct||0;
     var accBadge = f.account==='BIBIT'?'b-neu':f.account==='IPOT'?'b-pur':'b-amb';
@@ -5896,8 +6074,8 @@ function renderReksaDana(){
       pnlHtml='<span class="'+(pnl>=0?'up':'dn')+'">'+(pnl>=0?'+':'')+'Rp '+fmtK(pnl)+'</span>';
     }
     if(isBeli){posRd[tx.code].units+=tx.units;posRd[tx.code].cost+=tx.amount;}
-    var rdInfo=RD_DB[tx.code]||{name:tx.code,type:'?',color:'#707090'};
-    var tCol=(RD_TYPES[rdInfo.type]||{color:'#707090'}).color;
+    var rdInfo=RD_DB[tx.code]||{name:tx.code,type:'?',color:'#4a5e82'};
+    var tCol=(RD_TYPES[rdInfo.type]||{color:'#4a5e82'}).color;
     return '<tr>'
       +'<td class="mono" style="color:var(--text2);font-size:11px">'+tx.date+'</td>'
       +'<td><span class="badge '+(isBeli?'b-up':'b-dn')+'">'+tx.type+'</span></td>'
@@ -6379,7 +6557,7 @@ function importMutasiUI(){
     : 'Impor '+fmt(MUTASI_DATA.totals.n)+' transaksi saham historis (2018–2026)?\n\nPajak diambil per-transaksi (termasuk diskon 0,18%/0,28%); program pajak global tidak diterapkan.';
   if(!confirm(msg)) return;
   importMutasi(true);
-  if(typeof showSaveStatus==='function') showSaveStatus('✓ '+fmt(MUTASI_DATA.totals.n)+' transaksi mutasi diimpor','#00d4aa');
+  if(typeof showSaveStatus==='function') showSaveStatus('✓ '+fmt(MUTASI_DATA.totals.n)+' transaksi mutasi diimpor','#00e5a0');
   if(typeof updatePrices==='function') updatePrices();
   renderTransaksi();
   if(typeof renderDashboard==='function') renderDashboard();
@@ -6514,21 +6692,21 @@ function cdRenderCharts(R,s){
   kc('cdPrice');
   var ctx=el('cdPrice'); if(ctx){
     charts['cdPrice']=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[
-      {label:'Close',data:close,borderColor:'#ff6600',borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4,fill:false},
-      {label:'TP3',data:flat(s.tp3),borderColor:'rgba(0,212,170,.5)',borderWidth:1,borderDash:[4,4],pointRadius:0},
-      {label:'TP1',data:flat(s.tp1),borderColor:'rgba(0,212,170,.3)',borderWidth:1,borderDash:[2,3],pointRadius:0},
+      {label:'Close',data:close,borderColor:'#00c8ff',borderWidth:2,tension:.3,pointRadius:0,pointHoverRadius:4,fill:false},
+      {label:'TP3',data:flat(s.tp3),borderColor:'rgba(0,229,160,.5)',borderWidth:1,borderDash:[4,4],pointRadius:0},
+      {label:'TP1',data:flat(s.tp1),borderColor:'rgba(0,229,160,.3)',borderWidth:1,borderDash:[2,3],pointRadius:0},
       {label:'Breakout',data:flat(s.brk),borderColor:'rgba(77,166,255,.5)',borderWidth:1,borderDash:[5,3],pointRadius:0},
       {label:'Zona2 High',data:flat(s.z2h),borderColor:'rgba(45,212,191,.4)',borderWidth:1,borderDash:[3,3],pointRadius:0},
-      {label:'Stop Inval',data:flat(s.stopInval),borderColor:'rgba(255,68,102,.5)',borderWidth:1,borderDash:[4,4],pointRadius:0},
-      {label:'Stop Besar',data:flat(s.stopBig),borderColor:'rgba(255,68,102,.3)',borderWidth:1,borderDash:[2,3],pointRadius:0}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#9898b8',font:{size:9},boxWidth:12}},tooltip:Object.assign({},TT,{mode:'index',intersect:false})},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:9})},y:{grid:{color:GC},ticks:TC,position:'right'}}}});
+      {label:'Stop Inval',data:flat(s.stopInval),borderColor:'rgba(255,61,90,.5)',borderWidth:1,borderDash:[4,4],pointRadius:0},
+      {label:'Stop Besar',data:flat(s.stopBig),borderColor:'rgba(255,61,90,.3)',borderWidth:1,borderDash:[2,3],pointRadius:0}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8fa3c8',font:{size:9},boxWidth:12}},tooltip:Object.assign({},TT,{mode:'index',intersect:false})},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:9})},y:{grid:{color:GC},ticks:TC,position:'right'}}}});
   }
   kc('cdEquity');
   var ce=el('cdEquity'); if(ce){
     var eq=R.rows.map(function(r){return Math.round(r.equity)});
     var g=ce.getContext('2d').createLinearGradient(0,0,0,230);
-    g.addColorStop(0,'rgba(0,212,170,.25)');g.addColorStop(1,'rgba(0,212,170,0)');
-    charts['cdEquity']=new Chart(ce,{type:'line',data:{labels:labels,datasets:[{data:eq,borderColor:'#00d4aa',borderWidth:2,backgroundColor:g,fill:true,tension:.3,pointRadius:0,pointHoverRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return 'Equity: Rp '+fmt(c.parsed.y)}}})},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:9})},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v)}}),position:'right'}}}});
+    g.addColorStop(0,'rgba(0,229,160,.25)');g.addColorStop(1,'rgba(0,229,160,0)');
+    charts['cdEquity']=new Chart(ce,{type:'line',data:{labels:labels,datasets:[{data:eq,borderColor:'#00e5a0',borderWidth:2,backgroundColor:g,fill:true,tension:.3,pointRadius:0,pointHoverRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return 'Equity: Rp '+fmt(c.parsed.y)}}})},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:9})},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v)}}),position:'right'}}}});
   }
 }
 function cdRecalc(){
@@ -6644,7 +6822,7 @@ function renderCandle(){
 // STRATEGI PER-EMITEN + RISK STRIP + SARAN AI + PROBABILITAS FLOWSCAN
 // ============================================================
 var TRADE_TYPES=['Core Long','Swing Trade','Fast Trade'];
-var TRADE_COLOR={'Core Long':'#ff6600','Swing Trade':'#a889f0','Fast Trade':'#ffcc00'};
+var TRADE_COLOR={'Core Long':'#00c8ff','Swing Trade':'#a78bfa','Fast Trade':'#ffc107'};
 function stratOf(tk){ if(tradeStrategy[tk]) return tradeStrategy[tk]; return (DB[tk]&&DB[tk].tradeType)||'Core Long'; }
 function setStockStrategy(tk,val){ tradeStrategy[tk]=val; if(typeof saveData==='function')saveData(); renderStrategyPanel(); }
 function renderStrategyPanel(){
@@ -6677,7 +6855,7 @@ function renderStrategyPanel(){
   kc('stratPie');
   var cv=el('stratPie');
   if(cv && typeof Chart!=='undefined'){
-    charts['stratPie']=new Chart(cv,{type:'doughnut',data:{labels:TRADE_TYPES,datasets:[{data:TRADE_TYPES.map(function(n){return Math.round(agg[n])}),backgroundColor:TRADE_TYPES.map(function(n){return TRADE_COLOR[n]}),borderColor:'#0a0a0f',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.label+': Rp '+fmt(c.parsed)}}})}}});
+    charts['stratPie']=new Chart(cv,{type:'doughnut',data:{labels:TRADE_TYPES,datasets:[{data:TRADE_TYPES.map(function(n){return Math.round(agg[n])}),backgroundColor:TRADE_TYPES.map(function(n){return TRADE_COLOR[n]}),borderColor:'#0c1524',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.label+': Rp '+fmt(c.parsed)}}})}}});
   }
 }
 
@@ -6748,15 +6926,15 @@ function aiMacroWatch(bySec){
 function aiHeuristicHtml(ctx){
   var m=ctx.m;
   var retPct=(m.totalReturn*100);
-  var c=retPct>=0?'#00d4aa':'#ff4466';
-  var sec=function(t,b){return '<div style="margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.05)"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">'+t+'</div><div style="font-size:12px;color:#9898b8;line-height:1.7">'+b+'</div></div>';};
-  var perf='Total return portofolio <b style="color:'+c+'">'+(retPct>=0?'+':'')+retPct.toFixed(1)+'%</b> dari modal Rp '+fmtK(m.totalCost)+' (realized <b>'+(m.real>=0?'+':'')+'Rp '+fmtK(m.real)+'</b>, unrealized <b style="color:'+(m.unreal>=0?'#00d4aa':'#ff4466')+'">'+(m.unreal>=0?'+':'')+'Rp '+fmtK(m.unreal)+'</b>). Beta '+m.beta.toFixed(2)+' berarti portofolio bergerak '+(m.beta>1?'lebih agresif ('+((m.beta-1)*100).toFixed(0)+'% lebih kuat)':'lebih defensif')+' dibanding IHSG'+(ctx.ihsg?' (kini ~'+fmt(ctx.ihsg)+(ctx.ihsgChg?', '+ctx.ihsgChg:'')+')':'')+'. <i style="color:var(--text3)">Perbandingan return periode yang setara dengan IHSG perlu data return indeks — gunakan Konsultasi Claude (live) untuk angka terkini.</i>';
+  var c=retPct>=0?'#00e5a0':'#ff3d5a';
+  var sec=function(t,b){return '<div style="margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.05)"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">'+t+'</div><div style="font-size:12px;color:#c8d8ea;line-height:1.7">'+b+'</div></div>';};
+  var perf='Total return portofolio <b style="color:'+c+'">'+(retPct>=0?'+':'')+retPct.toFixed(1)+'%</b> dari modal Rp '+fmtK(m.totalCost)+' (realized <b>'+(m.real>=0?'+':'')+'Rp '+fmtK(m.real)+'</b>, unrealized <b style="color:'+(m.unreal>=0?'#00e5a0':'#ff3d5a')+'">'+(m.unreal>=0?'+':'')+'Rp '+fmtK(m.unreal)+'</b>). Beta '+m.beta.toFixed(2)+' berarti portofolio bergerak '+(m.beta>1?'lebih agresif ('+((m.beta-1)*100).toFixed(0)+'% lebih kuat)':'lebih defensif')+' dibanding IHSG'+(ctx.ihsg?' (kini ~'+fmt(ctx.ihsg)+(ctx.ihsgChg?', '+ctx.ihsgChg:'')+')':'')+'. <i style="color:var(--text3)">Perbandingan return periode yang setara dengan IHSG perlu data return indeks — gunakan Konsultasi Claude (live) untuk angka terkini.</i>';
   var contrib='';
   if(ctx.best&&ctx.worst){
-    contrib='Penyumbang terbaik: <b style="color:#00d4aa">'+ctx.best.ticker+'</b> ('+(ctx.best.unreal>=0?'+':'')+'Rp '+fmtK(ctx.best.unreal)+', '+ctx.best.ret.toFixed(1)+'%). Beban terberat: <b style="color:#ff4466">'+ctx.worst.ticker+'</b> ('+(ctx.worst.unreal>=0?'+':'')+'Rp '+fmtK(ctx.worst.unreal)+', '+ctx.worst.ret.toFixed(1)+'%).';
+    contrib='Penyumbang terbaik: <b style="color:#00e5a0">'+ctx.best.ticker+'</b> ('+(ctx.best.unreal>=0?'+':'')+'Rp '+fmtK(ctx.best.unreal)+', '+ctx.best.ret.toFixed(1)+'%). Beban terberat: <b style="color:#ff3d5a">'+ctx.worst.ticker+'</b> ('+(ctx.worst.unreal>=0?'+':'')+'Rp '+fmtK(ctx.worst.unreal)+', '+ctx.worst.ret.toFixed(1)+'%).';
   }
   var risk='Skor risiko <b>'+m.score+'/100</b>, volatilitas ~'+m.volAnn.toFixed(0)+'%/th, VaR 95% harian ~ -Rp '+fmtK(m.var95)+'. ';
-  if(m.topSecPct>50) risk+='<b style="color:#ff4466">Konsentrasi tinggi</b>: sektor '+m.topSec+' '+m.topSecPct.toFixed(0)+'% — sangat rentan terhadap guncangan sektor itu. ';
+  if(m.topSecPct>50) risk+='<b style="color:#ff3d5a">Konsentrasi tinggi</b>: sektor '+m.topSec+' '+m.topSecPct.toFixed(0)+'% — sangat rentan terhadap guncangan sektor itu. ';
   else if(m.topSecPct>35) risk+='Sektor '+m.topSec+' dominan ('+m.topSecPct.toFixed(0)+'%). ';
   if(m.n<8) risk+='Hanya '+m.n+' emiten — diversifikasi masih tipis (ideal 8–12). ';
   risk+='Kas '+ctx.cashPct.toFixed(0)+'% dari aset '+(ctx.cashPct<5?'(amat kering — ruang manuver kecil)':ctx.cashPct>30?'(menumpuk — pertimbangkan deploy bertahap)':'(wajar)')+'.';
@@ -6786,7 +6964,7 @@ function aiUpdateKeyBtn(){ var b=el('ai-key-btn'); if(b) b.textContent=aiGetKey(
 function aiSetKey(){ var cur=aiGetKey(); var k=prompt('Masukkan Anthropic API key (disimpan lokal di browser ini saja). Diperlukan untuk versi self-host. Kosongkan lalu OK untuk menghapus.',cur); if(k===null)return; try{ if(k.trim())localStorage.setItem('claude_api_key',k.trim()); else localStorage.removeItem('claude_api_key'); }catch(e){} aiUpdateKeyBtn(); }
 function aiFmtText(t){
   var esc=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  esc=esc.replace(/\*\*(.+?)\*\*/g,'<b style="color:#eeeef5">$1</b>');
+  esc=esc.replace(/\*\*(.+?)\*\*/g,'<b style="color:#dce8ff">$1</b>');
   esc=esc.replace(/^### (.+)$/gm,'<div style="font-weight:700;color:var(--accent);margin:8px 0 4px">$1</div>');
   esc=esc.replace(/\n/g,'<br>');
   return esc;
@@ -7290,7 +7468,7 @@ function fsV(n){if(!n||isNaN(n))return'—';if(n>=1e9)return(n/1e9).toFixed(2)+'
 function fsP(n){if(!n||isNaN(n))return'—';return'Rp '+(n<100?n.toFixed(2):Math.round(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
 function fsD(d){return new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'});}
 function fsPct(n){return(n>=0?'▲':'▼')+Math.abs(n).toFixed(2)+'%';}
-function fsScColor(s){return s>=58?'#00d4aa':s<=42?'#ff4466':'#9898b8';}
+function fsScColor(s){return s>=58?'#00e5a0':s<=42?'#ff3d5a':'#8fa3c8';}
 function fsMkBdg(sig,sm){
   var cls=sig==='AKUMULASI'?'b-up':sig==='DISTRIBUSI'?'b-dn':'b-neu';
   var ic=sig==='AKUMULASI'?'ti-trending-up':sig==='DISTRIBUSI'?'ti-trending-down':'ti-minus';
@@ -7489,39 +7667,39 @@ function fsRenderCharts(){
   var vl=data.map(function(d){return d.v;});
   var cm=a.cmf.map(function(v){return+(v*100).toFixed(2);});
   var rs=a.rsi;
-  var vc=data.map(function(d){return d.sig==='ACC'?'rgba(0,212,170,.7)':d.sig==='DIST'?'rgba(255,68,102,.7)':'rgba(50,65,82,.8)';});
+  var vc=data.map(function(d){return d.sig==='ACC'?'rgba(0,229,160,.7)':d.sig==='DIST'?'rgba(255,61,90,.7)':'rgba(50,65,82,.8)';});
   var nf=data.map(function(d){return+((d.buyVol-d.sellVol)/1e6).toFixed(2);});
 
   Object.values(FS_CHARTS).forEach(function(c){try{c.destroy();}catch(e){}});FS_CHARTS={};
 
-  var GC2='rgba(255,255,255,.04)',TC2={color:'#707090',font:{size:10}};
+  var GC2='rgba(255,255,255,.04)',TC2={color:'#4a5e82',font:{size:10}};
   var bo={responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(6,11,23,.95)',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#9898b8',bodyColor:'#eeeef5',bodyFont:{family:'IBM Plex Mono',size:11}}},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(6,11,23,.95)',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#8fa3c8',bodyColor:'#dce8ff',bodyFont:{family:'IBM Plex Mono',size:11}}},
     scales:{x:{ticks:Object.assign({maxTicksLimit:8,autoSkip:true},TC2),grid:{display:false},border:{display:false}},
             y:{ticks:TC2,grid:{color:GC2},border:{display:false}}}};
   function mo(extra){return Object.assign({},bo,extra);}
 
   var cvPr=document.getElementById('fsCPr');
   if(cvPr) FS_CHARTS.pr=new Chart(cvPr,{type:'line',data:{labels:lb,datasets:[
-    {data:cl,borderColor:'#2299ff',borderWidth:1.5,pointRadius:0,fill:true,tension:0.3,backgroundColor:function(ctx){var g=ctx.chart.ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,'rgba(77,166,255,.14)');g.addColorStop(1,'rgba(77,166,255,0)');return g;}},
-    {data:a.ma20,borderColor:'rgba(0,212,170,.55)',borderWidth:1,pointRadius:0,fill:false,borderDash:[4,2],tension:0.3,spanGaps:true},
-    {data:a.ma50,borderColor:'rgba(255,68,102,.45)',borderWidth:1,pointRadius:0,fill:false,borderDash:[6,3],tension:0.3,spanGaps:true}
+    {data:cl,borderColor:'#4da6ff',borderWidth:1.5,pointRadius:0,fill:true,tension:0.3,backgroundColor:function(ctx){var g=ctx.chart.ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,'rgba(77,166,255,.14)');g.addColorStop(1,'rgba(77,166,255,0)');return g;}},
+    {data:a.ma20,borderColor:'rgba(0,229,160,.55)',borderWidth:1,pointRadius:0,fill:false,borderDash:[4,2],tension:0.3,spanGaps:true},
+    {data:a.ma50,borderColor:'rgba(255,61,90,.45)',borderWidth:1,pointRadius:0,fill:false,borderDash:[6,3],tension:0.3,spanGaps:true}
   ]},options:mo({})});
 
   var cvVo=document.getElementById('fsCVo');
   if(cvVo) FS_CHARTS.vo=new Chart(cvVo,{type:'bar',data:{labels:lb,datasets:[{data:vl,backgroundColor:vc,borderWidth:0,borderRadius:2}]},options:mo({})});
 
   var cvCm=document.getElementById('fsCCm');
-  if(cvCm) FS_CHARTS.cm=new Chart(cvCm,{type:'bar',data:{labels:lb,datasets:[{data:cm,backgroundColor:cm.map(function(v){return v>0?'rgba(0,212,170,.65)':'rgba(255,68,102,.65)';}),borderWidth:0,borderRadius:1}]},options:mo({})});
+  if(cvCm) FS_CHARTS.cm=new Chart(cvCm,{type:'bar',data:{labels:lb,datasets:[{data:cm,backgroundColor:cm.map(function(v){return v>0?'rgba(0,229,160,.65)':'rgba(255,61,90,.65)';}),borderWidth:0,borderRadius:1}]},options:mo({})});
 
   var cvNf=document.getElementById('fsCNf');
-  if(cvNf) FS_CHARTS.nf=new Chart(cvNf,{type:'bar',data:{labels:lb,datasets:[{data:nf,backgroundColor:nf.map(function(v){return v>=0?'rgba(0,212,170,.6)':'rgba(255,68,102,.6)';}),borderWidth:0,borderRadius:2}]},options:mo({})});
+  if(cvNf) FS_CHARTS.nf=new Chart(cvNf,{type:'bar',data:{labels:lb,datasets:[{data:nf,backgroundColor:nf.map(function(v){return v>=0?'rgba(0,229,160,.6)':'rgba(255,61,90,.6)';}),borderWidth:0,borderRadius:2}]},options:mo({})});
 
   var cvRs=document.getElementById('fsCRs');
   if(cvRs) FS_CHARTS.rs=new Chart(cvRs,{type:'line',data:{labels:lb,datasets:[
-    {data:rs,borderColor:'#a889f0',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3},
-    {data:Array(rs.length).fill(70),borderColor:'rgba(255,68,102,.3)',borderWidth:1,pointRadius:0,fill:false,borderDash:[3,3]},
-    {data:Array(rs.length).fill(30),borderColor:'rgba(0,212,170,.3)',borderWidth:1,pointRadius:0,fill:false,borderDash:[3,3]}
+    {data:rs,borderColor:'#a78bfa',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3},
+    {data:Array(rs.length).fill(70),borderColor:'rgba(255,61,90,.3)',borderWidth:1,pointRadius:0,fill:false,borderDash:[3,3]},
+    {data:Array(rs.length).fill(30),borderColor:'rgba(0,229,160,.3)',borderWidth:1,pointRadius:0,fill:false,borderDash:[3,3]}
   ]},options:mo({scales:Object.assign({},bo.scales,{y:Object.assign({},bo.scales.y,{min:0,max:100})})})}); 
 }
 
@@ -7537,12 +7715,12 @@ function fsRenderInd(){
   var volLabel = 'Vol Ratio vs MA'+(a.maFP||20);
   var bvLabel  = 'Big Vol Days ('+lookback+'h)';
   var items=[
-    {n:'On-Balance Volume',v:(last.obv>=0?'+':'')+fsV(last.obv),d:a.obvT?'OBV naik → Big money masuk':'OBV turun → Tekanan jual dominan',p:a.obvT?72:28,c:a.obvT?'#00d4aa':'#ff4466'},
-    {n:cmfLabel,v:(a.cl*100).toFixed(2)+'%',d:a.cl>0.1?'Tekanan beli kuat':a.cl>0?'Tekanan beli lemah':a.cl>-0.1?'Tekanan jual lemah':'Tekanan jual kuat',p:Math.min(100,Math.max(0,(a.cl+0.3)*167)),c:a.cl>0?'#00d4aa':'#ff4466'},
-    {n:volLabel,v:last.vr.toFixed(2)+'×',d:last.vr>2?'Anomali institusional >2×':last.vr>1.5?'Volume di atas normal':last.vr>0.8?'Volume normal':'Volume sepi',p:Math.min(100,last.vr*40),c:last.vr>1.5?'#00d4aa':'#9898b8'},
-    {n:'A/D Line',v:a.adT?'Naik':'Turun',d:a.adT?'A/D naik — akumulasi berlanjut':'A/D turun — distribusi berlanjut',p:a.adT?72:28,c:a.adT?'#00d4aa':'#ff4466'},
-    {n:rsiLabel,v:a.rl.toFixed(1),d:a.rl>70?'Overbought':a.rl<30?'Oversold':a.rl>50?'Momentum positif':'Momentum negatif',p:a.rl,c:a.rl>70?'#ff4466':a.rl<30?'#00d4aa':'#9898b8'},
-    {n:bvLabel,v:a.bu+' naik / '+a.bd+' turun',d:a.bu>a.bd?'Big vol dominan hari naik → Akumulasi':a.bu<a.bd?'Big vol dominan hari turun → Distribusi':'Imbang',p:a.bu+a.bd>0?Math.min(100,a.bu/(a.bu+a.bd)*100):50,c:a.bu>a.bd?'#00d4aa':a.bu<a.bd?'#ff4466':'#9898b8'}
+    {n:'On-Balance Volume',v:(last.obv>=0?'+':'')+fsV(last.obv),d:a.obvT?'OBV naik → Big money masuk':'OBV turun → Tekanan jual dominan',p:a.obvT?72:28,c:a.obvT?'#00e5a0':'#ff3d5a'},
+    {n:cmfLabel,v:(a.cl*100).toFixed(2)+'%',d:a.cl>0.1?'Tekanan beli kuat':a.cl>0?'Tekanan beli lemah':a.cl>-0.1?'Tekanan jual lemah':'Tekanan jual kuat',p:Math.min(100,Math.max(0,(a.cl+0.3)*167)),c:a.cl>0?'#00e5a0':'#ff3d5a'},
+    {n:volLabel,v:last.vr.toFixed(2)+'×',d:last.vr>2?'Anomali institusional >2×':last.vr>1.5?'Volume di atas normal':last.vr>0.8?'Volume normal':'Volume sepi',p:Math.min(100,last.vr*40),c:last.vr>1.5?'#00e5a0':'#8fa3c8'},
+    {n:'A/D Line',v:a.adT?'Naik':'Turun',d:a.adT?'A/D naik — akumulasi berlanjut':'A/D turun — distribusi berlanjut',p:a.adT?72:28,c:a.adT?'#00e5a0':'#ff3d5a'},
+    {n:rsiLabel,v:a.rl.toFixed(1),d:a.rl>70?'Overbought':a.rl<30?'Oversold':a.rl>50?'Momentum positif':'Momentum negatif',p:a.rl,c:a.rl>70?'#ff3d5a':a.rl<30?'#00e5a0':'#8fa3c8'},
+    {n:bvLabel,v:a.bu+' naik / '+a.bd+' turun',d:a.bu>a.bd?'Big vol dominan hari naik → Akumulasi':a.bu<a.bd?'Big vol dominan hari turun → Distribusi':'Imbang',p:a.bu+a.bd>0?Math.min(100,a.bu/(a.bu+a.bd)*100):50,c:a.bu>a.bd?'#00e5a0':a.bu<a.bd?'#ff3d5a':'#8fa3c8'}
   ];
   var grid=document.getElementById('fs-ind-grid');
   if(grid) grid.innerHTML=items.map(function(x){
@@ -7563,12 +7741,12 @@ function fsRenderDailyTable(){
   tbody.innerHTML='';
   data.slice(-60).reverse().forEach(function(d){
     var chg=d.o>0?((d.c-d.o)/d.o*100):0;
-    var vc=d.vr>=2?'#00d4aa':d.vr>=1.5?'rgba(0,212,170,.7)':d.vr<0.7?'#ff4466':'#9898b8';
+    var vc=d.vr>=2?'#00e5a0':d.vr>=1.5?'rgba(0,229,160,.7)':d.vr<0.7?'#ff3d5a':'#8fa3c8';
     var sig=d.sig==='ACC'?'<span class="badge b-up"><i class="ti ti-trending-up"></i> Akumulasi</span>':d.sig==='DIST'?'<span class="badge b-dn"><i class="ti ti-trending-down"></i> Distribusi</span>':'';
-    var cc=d.cmf>0.1?'#00d4aa':d.cmf<-0.1?'#ff4466':'#9898b8';
+    var cc=d.cmf>0.1?'#00e5a0':d.cmf<-0.1?'#ff3d5a':'#8fa3c8';
     var tr=document.createElement('tr');
-    if(d.sig==='ACC')tr.style.background='rgba(0,212,170,.04)';
-    if(d.sig==='DIST')tr.style.background='rgba(255,68,102,.04)';
+    if(d.sig==='ACC')tr.style.background='rgba(0,229,160,.04)';
+    if(d.sig==='DIST')tr.style.background='rgba(255,61,90,.04)';
     tr.innerHTML='<td class="mono">'+fsD(d.dt)+'</td><td class="mono">'+fsP(d.o)+'</td>'+
       '<td class="mono up">'+fsP(d.h)+'</td><td class="mono dn">'+fsP(d.l)+'</td>'+
       '<td class="mono" style="font-weight:600">'+fsP(d.c)+'</td>'+
@@ -7625,17 +7803,17 @@ function fsRenderVWAP(){
   if(FS_CHARTS.vwap){try{FS_CHARTS.vwap.destroy();}catch(e){}}
   var cv1=document.getElementById('fsVwapChart');
   var boV={responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:true,position:'top',labels:{color:'#707090',font:{size:9},boxWidth:16}},
+    plugins:{legend:{display:true,position:'top',labels:{color:'#4a5e82',font:{size:9},boxWidth:16}},
       tooltip:{backgroundColor:'rgba(6,11,23,.95)',borderColor:'rgba(255,255,255,.08)',borderWidth:1,
-        titleColor:'#9898b8',bodyColor:'#eeeef5',bodyFont:{family:'IBM Plex Mono',size:10},
+        titleColor:'#8fa3c8',bodyColor:'#dce8ff',bodyFont:{family:'IBM Plex Mono',size:10},
         callbacks:{label:function(c){return c.dataset.label+': '+fsP(c.parsed.y);}}}},
-    scales:{x:{ticks:{maxTicksLimit:8,autoSkip:true,color:'#707090',font:{size:9}},grid:{display:false},border:{display:false}},
-            y:{ticks:{color:'#707090',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'},border:{display:false}}}};
+    scales:{x:{ticks:{maxTicksLimit:8,autoSkip:true,color:'#4a5e82',font:{size:9}},grid:{display:false},border:{display:false}},
+            y:{ticks:{color:'#4a5e82',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'},border:{display:false}}}};
   if(cv1) FS_CHARTS.vwap=new Chart(cv1,{type:'line',data:{labels:labels,datasets:[
     {label:'Harga',data:closes,borderColor:'rgba(77,166,255,.9)',borderWidth:1.5,pointRadius:0,fill:false,tension:.3},
-    {label:'VWAP',data:vwap,borderColor:'#ffcc00',borderWidth:2.5,pointRadius:0,fill:false,tension:.3},
-    {label:'Upper +'+sigma+'σ',data:upper,borderColor:'rgba(255,68,102,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.3,borderDash:[4,2]},
-    {label:'Lower −'+sigma+'σ',data:lower,borderColor:'rgba(0,212,170,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.3,borderDash:[4,2]},
+    {label:'VWAP',data:vwap,borderColor:'#ffc107',borderWidth:2.5,pointRadius:0,fill:false,tension:.3},
+    {label:'Upper +'+sigma+'σ',data:upper,borderColor:'rgba(255,61,90,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.3,borderDash:[4,2]},
+    {label:'Lower −'+sigma+'σ',data:lower,borderColor:'rgba(0,229,160,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.3,borderDash:[4,2]},
   ]},options:boV});
   // Chart 2: Multi-period
   var vwap5=fsCalcVWAPPeriod(data,5),vwap20=fsCalcVWAPPeriod(data,20);
@@ -7643,18 +7821,18 @@ function fsRenderVWAP(){
   var cv2=document.getElementById('fsVwapMulti');
   if(cv2) FS_CHARTS.vwapM=new Chart(cv2,{type:'line',data:{labels:labels,datasets:[
     {label:'Harga',data:closes,borderColor:'rgba(77,166,255,.7)',borderWidth:1.5,pointRadius:0,fill:false,tension:.3},
-    {label:'VWAP-1D',data:vwap,borderColor:'#ffcc00',borderWidth:2,pointRadius:0,fill:false,tension:.3},
-    {label:'VWAP-5H',data:vwap5,borderColor:'#a889f0',borderWidth:1.5,pointRadius:0,fill:false,tension:.3,borderDash:[4,2]},
+    {label:'VWAP-1D',data:vwap,borderColor:'#ffc107',borderWidth:2,pointRadius:0,fill:false,tension:.3},
+    {label:'VWAP-5H',data:vwap5,borderColor:'#a78bfa',borderWidth:1.5,pointRadius:0,fill:false,tension:.3,borderDash:[4,2]},
     {label:'VWAP-20H',data:vwap20,borderColor:'#ff6b6b',borderWidth:1.5,pointRadius:0,fill:false,tension:.3,borderDash:[6,3]},
   ]},options:boV});
   // Level cards
   var aboveV=last.c>vL;
   var pctV=((last.c-vL)/vL*100).toFixed(2);
   var lvls=[
-    {label:'VWAP Harian',val:vL,color:'#ffcc00',desc:'Harga rata-rata berbobot volume'},
-    {label:'Upper Band +'+sigma+'σ',val:uL,color:'#ff4466',desc:'Resistance / overbought zona'},
-    {label:'Lower Band −'+sigma+'σ',val:lL,color:'#00d4aa',desc:'Support / oversold zona'},
-    {label:'Harga Terakhir',val:last.c,color:aboveV?'#00d4aa':'#ff4466',desc:(aboveV?'Di atas':'Di bawah')+' VWAP ('+pctV+'%)'},
+    {label:'VWAP Harian',val:vL,color:'#ffc107',desc:'Harga rata-rata berbobot volume'},
+    {label:'Upper Band +'+sigma+'σ',val:uL,color:'#ff3d5a',desc:'Resistance / overbought zona'},
+    {label:'Lower Band −'+sigma+'σ',val:lL,color:'#00e5a0',desc:'Support / oversold zona'},
+    {label:'Harga Terakhir',val:last.c,color:aboveV?'#00e5a0':'#ff3d5a',desc:(aboveV?'Di atas':'Di bawah')+' VWAP ('+pctV+'%)'},
   ];
   var lvlEl=document.getElementById('vwap-levels');
   if(lvlEl) lvlEl.innerHTML=lvls.map(function(l){
@@ -7664,10 +7842,10 @@ function fsRenderVWAP(){
   }).join('');
   // Signal text
   var sig='';
-  if(last.c>uL) sig='<span style="color:#ff4466">⚠️ Di atas Upper Band (+'+sigma+'σ)</span><br>Kondisi <strong>overbought</strong>. Potensi pullback ke VWAP ('+fsP(vL)+').';
-  else if(last.c<lL) sig='<span style="color:#00d4aa">🎯 Di bawah Lower Band (−'+sigma+'σ)</span><br>Kondisi <strong>oversold</strong>. Zona akumulasi, potensi bounce ke VWAP.';
-  else if(last.c>vL) sig='<span style="color:#00d4aa">✅ Di atas VWAP</span><br>Tren <strong>bullish</strong>. VWAP '+fsP(vL)+' sebagai support dinamis.';
-  else sig='<span style="color:#ff4466">📉 Di bawah VWAP</span><br>Tren <strong>bearish</strong>. VWAP '+fsP(vL)+' sebagai resistance.';
+  if(last.c>uL) sig='<span style="color:#ff3d5a">⚠️ Di atas Upper Band (+'+sigma+'σ)</span><br>Kondisi <strong>overbought</strong>. Potensi pullback ke VWAP ('+fsP(vL)+').';
+  else if(last.c<lL) sig='<span style="color:#00e5a0">🎯 Di bawah Lower Band (−'+sigma+'σ)</span><br>Kondisi <strong>oversold</strong>. Zona akumulasi, potensi bounce ke VWAP.';
+  else if(last.c>vL) sig='<span style="color:#00e5a0">✅ Di atas VWAP</span><br>Tren <strong>bullish</strong>. VWAP '+fsP(vL)+' sebagai support dinamis.';
+  else sig='<span style="color:#ff3d5a">📉 Di bawah VWAP</span><br>Tren <strong>bearish</strong>. VWAP '+fsP(vL)+' sebagai resistance.';
   var v5L=vwap5[vwap5.length-1],v20L=vwap20[vwap20.length-1];
   if(last.c>vL&&last.c>v5L&&last.c>v20L) sig+='<br><br>🔥 <strong>Triple VWAP Confluence Bullish</strong> — buyer dominan di semua timeframe.';
   if(last.c<vL&&last.c<v5L&&last.c<v20L) sig+='<br><br>❄️ <strong>Triple VWAP Confluence Bearish</strong> — seller dominan di semua timeframe.';
@@ -7689,10 +7867,10 @@ function fsRenderRanking(){
   var avg=Math.round(FS_RD.reduce(function(s,r){return s+r.a.sc;},0)/FS_RD.length);
   var rkSum=document.getElementById('rk-sum');
   if(rkSum) rkSum.innerHTML=[
-    {v:acc,l:'Akumulasi',c:'rgba(0,212,170,.1)',bc:'rgba(0,212,170,.2)',tc:'#00d4aa'},
-    {v:dist,l:'Distribusi',c:'rgba(255,68,102,.1)',bc:'rgba(255,68,102,.2)',tc:'#ff4466'},
+    {v:acc,l:'Akumulasi',c:'rgba(0,229,160,.1)',bc:'rgba(0,229,160,.2)',tc:'#00e5a0'},
+    {v:dist,l:'Distribusi',c:'rgba(255,61,90,.1)',bc:'rgba(255,61,90,.2)',tc:'#ff3d5a'},
     {v:neut,l:'Netral',c:'var(--bg3)',bc:'var(--border)',tc:'var(--text2)'},
-    {v:avg,l:'Avg Skor',c:'rgba(255,102,0,.08)',bc:'rgba(255,102,0,.2)',tc:'var(--accent)'},
+    {v:avg,l:'Avg Skor',c:'rgba(0,200,255,.08)',bc:'rgba(0,200,255,.2)',tc:'var(--accent)'},
   ].map(function(x){return '<div style="background:'+x.c+';border:.5px solid '+x.bc+';border-radius:8px;padding:10px 12px;text-align:center"><div class="mono" style="font-size:20px;font-weight:600;color:'+x.tc+'">'+x.v+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.8px">'+x.l+'</div></div>';}).join('');
 
   var rkChart=document.getElementById('rk-chart');
@@ -7702,17 +7880,17 @@ function fsRenderRanking(){
     FS_CHARTS.rk=new Chart(rkChart,{type:'bar',
       data:{labels:top.map(function(r){return r.t;}),
             datasets:[{data:top.map(function(r){return r.a.sc;}),
-              backgroundColor:top.map(function(r){return r.a.sig==='AKUMULASI'?'rgba(0,212,170,.75)':r.a.sig==='DISTRIBUSI'?'rgba(255,68,102,.75)':'rgba(60,75,95,.8)';}),borderWidth:0,borderRadius:3}]},
+              backgroundColor:top.map(function(r){return r.a.sig==='AKUMULASI'?'rgba(0,229,160,.75)':r.a.sig==='DISTRIBUSI'?'rgba(255,61,90,.75)':'rgba(60,75,95,.8)';}),borderWidth:0,borderRadius:3}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{ticks:{color:'#707090',font:{family:'IBM Plex Mono',size:10}},grid:{display:false},border:{display:false}},
-                y:{min:0,max:100,ticks:{color:'#707090',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},border:{display:false}}}}});
+        scales:{x:{ticks:{color:'#4a5e82',font:{family:'IBM Plex Mono',size:10}},grid:{display:false},border:{display:false}},
+                y:{min:0,max:100,ticks:{color:'#4a5e82',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},border:{display:false}}}}});
   }
 
   var rkBody=document.getElementById('rk-body');
   if(rkBody) rkBody.innerHTML=list.map(function(r,i){
     var last=r.data[r.data.length-1];
     var inWl=FS_WL.some(function(w){return w.t===r.t;});
-    return '<tr style="'+(r.a.sig==='AKUMULASI'?'background:rgba(0,212,170,.03)':r.a.sig==='DISTRIBUSI'?'background:rgba(255,68,102,.03)':'')+'">'
+    return '<tr style="'+(r.a.sig==='AKUMULASI'?'background:rgba(0,229,160,.03)':r.a.sig==='DISTRIBUSI'?'background:rgba(255,61,90,.03)':'')+'">'
       +'<td class="mono" style="color:var(--text3)">'+(i+1)+'</td>'
       +'<td class="mono" style="font-weight:600;cursor:pointer;color:var(--accent)" onclick="fsQuickLoad(\''+r.t+'\')">'+r.t+'</td>'
       +'<td><div style="font-size:12px">'+r.n+'</div><span class="badge b-neu" style="font-size:9px">'+r.s+'</span></td>'
@@ -7721,8 +7899,8 @@ function fsRenderRanking(){
       +'<td class="mono" style="color:var(--text2)">'+r.cap+'T</td>'
       +'<td><div style="display:flex;align-items:center;gap:5px"><span class="mono" style="color:'+fsScColor(r.a.sc)+';min-width:22px;font-weight:600">'+r.a.sc+'</span><div class="prog" style="width:50px"><div class="progf" style="width:'+r.a.sc+'%;background:'+fsScColor(r.a.sc)+'"></div></div></div></td>'
       +'<td>'+fsMkBdg(r.a.sig,true)+'</td>'
-      +'<td class="mono" style="color:'+(r.a.cl>0?'#00d4aa':'#ff4466')+'">'+(r.a.cl*100).toFixed(1)+'%</td>'
-      +'<td class="mono" style="color:'+(r.a.rl>70?'#ff4466':r.a.rl<30?'#00d4aa':'var(--text2)')+'">'+r.a.rl.toFixed(1)+'</td>'
+      +'<td class="mono" style="color:'+(r.a.cl>0?'#00e5a0':'#ff3d5a')+'">'+(r.a.cl*100).toFixed(1)+'%</td>'
+      +'<td class="mono" style="color:'+(r.a.rl>70?'#ff3d5a':r.a.rl<30?'#00e5a0':'var(--text2)')+'">'+r.a.rl.toFixed(1)+'</td>'
       +'<td><button class="btn btn-ghost btn-xs '+(inWl?'b-up':'')+'" onclick="fsTgWl(\''+r.t+'\');fsRenderRanking()" style="font-size:10px">'+(inWl?'★':'☆')+'</button></td>'
       +'<td><button class="btn btn-ghost btn-xs" onclick="fsQuickLoad(\''+r.t+'\')" style="font-size:10px">Lihat</button></td>'
       +'</tr>';
@@ -7742,12 +7920,12 @@ function fsRenderHeatmap(){
     else if(m==='cmf'){val=r.a.cl;disp=(val*100).toFixed(1)+'%';}
     else{val=r.a.chgPct;disp=fsPct(val);}
     var cls=r.a.sig==='AKUMULASI'?'fs-hm-acc':r.a.sig==='DISTRIBUSI'?'fs-hm-dist':'fs-hm-neut';
-    var vc=r.a.sig==='AKUMULASI'?'#00d4aa':r.a.sig==='DISTRIBUSI'?'#ff4466':'#9898b8';
+    var vc=r.a.sig==='AKUMULASI'?'#00e5a0':r.a.sig==='DISTRIBUSI'?'#ff3d5a':'#8fa3c8';
     var inWl=FS_WL.some(function(w){return w.t===r.t;});
     return '<div class="fs-hm-cell '+cls+'" onclick="fsQuickLoad(\''+r.t+'\')" title="'+(inWl?'★ ':'')+r.n+' — '+r.a.sig+'">'
       +'<div class="mono" style="font-size:11px;font-weight:500;color:var(--text)">'+(inWl?'★ ':'')+r.t+'</div>'
       +'<div class="mono" style="font-size:13px;font-weight:700;color:'+vc+'">'+disp+'</div>'
-      +'<div class="mono" style="font-size:10px;margin-top:1px;color:'+(r.a.chgPct>=0?'#00d4aa':'#ff4466')+'">'+fsPct(r.a.chgPct)+'</div>'
+      +'<div class="mono" style="font-size:10px;margin-top:1px;color:'+(r.a.chgPct>=0?'#00e5a0':'#ff3d5a')+'">'+fsPct(r.a.chgPct)+'</div>'
       +'</div>';
   }).join('');
 }
@@ -7765,8 +7943,8 @@ function fsRunScanner(){
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">'
     +res.map(function(r){
       var last=r.data[r.data.length-1];
-      var bc=r.a.sig==='AKUMULASI'?'rgba(0,212,170,.08)':'rgba(255,68,102,.08)';
-      var brd=r.a.sig==='AKUMULASI'?'rgba(0,212,170,.2)':'rgba(255,68,102,.2)';
+      var bc=r.a.sig==='AKUMULASI'?'rgba(0,229,160,.08)':'rgba(255,61,90,.08)';
+      var brd=r.a.sig==='AKUMULASI'?'rgba(0,229,160,.2)':'rgba(255,61,90,.2)';
       var inWl=FS_WL.some(function(w){return w.t===r.t;});
       return '<div style="background:'+bc+';border:.5px solid '+brd+';border-radius:8px;padding:12px">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
@@ -7775,8 +7953,8 @@ function fsRunScanner(){
         +'</div>'
         +'<div style="font-size:11px;color:var(--text2);margin-bottom:5px">'+r.n.split(' ').slice(0,3).join(' ')+'</div>'
         +'<div style="display:flex;justify-content:space-between;margin-bottom:5px">'
-        +'<span class="mono" style="font-size:10px;color:'+(r.a.cl>0?'#00d4aa':'#ff4466')+'">CMF '+(r.a.cl*100).toFixed(1)+'%</span>'
-        +'<span class="mono" style="font-size:10px;color:'+(last.vr>1.5?'#00d4aa':'var(--text2)')+'">'+last.vr.toFixed(1)+'×</span>'
+        +'<span class="mono" style="font-size:10px;color:'+(r.a.cl>0?'#00e5a0':'#ff3d5a')+'">CMF '+(r.a.cl*100).toFixed(1)+'%</span>'
+        +'<span class="mono" style="font-size:10px;color:'+(last.vr>1.5?'#00e5a0':'var(--text2)')+'">'+last.vr.toFixed(1)+'×</span>'
         +'</div>'+fsMkBdg(r.a.sig,true)+'</div>';
     }).join('')+'</div>';
 }
@@ -7843,16 +8021,16 @@ function fsRenderWlPage(){
     +list.map(function(w){
       var last=w.data[w.data.length-1],prev=w.data[w.data.length-2]||last;
       var chg=((last.c-prev.c)/prev.c*100);
-      return '<tr style="'+(w.a.sig==='AKUMULASI'?'background:rgba(0,212,170,.03)':w.a.sig==='DISTRIBUSI'?'background:rgba(255,68,102,.03)':'')+'">'
+      return '<tr style="'+(w.a.sig==='AKUMULASI'?'background:rgba(0,229,160,.03)':w.a.sig==='DISTRIBUSI'?'background:rgba(255,61,90,.03)':'')+'">'
         +'<td class="mono" style="font-weight:600;cursor:pointer;color:var(--accent)" onclick="fsQuickLoad(\''+w.t+'\')">'+w.t+'</td>'
         +'<td><div style="font-size:12px">'+w.n+'</div><span class="badge b-neu" style="font-size:9px">'+w.s+'</span></td>'
         +'<td class="mono">'+fsP(last.c)+'</td>'
         +'<td class="mono '+(chg>=0?'up':'dn')+'">'+fsPct(chg)+'</td>'
         +'<td><div style="display:flex;align-items:center;gap:5px"><span class="mono" style="color:'+fsScColor(w.a.sc)+';min-width:22px;font-weight:600">'+w.a.sc+'</span><div class="prog" style="width:50px"><div class="progf" style="width:'+w.a.sc+'%;background:'+fsScColor(w.a.sc)+'"></div></div></div></td>'
         +'<td>'+fsMkBdg(w.a.sig,true)+'</td>'
-        +'<td class="mono" style="color:'+(w.a.cl>0?'#00d4aa':'#ff4466')+'">'+(w.a.cl*100).toFixed(1)+'%</td>'
-        +'<td class="mono" style="color:'+(last.vr>1.5?'#00d4aa':'var(--text2)')+'">'+last.vr.toFixed(2)+'×</td>'
-        +'<td class="mono" style="color:'+(w.a.rl>70?'#ff4466':w.a.rl<30?'#00d4aa':'var(--text2)')+'">'+w.a.rl.toFixed(1)+'</td>'
+        +'<td class="mono" style="color:'+(w.a.cl>0?'#00e5a0':'#ff3d5a')+'">'+(w.a.cl*100).toFixed(1)+'%</td>'
+        +'<td class="mono" style="color:'+(last.vr>1.5?'#00e5a0':'var(--text2)')+'">'+last.vr.toFixed(2)+'×</td>'
+        +'<td class="mono" style="color:'+(w.a.rl>70?'#ff3d5a':w.a.rl<30?'#00e5a0':'var(--text2)')+'">'+w.a.rl.toFixed(1)+'</td>'
         +'<td><button class="btn btn-red btn-xs" onclick="fsTgWl(\''+w.t+'\');fsRenderWlPage()" style="font-size:10px">✕</button></td>'
         +'</tr>';
     }).join('')+'</tbody></table></div>';
@@ -7889,17 +8067,17 @@ function fsRunAI(){
     var s1,s2,s3,s4,s5;
     // reuse logic from index.html adapted
     if(a.sig==='AKUMULASI'){
-      s1='Saham <strong>'+tk+'</strong> ('+info.s+') menunjukkan pola <strong style="color:#00d4aa">akumulasi institusional</strong> yang '+(a.sc>=70?'sangat kuat':'cukup signifikan')+' dengan skor '+a.sc+'/100. Dalam 20 hari terakhir, tercatat <strong>'+a.bu+' hari big volume pada hari harga naik</strong> vs '+a.bd+' hari big volume turun. CMF-20 di <strong style="color:#00d4aa">+'+(a.cl*100).toFixed(1)+'%</strong> mengkonfirmasi aliran uang besar masuk secara konsisten.';
+      s1='Saham <strong>'+tk+'</strong> ('+info.s+') menunjukkan pola <strong style="color:#00e5a0">akumulasi institusional</strong> yang '+(a.sc>=70?'sangat kuat':'cukup signifikan')+' dengan skor '+a.sc+'/100. Dalam 20 hari terakhir, tercatat <strong>'+a.bu+' hari big volume pada hari harga naik</strong> vs '+a.bd+' hari big volume turun. CMF-20 di <strong style="color:#00e5a0">+'+(a.cl*100).toFixed(1)+'%</strong> mengkonfirmasi aliran uang besar masuk secara konsisten.';
       s4='<strong>Skenario Bullish</strong>: CMF tetap positif + volume beli dominan — target resistance sekitar <strong>'+fsP(last.h*1.03)+'</strong>.<br><br><strong>Skenario Bearish</strong>: Jika CMF berbalik negatif di bawah -10%, waspadai exit institusi. Break MA20 ke bawah adalah sinyal peringatan.';
     } else if(a.sig==='DISTRIBUSI'){
-      s1='Analisa volume flow <strong>'+tk+'</strong> ('+info.s+') mengungkap <strong style="color:#ff4466">distribusi institusional</strong>. Tercatat <strong>'+a.bd+' hari big volume pada hari harga turun</strong> vs '+a.bu+' hari naik. CMF-20 di <strong style="color:#ff4466">'+(a.cl*100).toFixed(1)+'%</strong> mengkonfirmasi aliran uang keluar.';
+      s1='Analisa volume flow <strong>'+tk+'</strong> ('+info.s+') mengungkap <strong style="color:#ff3d5a">distribusi institusional</strong>. Tercatat <strong>'+a.bd+' hari big volume pada hari harga turun</strong> vs '+a.bu+' hari naik. CMF-20 di <strong style="color:#ff3d5a">'+(a.cl*100).toFixed(1)+'%</strong> mengkonfirmasi aliran uang keluar.';
       s4='<strong>Skenario Bearish</strong>: Distribusi dapat mendorong harga ke support MA50 '+fsP(ma50L||last.c*.92)+'.<br><br><strong>Skenario Reversal</strong>: Big volume bullish + CMF berbalik positif bisa tanda akumulasi baru dimulai.';
     } else {
       s1='Saham <strong>'+tk+'</strong> ('+info.s+') berada dalam <strong>fase konsolidasi netral</strong> (skor '+a.sc+'/100). Big volume hampir seimbang: '+a.bu+' hari naik vs '+a.bd+' hari turun. CMF '+(a.cl*100).toFixed(1)+'% belum memberikan sinyal arah yang jelas.';
       s4='<strong>Skenario Breakout</strong>: Big volume >2× + harga tembus resistance + CMF >+10% → sinyal akumulasi.<br><br><strong>Skenario Breakdown</strong>: Big vol hari turun + CMF <-10% → distribusi tahap awal.';
     }
-    s2='Net volume beli institusional 20 hari: <span style="color:'+(net>=0?'#00d4aa':'#ff4466')+'">'+(net>=0?'+':'')+fsV(Math.abs(net))+(net>=0?' (net beli)':' (net jual)')+'</span>. '+(a.obvT?'OBV naik — tekanan beli dominan.':'OBV turun — tekanan jual masih dominan.')+' '+(a.adT?'A/D Line naik — uang kumulatif masuk.':'A/D Line turun — distribusi berlangsung.');
-    s3='Harga '+fsP(last.c)+' berada <strong style="color:'+(p20>0?'#00d4aa':'#ff4466')+'">'+Math.abs(p20).toFixed(1)+'% '+(p20>0?'di atas':'di bawah')+'</strong> MA20 ('+fsP(ma20L)+') dan <strong style="color:'+(p50>0?'#00d4aa':'#ff4466')+'">'+Math.abs(p50).toFixed(1)+'% '+(p50>0?'di atas':'di bawah')+'</strong> MA50 ('+fsP(ma50L)+'). RSI-14: '+(a.rl>70?'<span style="color:#ff4466">overbought ('+a.rl.toFixed(1)+')</span>':a.rl<30?'<span style="color:#00d4aa">oversold ('+a.rl.toFixed(1)+')</span>':'<span>'+a.rl.toFixed(1)+'</span>')+'.';
+    s2='Net volume beli institusional 20 hari: <span style="color:'+(net>=0?'#00e5a0':'#ff3d5a')+'">'+(net>=0?'+':'')+fsV(Math.abs(net))+(net>=0?' (net beli)':' (net jual)')+'</span>. '+(a.obvT?'OBV naik — tekanan beli dominan.':'OBV turun — tekanan jual masih dominan.')+' '+(a.adT?'A/D Line naik — uang kumulatif masuk.':'A/D Line turun — distribusi berlangsung.');
+    s3='Harga '+fsP(last.c)+' berada <strong style="color:'+(p20>0?'#00e5a0':'#ff3d5a')+'">'+Math.abs(p20).toFixed(1)+'% '+(p20>0?'di atas':'di bawah')+'</strong> MA20 ('+fsP(ma20L)+') dan <strong style="color:'+(p50>0?'#00e5a0':'#ff3d5a')+'">'+Math.abs(p50).toFixed(1)+'% '+(p50>0?'di atas':'di bawah')+'</strong> MA50 ('+fsP(ma50L)+'). RSI-14: '+(a.rl>70?'<span style="color:#ff3d5a">overbought ('+a.rl.toFixed(1)+')</span>':a.rl<30?'<span style="color:#00e5a0">oversold ('+a.rl.toFixed(1)+')</span>':'<span>'+a.rl.toFixed(1)+'</span>')+'.';
     if(mode==='trade') s5=(a.sig==='AKUMULASI'?'Entry ideal: pullback ke MA20 '+fsP(ma20L||last.c*.97)+'. Stop loss di bawah MA50. R/R minimal 1:2. Target: '+fsP(last.h*1.03)+'.':a.sig==='DISTRIBUSI'?'Sudah holding: pertimbangkan reduce position. Belum masuk: <strong>hindari entry</strong> — tunggu reversal berupa big vol bullish + CMF positif 3 hari.':'<strong>Wait and see.</strong> Set alert di '+fsP(last.h*1.02)+' (buy) dan '+fsP(ma20L||last.c*.96)+' (stop).');
     else if(mode==='deep') s5=(a.sig==='AKUMULASI'?'Pola stealth accumulation terdeteksi — institusi mengisi posisi diam-diam. Investor retail yang masuk sekarang berpotensi ikut tren institusional sejak awal.':a.sig==='DISTRIBUSI'?'Distribusi bertahap bisa berlangsung mingguan. Retail sering terjebak beli saat institusi justru jual.':'Institusi belum menunjukkan posisi jelas. Bisa berarti base building sebelum rally.');
     else s5=(a.sig==='AKUMULASI'?'Saham ini layak dipantau. Konfirmasi dengan fundamental sebelum masuk. Pantau CMF dan big vol sebagai konfirmasi.':a.sig==='DISTRIBUSI'?'Ekstra hati-hati. Tunggu reversal volume yang jelas sebelum entry.':'Bersabar. Gunakan capital untuk saham dengan sinyal lebih jelas.');
@@ -7907,7 +8085,7 @@ function fsRunAI(){
     var html='<div style="display:flex;align-items:center;gap:9px;margin-bottom:13px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.05)">';
     html+=fsMkBdg(a.sig);
     html+='<span style="font-size:11px;color:var(--text2)">Skor: <span class="mono" style="color:'+fsScColor(a.sc)+'">'+a.sc+'/100</span></span>';
-    html+='<span style="font-size:11px;color:var(--text2)">CMF: <span class="mono" style="color:'+(a.cl>0?'#00d4aa':'#ff4466')+'">'+(a.cl*100).toFixed(1)+'%</span></span>';
+    html+='<span style="font-size:11px;color:var(--text2)">CMF: <span class="mono" style="color:'+(a.cl>0?'#00e5a0':'#ff3d5a')+'">'+(a.cl*100).toFixed(1)+'%</span></span>';
     html+='</div>';
     var sections=[
       {t:'01 — Ringkasan Sinyal',ic:'ti-radar',b:s1},
@@ -7919,7 +8097,7 @@ function fsRunAI(){
     sections.forEach(function(sec){
       html+='<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.04)">';
       html+='<div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px"><i class="ti '+sec.ic+'"></i> '+sec.t+'</div>';
-      html+='<div style="font-size:13px;color:#9898b8;line-height:1.85">'+sec.b+'</div></div>';
+      html+='<div style="font-size:13px;color:#c8d8ea;line-height:1.85">'+sec.b+'</div></div>';
     });
     html+='<div style="font-size:11px;color:var(--text3);padding:9px 12px;background:var(--bg);border-radius:6px;border-left:2px solid var(--border2);margin-top:4px;line-height:1.6"><i class="ti ti-alert-circle" style="font-size:11px;vertical-align:-1px;margin-right:4px"></i>Analisa otomatis berbasis indikator teknikal. Bukan rekomendasi investasi. Selalu lakukan riset mandiri.</div>';
     box.innerHTML=html;
@@ -8120,7 +8298,7 @@ function authStartTimeoutBar(){
     var remaining = s.exp - Date.now();
     var pct = Math.max(0, (remaining / AUTH.SESSION_MS) * 100);
     bar.style.width = pct + '%';
-    bar.style.background = pct < 20 ? '#ff4466' : pct < 50 ? '#ffcc00' : 'var(--accent)';
+    bar.style.background = pct < 20 ? '#ff3d5a' : pct < 50 ? '#ffc107' : 'var(--accent)';
   }, 5000);
 }
 
@@ -8243,8 +8421,8 @@ function authDoSetup(){
     var msg = el('auth-setup-msg');
     if(msg){
       msg.style.color='var(--green)';
-      msg.style.background='rgba(0,212,170,.08)';
-      msg.style.border='1px solid rgba(0,212,170,.2)';
+      msg.style.background='rgba(0,229,160,.08)';
+      msg.style.border='1px solid rgba(0,229,160,.2)';
       msg.innerHTML =
         '✅ Akun berhasil dibuat!<br><br>'+
         '🔑 <strong>Kode Reset Darurat:</strong><br>'+
@@ -8545,16 +8723,16 @@ function diAnalyze(){
 
     var rating,ratingLabel,ratingColor,ratingNote;
     if(yearsPaid.length===0){
-      rating='NONE'; ratingLabel='⬜ Tidak Bayar'; ratingColor='#707090';
+      rating='NONE'; ratingLabel='⬜ Tidak Bayar'; ratingColor='#4a5e82';
       ratingNote='Belum pernah membagikan dividen';
     } else if(score>=62 && consistency>=0.55 && yom>=2){
-      rating='HIGH'; ratingLabel='🏆 High'; ratingColor='#00d4aa';
+      rating='HIGH'; ratingLabel='🏆 High'; ratingColor='#00e5a0';
       ratingNote='Pembayar konsisten, yield & pertumbuhan baik';
     } else if(score>=38 && consistency>=0.35){
-      rating='MODERATE'; ratingLabel='⚖️ Moderate'; ratingColor='#ffcc00';
+      rating='MODERATE'; ratingLabel='⚖️ Moderate'; ratingColor='#ffc107';
       ratingNote='Pembayar moderat, perlu monitoring berkala';
     } else {
-      rating='LOW'; ratingLabel='📉 Low'; ratingColor='#ff4466';
+      rating='LOW'; ratingLabel='📉 Low'; ratingColor='#ff3d5a';
       ratingNote='Konsistensi rendah atau yield tidak menarik';
     }
 
@@ -8651,7 +8829,7 @@ function renderDivInvest(){
       var pnlColor = r.unrealPnl>=0?'var(--green)':'var(--red)';
       var pnlSign  = r.unrealPnl>=0?'+':'';
       var portoBadge = r.inPortfolio
-        ? '<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(0,212,170,.12);color:var(--green)">📈 '+r.currentLot+' lot</span>'
+        ? '<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(0,229,160,.12);color:var(--green)">📈 '+r.currentLot+' lot</span>'
         : '<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(74,94,130,.2);color:var(--text3)">Tidak di porto</span>';
       var histBars = ['2019','2020','2021','2022','2023','2024','2025','2026'].map(function(y){
         var dps = r.dpsByYear[y];
@@ -8799,9 +8977,9 @@ function renderDivInvest(){
   if(histTbody){
     histTbody.innerHTML = filteredHist.map(function(d){
       var yoc = d.avgPrice>0&&d.dps>0 ? (d.dps/d.avgPrice*100).toFixed(2)+'%' : '—';
-      var srcBadge = d._src==='lampiran'?'<span style="font-size:8px;background:rgba(168,137,240,.15);color:var(--purple);padding:1px 4px;border-radius:3px">lampiran</span>'
+      var srcBadge = d._src==='lampiran'?'<span style="font-size:8px;background:rgba(167,139,250,.15);color:var(--purple);padding:1px 4px;border-radius:3px">lampiran</span>'
                   : d._src==='manual'?'<span style="font-size:8px;background:rgba(255,193,7,.12);color:var(--amber);padding:1px 4px;border-radius:3px">manual</span>'
-                  : '<span style="font-size:8px;background:rgba(0,212,170,.1);color:var(--green);padding:1px 4px;border-radius:3px">porto</span>';
+                  : '<span style="font-size:8px;background:rgba(0,229,160,.1);color:var(--green);padding:1px 4px;border-radius:3px">porto</span>';
       var deleteBtn = d._src==='manual'
         ? '<button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delDivInvestEntry('+d.id+')" title="Hapus">✕</button>'
         : '<span style="font-size:10px;color:var(--text3)" title="Hapus dari tab Dividen">—</span>';
@@ -8837,14 +9015,14 @@ function renderDivHistoryChart(){
     // Stacked: net per year
     var byYr={};
     filtered.forEach(function(d){var y=d.date.slice(0,4);byYr[y]=(byYr[y]||0)+d.net;});
-    charts['diHistC']=new Chart(cv,{type:'bar',data:{labels:YEARS,datasets:[{label:'Net Dividen',data:YEARS.map(function(y){return byYr[y]||0;}),backgroundColor:'rgba(0,212,170,.65)',borderRadius:4}]},
+    charts['diHistC']=new Chart(cv,{type:'bar',data:{labels:YEARS,datasets:[{label:'Net Dividen',data:YEARS.map(function(y){return byYr[y]||0;}),backgroundColor:'rgba(0,229,160,.65)',borderRadius:4}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return 'Rp '+fmtK(c.parsed.y);}}})},
         scales:{x:{grid:{color:GC},ticks:TC},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v);}}),position:'right'}}}});
   } else {
     // DPS trend for single ticker
     var dpsByYr={};
     filtered.forEach(function(d){var y=d.date.slice(0,4);dpsByYr[y]=(dpsByYr[y]||0)+d.dps;});
-    charts['diHistC']=new Chart(cv,{type:'line',data:{labels:YEARS,datasets:[{label:'DPS ('+sel+')',data:YEARS.map(function(y){return dpsByYr[y]||null;}),borderColor:'#ffcc00',borderWidth:2,fill:true,tension:.4,pointRadius:4,backgroundColor:'rgba(255,193,7,.08)',spanGaps:false}]},
+    charts['diHistC']=new Chart(cv,{type:'line',data:{labels:YEARS,datasets:[{label:'DPS ('+sel+')',data:YEARS.map(function(y){return dpsByYr[y]||null;}),borderColor:'#ffc107',borderWidth:2,fill:true,tension:.4,pointRadius:4,backgroundColor:'rgba(255,193,7,.08)',spanGaps:false}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return 'DPS: Rp '+fmt(c.parsed.y);}}})},
         scales:{x:{grid:{color:GC},ticks:TC},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmt(v);}}),position:'right'}}}});
   }
@@ -8853,6 +9031,447 @@ function renderDivHistoryChart(){
 // Init divInvest on load
 (function(){ try{ diLoadData(); }catch(e){} })();
 
+// ==========================================
+// HARGA WAJAR — MoS Valuation Engine
+// ==========================================
+
+var hwData = { rows: [], ticker: '', currentPrice: 0, minReturn: 6, projYears: 5 };
+var hwHistChart = null;
+
+function hw_defaultRows() {
+  var currentYear = new Date().getFullYear();
+  var rows = [];
+  for (var i = 4; i >= 0; i--) {
+    rows.push({ year: currentYear - i, eps: '', equity: '', shares: '', dps: '', per: '', netIncome: '' });
+  }
+  return rows;
+}
+
+function hw_init() {
+  try {
+    var saved = localStorage.getItem('hw_state');
+    if (saved) {
+      var s = JSON.parse(saved);
+      hwData = s;
+    } else {
+      hwData.rows = hw_defaultRows();
+    }
+  } catch(e) { hwData.rows = hw_defaultRows(); }
+  hw_renderTable();
+  hw_renderHistoryList();
+}
+
+function hw_renderTable() {
+  var tbody = document.getElementById('hw-data-body');
+  if (!tbody) return;
+  var html = '';
+  hwData.rows.forEach(function(row, i) {
+    html += '<tr>';
+    html += '<td><input type="number" value="'+row.year+'" style="width:58px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px" onchange="hwData.rows['+i+'].year=+this.value;hw_recalc()"></td>';
+    ['eps','equity','shares','dps','per','netIncome'].forEach(function(field) {
+      var ph = {eps:'e.g. 350',equity:'e.g. 50000',shares:'e.g. 12000',dps:'e.g. 100',per:'e.g. 15',netIncome:'e.g. 4200'}[field];
+      html += '<td><input type="number" value="'+(row[field]||'')+'" placeholder="'+ph+'" style="width:80px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px" onchange="hwData.rows['+i+'].'+field+'=+this.value||\'\'"></td>';
+    });
+    html += '<td><button onclick="hw_removeRow('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:0 4px">×</button></td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+  if (document.getElementById('hw-current-price')) document.getElementById('hw-current-price').value = hwData.currentPrice || '';
+  if (document.getElementById('hw-min-return')) document.getElementById('hw-min-return').value = hwData.minReturn || 6;
+  if (document.getElementById('hw-proj-years')) document.getElementById('hw-proj-years').value = hwData.projYears || 5;
+  if (document.getElementById('hw-ticker-input')) document.getElementById('hw-ticker-input').value = hwData.ticker || '';
+}
+
+function hw_addYear() {
+  var lastYear = hwData.rows.length ? hwData.rows[hwData.rows.length-1].year : new Date().getFullYear()-1;
+  hwData.rows.push({ year: lastYear+1, eps:'', equity:'', shares:'', dps:'', per:'', netIncome:'' });
+  hw_renderTable();
+}
+
+function hw_removeRow(i) {
+  hwData.rows.splice(i, 1);
+  hw_renderTable();
+  hw_recalc();
+}
+
+function hw_resetAll() {
+  if (!confirm('Reset semua data?')) return;
+  hwData = { rows: hw_defaultRows(), ticker: '', currentPrice: 0, minReturn: 6, projYears: 5 };
+  hw_renderTable();
+  hw_clearResults();
+}
+
+function hw_syncInputs() {
+  hwData.ticker = (document.getElementById('hw-ticker-input')||{}).value || '';
+  hwData.currentPrice = parseFloat((document.getElementById('hw-current-price')||{}).value) || 0;
+  hwData.minReturn = parseFloat((document.getElementById('hw-min-return')||{}).value) || 6;
+  hwData.projYears = parseInt((document.getElementById('hw-proj-years')||{}).value) || 5;
+  // sync table values from DOM
+  var inputs = document.querySelectorAll('#hw-data-body input');
+  var fields = ['year','eps','equity','shares','dps','per','netIncome'];
+  var col = 0; var row = 0;
+  inputs.forEach(function(inp) {
+    if (row < hwData.rows.length) {
+      var val = parseFloat(inp.value);
+      hwData.rows[row][fields[col]] = isNaN(val) ? '' : val;
+      col++;
+      if (col >= fields.length) { col = 0; row++; }
+    }
+  });
+}
+
+function hw_avg(arr) {
+  var valid = arr.filter(function(v){ return typeof v === 'number' && !isNaN(v) && v !== 0; });
+  if (!valid.length) return 0;
+  return valid.reduce(function(s,v){ return s+v; }, 0) / valid.length;
+}
+
+function hw_recalc() {
+  hw_syncInputs();
+  var rows = hwData.rows.filter(function(r){ return r.eps && r.equity && r.shares; });
+  if (rows.length < 2 || !hwData.currentPrice) { hw_clearResults(); return; }
+
+  // === Step 1: Initial IRR ===
+  var latestRow = rows[rows.length-1];
+  var eps0 = parseFloat(latestRow.eps) || 0;
+  var price0 = hwData.currentPrice;
+  var irr = eps0 / price0; // expressed as decimal
+
+  // === Step 2: Average ROE ===
+  var roeList = rows.map(function(r) {
+    return r.netIncome && r.equity ? (r.netIncome / r.equity) : (r.eps && r.shares && r.equity ? (r.eps * r.shares / r.equity) : null);
+  }).filter(function(v){ return v !== null && !isNaN(v) && v > 0; });
+  var avgROE = hw_avg(roeList);
+
+  // === Average DPR ===
+  var dprList = rows.map(function(r) {
+    if (!r.dps || !r.eps) return null;
+    var v = parseFloat(r.dps) / parseFloat(r.eps);
+    return (v >= 0 && v <= 1.5) ? v : null;
+  }).filter(function(v){ return v !== null; });
+  var avgDPR = hw_avg(dprList);
+
+  // === ROE after payout ===
+  var roeAfterPayout = avgROE * (1 - avgDPR);
+
+  // === Step 3: Current Equity/Share ===
+  var equityPerShare = (parseFloat(latestRow.equity) * 1e6) / (parseFloat(latestRow.shares) * 1e6); // both in millions of units
+  // Actually equity in M (miliar), shares in juta
+  // equity (M Rp) * 1,000,000 / shares (juta) * 1,000,000 = equity(M) / shares(juta) * 1000 if M=miliar & shares=juta... let's interpret as:
+  // equity column = total equity in Miliar Rp; shares column = shares in Juta lembar
+  equityPerShare = (parseFloat(latestRow.equity) * 1e9) / (parseFloat(latestRow.shares) * 1e6);
+
+  // === Step 3: Future Equity per Share ===
+  var N = hwData.projYears;
+  var futureEquityPerShare = equityPerShare * Math.pow(1 + roeAfterPayout, N);
+
+  // === Step 4: Future EPS ===
+  var futureEPS = futureEquityPerShare * avgROE;
+
+  // === Step 5: Average PER ===
+  var perList = rows.map(function(r){ return parseFloat(r.per)||null; }).filter(function(v){ return v && v > 0 && v < 200; });
+  var avgPER = hw_avg(perList);
+
+  // === Future Stock Price ===
+  var futurePrice = futureEPS * avgPER;
+
+  // === Harga Wajar (Fair Value = discounted future price) ===
+  var reqReturn = hwData.minReturn / 100;
+  var fairValue = futurePrice / Math.pow(1 + reqReturn, N);
+
+  // === MoS ===
+  var mosPct = (fairValue - price0) / fairValue * 100; // positive = discount (cheap), negative = premium (expensive)
+
+  // === Pass/Fail ===
+  var irrPass = irr * 100 >= hwData.minReturn;
+  var mosPass = mosPct > 0;
+  var overallPass = irrPass && mosPass;
+
+  // Render results
+  var ticker = hwData.ticker || '?';
+  document.getElementById('hw-ticker-display').textContent = ticker;
+
+  var badge = document.getElementById('hw-verdict-badge');
+  if (overallPass) {
+    badge.textContent = '✅ UNDERVALUED — LAYAK BELI';
+    badge.style.background = 'rgba(0,212,170,.15)';
+    badge.style.color = 'var(--green)';
+    badge.style.borderColor = 'rgba(0,212,170,.4)';
+    document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--green)';
+  } else if (!irrPass && !mosPass) {
+    badge.textContent = '🚫 OVERVALUED — HINDARI';
+    badge.style.background = 'rgba(255,34,68,.12)';
+    badge.style.color = 'var(--red)';
+    badge.style.borderColor = 'rgba(255,34,68,.3)';
+    document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--red)';
+  } else {
+    badge.textContent = '⚠️ PERHATIKAN — BORDERLINE';
+    badge.style.background = 'rgba(255,187,0,.12)';
+    badge.style.color = 'var(--amber)';
+    badge.style.borderColor = 'rgba(255,187,0,.3)';
+    document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--amber)';
+  }
+
+  function fmt(n, dec) { return isNaN(n) ? '—' : n.toLocaleString('id-ID', {maximumFractionDigits: dec||0}); }
+  function fmtPct(n) { return isNaN(n) ? '—' : (n >= 0 ? '+' : '') + n.toFixed(1) + '%'; }
+
+  document.getElementById('hw-fair-price').textContent = 'Rp ' + fmt(fairValue);
+  document.getElementById('hw-fair-price').style.color = mosPass ? 'var(--green)' : 'var(--red)';
+  document.getElementById('hw-current-display').textContent = 'Rp ' + fmt(price0);
+  document.getElementById('hw-mos-pct').textContent = fmtPct(mosPct);
+  document.getElementById('hw-mos-pct').style.color = mosPct > 30 ? 'var(--green)' : mosPct > 0 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('hw-irr-display').textContent = fmtPct(irr*100);
+  document.getElementById('hw-irr-display').style.color = irrPass ? 'var(--green)' : 'var(--red)';
+
+  // MoS gauge: center=50%, range -100% to +100%
+  var gaugeVal = Math.min(Math.max((mosPct + 100) / 200 * 100, 0), 100);
+  document.getElementById('hw-mos-bar').style.width = gaugeVal + '%';
+  document.getElementById('hw-mos-bar').style.background = mosPct > 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('hw-mos-label').textContent = fmtPct(mosPct);
+  document.getElementById('hw-mos-label').style.color = mosPct > 0 ? 'var(--green)' : 'var(--red)';
+
+  // Metrics
+  document.getElementById('hw-v-roe').textContent = fmtPct(avgROE*100);
+  document.getElementById('hw-v-dpr').textContent = fmtPct(avgDPR*100);
+  document.getElementById('hw-v-per').textContent = fmt(avgPER, 1) + 'x';
+  document.getElementById('hw-v-eps').textContent = 'Rp ' + fmt(eps0);
+  document.getElementById('hw-v-eq').textContent = 'Rp ' + fmt(equityPerShare);
+  document.getElementById('hw-v-feps').textContent = 'Rp ' + fmt(futureEPS);
+  document.getElementById('hw-v-fsp').textContent = 'Rp ' + fmt(futurePrice);
+  document.getElementById('hw-v-roe2').textContent = fmtPct(roeAfterPayout*100);
+
+  // Steps
+  var stepsCard = document.getElementById('hw-steps-card');
+  var stepsBody = document.getElementById('hw-steps-body');
+  if (stepsCard && stepsBody) {
+    stepsCard.style.display = 'block';
+    var steps = [
+      { label: 'Step 1: IRR Awal', val: fmtPct(irr*100) + (irrPass ? ' ✅' : ' ❌'), desc: 'EPS / Harga Saham', ok: irrPass },
+      { label: 'Step 2: Avg ROE', val: fmtPct(avgROE*100), desc: avgROE > 0 ? 'dari ' + roeList.length + ' tahun data' : 'Perlu Net Income', ok: avgROE > 0 },
+      { label: 'Step 2b: Avg DPR', val: fmtPct(avgDPR*100), desc: dprList.length + ' tahun data', ok: true },
+      { label: 'Step 2c: ROE after payout', val: fmtPct(roeAfterPayout*100), desc: 'ROE × (1 - DPR)', ok: roeAfterPayout > 0 },
+      { label: 'Step 3: Equity/Share kini', val: 'Rp '+fmt(equityPerShare), desc: 'Equity ÷ Saham', ok: equityPerShare > 0 },
+      { label: 'Step 3b: Future Eq/Share', val: 'Rp '+fmt(futureEquityPerShare), desc: 'Proyeksi ' + N + ' thn', ok: futureEquityPerShare > 0 },
+      { label: 'Step 4: Future EPS', val: 'Rp '+fmt(futureEPS), desc: 'Future Eq × Avg ROE', ok: futureEPS > 0 },
+      { label: 'Step 5: Future Price', val: 'Rp '+fmt(futurePrice), desc: 'Future EPS × Avg PER', ok: futurePrice > 0 },
+      { label: 'Harga Wajar (PV)', val: 'Rp '+fmt(fairValue), desc: 'Discounted @ ' + hwData.minReturn + '%/thn', ok: fairValue > 0 },
+      { label: 'Margin of Safety', val: fmtPct(mosPct), desc: mosPass ? 'Undervalued ✅' : 'Overvalued ❌', ok: mosPass },
+    ];
+    stepsBody.innerHTML = steps.map(function(s) {
+      return '<div style="background:var(--bg3);border-radius:2px;padding:7px 9px;border-left:2px solid '+(s.ok?'var(--green)':'var(--red)')+'">'
+        + '<div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">'+s.label+'</div>'
+        + '<div style="font-size:13px;font-weight:700;font-family:\'IBM Plex Mono\',monospace;color:var(--text);margin:2px 0">'+s.val+'</div>'
+        + '<div style="font-size:9px;color:var(--text3)">'+s.desc+'</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Chart
+  hw_renderChart(rows);
+
+  // Store result in hwData for saving
+  hwData._result = { fairValue, mosPct, irr: irr*100, futurePrice, futureEPS, avgROE, avgDPR, avgPER, roeAfterPayout, equityPerShare };
+}
+
+function hw_renderChart(rows) {
+  var chartCard = document.getElementById('hw-chart-card');
+  if (!chartCard) return;
+  chartCard.style.display = 'block';
+  var ctx = document.getElementById('hw-history-chart');
+  if (!ctx) return;
+  if (hwHistChart) { hwHistChart.destroy(); hwHistChart = null; }
+  var labels = rows.map(function(r){ return r.year; });
+  var epsData = rows.map(function(r){ return parseFloat(r.eps)||null; });
+  var perData = rows.map(function(r){ return parseFloat(r.per)||null; });
+  hwHistChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'EPS (Rp)', data: epsData, backgroundColor: 'rgba(255,102,0,.5)', yAxisID: 'y' },
+        { label: 'PER (x)', data: perData, type: 'line', borderColor: 'var(--blue)', backgroundColor: 'transparent', yAxisID: 'y2', tension: .3, pointRadius: 3, pointBackgroundColor: 'var(--blue)' },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8888aa', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 10 } } },
+      scales: {
+        x: { ticks: { color: '#8888aa', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { position: 'left', ticks: { color: '#8888aa', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' }, title: { display: true, text: 'EPS', color: '#ff6600', font: { size: 8 } } },
+        y2: { position: 'right', ticks: { color: '#0088ff', font: { size: 9 } }, grid: { display: false }, title: { display: true, text: 'PER', color: '#0088ff', font: { size: 8 } } }
+      }
+    }
+  });
+}
+
+function hw_clearResults() {
+  ['hw-fair-price','hw-current-display','hw-mos-pct','hw-irr-display','hw-v-roe','hw-v-dpr','hw-v-per','hw-v-eps','hw-v-eq','hw-v-feps','hw-v-fsp','hw-v-roe2','hw-ticker-display'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = '—';
+  });
+  var badge = document.getElementById('hw-verdict-badge');
+  if (badge) { badge.textContent = 'BELUM DIHITUNG'; badge.style.background='var(--bg4)'; badge.style.color='var(--text3)'; badge.style.borderColor='var(--border)'; }
+  if (document.getElementById('hw-steps-card')) document.getElementById('hw-steps-card').style.display = 'none';
+  if (document.getElementById('hw-chart-card')) document.getElementById('hw-chart-card').style.display = 'none';
+  if (document.getElementById('hw-mos-bar')) document.getElementById('hw-mos-bar').style.width = '50%';
+}
+
+function hw_saveToStorage() {
+  hw_syncInputs();
+  try { localStorage.setItem('hw_state', JSON.stringify(hwData)); } catch(e) {}
+  // Save to history
+  if (hwData.ticker && hwData._result) {
+    try {
+      var hist = JSON.parse(localStorage.getItem('hw_history')||'[]');
+      var r = hwData._result;
+      hist.unshift({
+        ticker: hwData.ticker,
+        date: new Date().toLocaleDateString('id-ID'),
+        price: hwData.currentPrice,
+        fairValue: r.fairValue,
+        mosPct: r.mosPct,
+        irr: r.irr
+      });
+      hist = hist.slice(0, 20);
+      localStorage.setItem('hw_history', JSON.stringify(hist));
+      hw_renderHistoryList();
+      if (typeof showSaveStatus === 'function') showSaveStatus('Analisa disimpan', 'var(--green)');
+    } catch(e) {}
+  }
+}
+
+function hw_renderHistoryList() {
+  var el = document.getElementById('hw-history-list');
+  if (!el) return;
+  try {
+    var hist = JSON.parse(localStorage.getItem('hw_history')||'[]');
+    if (!hist.length) { el.innerHTML = '<div style="font-size:10px;color:var(--text3);text-align:center;padding:16px">Belum ada analisa tersimpan</div>'; return; }
+    el.innerHTML = hist.map(function(h) {
+      var mos = h.mosPct || 0;
+      var col = mos > 20 ? 'var(--green)' : mos > 0 ? 'var(--amber)' : 'var(--red)';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border);cursor:pointer" onclick="hw_loadHistory(this)" data-h=\''+JSON.stringify(h)+'\' style="transition:.1s" onmouseover="this.style.background=\'var(--bg3)\'" onmouseout="this.style.background=\'transparent\'">'
+        + '<div><span style="font-weight:700;font-family:\'IBM Plex Mono\',monospace;color:var(--bb-orange);font-size:11px">'+h.ticker+'</span> <span style="font-size:9px;color:var(--text3)">'+h.date+'</span></div>'
+        + '<div style="text-align:right"><div style="font-size:10px;color:var(--text);font-family:\'IBM Plex Mono\',monospace">Rp '+Math.round(h.fairValue||0).toLocaleString('id-ID')+'</div>'
+        + '<div style="font-size:9px;color:'+col+'">'+(mos>=0?'+':'')+mos.toFixed(1)+'% MoS</div></div>'
+        + '</div>';
+    }).join('');
+  } catch(e) {}
+}
+
+function hw_clearHistory() {
+  if (!confirm('Hapus semua histori analisa?')) return;
+  localStorage.removeItem('hw_history');
+  hw_renderHistoryList();
+}
+
+function hw_onFileSelect(inp) {
+  var f = inp.files[0];
+  if (!f) return;
+  document.getElementById('hw-file-name').textContent = f.name + ' (' + (f.size/1024).toFixed(0) + ' KB)';
+  document.getElementById('hw-extract-btn').disabled = false;
+  document.getElementById('hw-ai-status').textContent = 'File dipilih · Klik Ekstrak';
+  document.getElementById('hw-ai-status').style.color = 'var(--amber)';
+}
+
+function hw_extractWithAI() {
+  var inp = document.getElementById('hw-pdf-input');
+  var ticker = document.getElementById('hw-ticker-input').value.trim();
+  if (!inp.files[0]) { alert('Pilih file PDF terlebih dahulu'); return; }
+  if (!ticker) { alert('Masukkan kode saham terlebih dahulu'); return; }
+
+  var f = inp.files[0];
+  if (f.size > 15*1024*1024) { alert('File terlalu besar (max 15MB)'); return; }
+
+  var statusEl = document.getElementById('hw-ai-status');
+  var btn = document.getElementById('hw-extract-btn');
+  statusEl.textContent = '🤖 AI sedang membaca PDF...';
+  statusEl.style.color = 'var(--amber)';
+  btn.disabled = true;
+  btn.textContent = '⏳ Mengekstrak...';
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64 = e.target.result.split(',')[1];
+    hw_callClaudeAPI(base64, ticker, statusEl, btn);
+  };
+  reader.readAsDataURL(f);
+}
+
+async function hw_callClaudeAPI(base64PDF, ticker, statusEl, btn) {
+  var prompt = 'Kamu adalah analis keuangan. Ekstrak data keuangan tahunan dari laporan keuangan PDF ini untuk perusahaan dengan kode saham ' + ticker + '.\n\n'
+    + 'Kembalikan HANYA JSON valid (tanpa preamble, tanpa markdown), format:\n'
+    + '{"ticker":"'+ticker+'","years":[{"year":2024,"eps":350,"total_equity_miliar":45000,"shares_juta":12000,"dps":150,"per":15,"net_income_miliar":4200},...]}\n\n'
+    + 'Catatan penting:\n'
+    + '- EPS dalam Rupiah per saham (bukan juta)\n'
+    + '- total_equity_miliar dalam Miliar Rupiah\n'
+    + '- shares_juta dalam Juta lembar saham\n'
+    + '- DPS (Dividen per Saham) dalam Rupiah\n'
+    + '- PER (Price to Earnings Ratio) kalau tersedia\n'
+    + '- net_income_miliar dalam Miliar Rupiah\n'
+    + '- Ambil semua tahun yang ada dalam laporan (biasanya 2-5 tahun)\n'
+    + '- Jika data tidak tersedia, isi dengan null\n'
+    + '- Jangan tambahkan komentar atau penjelasan apapun, hanya JSON murni';
+
+  try {
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64PDF } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    if (!resp.ok) throw new Error('API error: ' + resp.status);
+    var data = await resp.json();
+    var text = (data.content || []).map(function(c){ return c.text||''; }).join('');
+    var clean = text.replace(/```json|```/g, '').trim();
+    var parsed = JSON.parse(clean);
+
+    if (parsed.years && parsed.years.length) {
+      // Convert to hwData format
+      var newRows = parsed.years.map(function(y) {
+        return {
+          year: y.year || 0,
+          eps: y.eps || '',
+          equity: y.total_equity_miliar || '',
+          shares: y.shares_juta || '',
+          dps: y.dps || '',
+          per: y.per || '',
+          netIncome: y.net_income_miliar || ''
+        };
+      });
+      newRows.sort(function(a,b){ return a.year - b.year; });
+      hwData.rows = newRows;
+      hwData.ticker = parsed.ticker || ticker;
+      hw_renderTable();
+      document.getElementById('hw-ticker-input').value = hwData.ticker;
+      statusEl.textContent = '✅ Berhasil ekstrak ' + newRows.length + ' tahun data!';
+      statusEl.style.color = 'var(--green)';
+      hw_recalc();
+    } else {
+      throw new Error('Data years tidak ditemukan dalam respons');
+    }
+  } catch(err) {
+    statusEl.textContent = '❌ Gagal: ' + err.message.substring(0,60);
+    statusEl.style.color = 'var(--red)';
+    console.error('hw AI error:', err);
+  }
+  btn.disabled = false;
+  btn.textContent = '🤖 Ekstrak dengan AI';
+}
+
+// Init on page load
+(function(){ try { if(document.getElementById('hw-data-body')) hw_init(); } catch(e){} })();
+// Also init when tab is clicked
+var _hw_origGoPage = typeof goPage === 'function' ? goPage : null;
 </script>
 </body>
 </html>
