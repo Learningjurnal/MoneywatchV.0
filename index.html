@@ -9063,22 +9063,45 @@ function hw_init() {
 function hw_renderTable() {
   var tbody = document.getElementById('hw-data-body');
   if (!tbody) return;
-  var html = '';
+  // Use DOM API to avoid any attribute escaping issues
+  tbody.innerHTML = '';
+  var inpStyle = 'background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:"IBM Plex Mono",monospace;font-size:11px;padding:3px 5px;border-radius:1px;box-sizing:border-box;width:100%';
+  var placeholders = {year:'Tahun',eps:'e.g. 350',equity:'e.g. 50000',shares:'e.g. 12000',dps:'e.g. 100',per:'e.g. 15',netIncome:'e.g. 4200'};
+  var widths = {year:'58px',eps:'90px',equity:'110px',shares:'100px',dps:'90px',per:'70px',netIncome:'110px'};
   hwData.rows.forEach(function(row, i) {
-    html += '<tr>';
-    html += '<td><input type="number" value="'+row.year+'" data-row="'+i+'" data-field="year" style="width:58px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px"></td>';
-    ['eps','equity','shares','dps','per','netIncome'].forEach(function(field) {
-      var ph = {eps:'e.g. 350',equity:'e.g. 50000',shares:'e.g. 12000',dps:'e.g. 100',per:'e.g. 15',netIncome:'e.g. 4200'}[field];
-      html += '<td><input type="number" value="'+(row[field]||'')+'" placeholder="'+ph+'" data-row="'+i+'" data-field="'+field+'" style="width:80px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px"></td>';
+    var tr = document.createElement('tr');
+    var allFields = ['year','eps','equity','shares','dps','per','netIncome'];
+    allFields.forEach(function(field) {
+      var td = document.createElement('td');
+      var inp = document.createElement('input');
+      inp.type = 'number';
+      inp.value = (row[field] !== '' && row[field] !== undefined && row[field] !== null) ? row[field] : '';
+      inp.placeholder = placeholders[field] || '';
+      inp.setAttribute('style', inpStyle);
+      inp.style.width = widths[field] || '80px';
+      inp.setAttribute('data-hw-row', String(i));
+      inp.setAttribute('data-hw-field', field);
+      td.appendChild(inp);
+      tr.appendChild(td);
     });
-    html += '<td><button onclick="hw_removeRow('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:0 4px">×</button></td>';
-    html += '</tr>';
+    // Delete button
+    var tdDel = document.createElement('td');
+    var btnDel = document.createElement('button');
+    btnDel.textContent = '×';
+    btnDel.setAttribute('style','background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 6px');
+    btnDel.onclick = (function(idx){ return function(){ hw_removeRow(idx); }; })(i);
+    tdDel.appendChild(btnDel);
+    tr.appendChild(tdDel);
+    tbody.appendChild(tr);
   });
-  tbody.innerHTML = html;
-  if (document.getElementById('hw-current-price')) document.getElementById('hw-current-price').value = hwData.currentPrice || '';
-  if (document.getElementById('hw-min-return')) document.getElementById('hw-min-return').value = hwData.minReturn || 6;
-  if (document.getElementById('hw-proj-years')) document.getElementById('hw-proj-years').value = hwData.projYears || 5;
-  if (document.getElementById('hw-ticker-input')) document.getElementById('hw-ticker-input').value = hwData.ticker || '';
+  var cp = document.getElementById('hw-current-price');
+  if (cp) cp.value = hwData.currentPrice || '';
+  var mr = document.getElementById('hw-min-return');
+  if (mr) mr.value = hwData.minReturn || 6;
+  var py = document.getElementById('hw-proj-years');
+  if (py) py.value = hwData.projYears || 5;
+  var ti = document.getElementById('hw-ticker-input');
+  if (ti) ti.value = hwData.ticker || '';
 }
 
 function hw_addYear() {
@@ -9105,11 +9128,11 @@ function hw_syncInputs() {
   hwData.currentPrice = parseFloat((document.getElementById('hw-current-price')||{}).value) || 0;
   hwData.minReturn = parseFloat((document.getElementById('hw-min-return')||{}).value) || 6;
   hwData.projYears = parseInt((document.getElementById('hw-proj-years')||{}).value) || 5;
-  // sync table values from DOM using data attributes
-  document.querySelectorAll('#hw-data-body input[data-row][data-field]').forEach(function(inp) {
-    var r = parseInt(inp.getAttribute('data-row'));
-    var f = inp.getAttribute('data-field');
-    if (hwData.rows[r] !== undefined) {
+  // sync table values from DOM
+  document.querySelectorAll('#hw-data-body input[data-hw-row]').forEach(function(inp) {
+    var r = parseInt(inp.getAttribute('data-hw-row'));
+    var f = inp.getAttribute('data-hw-field');
+    if (f && hwData.rows[r] !== undefined) {
       var val = parseFloat(inp.value);
       hwData.rows[r][f] = isNaN(val) ? '' : val;
     }
@@ -9125,192 +9148,181 @@ function hw_avg(arr) {
 function hw_recalc() {
   hw_syncInputs();
 
-  // Visual feedback: button loading state
   var btn = document.getElementById('hw-hitung-btn');
-  if (btn) { btn.textContent = '⏳ Menghitung...'; btn.style.opacity = '.7'; btn.disabled = true; }
+  if (btn) { btn.textContent = '\u23f3 Menghitung...'; btn.style.opacity = '.7'; btn.disabled = true; }
 
-  // Validation
+  function done() { if (btn) { btn.textContent = '\u26a1 HITUNG'; btn.style.opacity = '1'; btn.disabled = false; } }
+  function fmt(n, dec) { return (n === null || n === undefined || isNaN(n)) ? '\u2014' : Math.round(n).toLocaleString('id-ID'); }
+  function fmtD(n, dec) { return (n === null || n === undefined || isNaN(n)) ? '\u2014' : n.toFixed(dec !== undefined ? dec : 1); }
+  function fmtPct(n) { if (n === null || n === undefined || isNaN(n)) return '\u2014'; return (n >= 0 ? '+' : '') + n.toFixed(1) + '%'; }
+  function fmtRp(n) { return 'Rp ' + fmt(n); }
+
+  // === Validation ===
   var errors = [];
   if (!hwData.ticker) errors.push('Kode saham belum diisi');
   if (!hwData.currentPrice || hwData.currentPrice <= 0) errors.push('Harga saham saat ini belum diisi');
-  var validRows = hwData.rows.filter(function(r){ return r.eps && r.equity && r.shares; });
-  if (validRows.length < 2) errors.push('Minimal 2 baris data lengkap (EPS, Equity, Shares)');
+  var rows = hwData.rows.filter(function(r) {
+    return parseFloat(r.eps) > 0 && parseFloat(r.equity) > 0 && parseFloat(r.shares) > 0;
+  });
+  if (rows.length < 2) errors.push('Minimal 2 baris data lengkap (EPS, Total Equity, Shares)');
 
   if (errors.length) {
     hw_clearResults();
-    // Show error in verdict area
     var badge = document.getElementById('hw-verdict-badge');
-    if (badge) {
-      badge.textContent = '⚠️ DATA TIDAK LENGKAP';
-      badge.style.background = 'rgba(255,187,0,.12)';
-      badge.style.color = 'var(--amber)';
-      badge.style.borderColor = 'rgba(255,187,0,.3)';
-    }
-    var conclusionEl = document.getElementById('hw-conclusion');
-    var conclusionText = document.getElementById('hw-conclusion-text');
-    if (conclusionEl && conclusionText) {
-      conclusionEl.style.display = 'block';
-      conclusionEl.style.borderLeftColor = 'var(--amber)';
-      conclusionText.innerHTML = '<b style="color:var(--amber)">Lengkapi data berikut sebelum menghitung:</b><br>' + errors.map(function(e){ return '• ' + e; }).join('<br>');
-    }
-    if (btn) { btn.textContent = '⚡ HITUNG'; btn.style.opacity = '1'; btn.disabled = false; }
-    return;
+    if (badge) { badge.textContent = '\u26a0\ufe0f DATA TIDAK LENGKAP'; badge.style.background = 'rgba(255,187,0,.12)'; badge.style.color = 'var(--amber)'; badge.style.borderColor = 'rgba(255,187,0,.3)'; }
+    var cEl = document.getElementById('hw-conclusion'); var cTx = document.getElementById('hw-conclusion-text');
+    if (cEl && cTx) { cEl.style.display = 'block'; cEl.style.borderLeftColor = 'var(--amber)'; cTx.innerHTML = '<b style="color:var(--amber)">Lengkapi data berikut:</b><br>' + errors.map(function(e){ return '\u2022 ' + e; }).join('<br>'); }
+    done(); return;
   }
 
-  var rows = validRows;
-  if (!hwData.currentPrice) { hw_clearResults(); if (btn) { btn.textContent = '⚡ HITUNG'; btn.style.opacity = '1'; btn.disabled = false; } return; }
-
-  // === Step 1: Initial IRR ===
-  var latestRow = rows[rows.length-1];
-  var eps0 = parseFloat(latestRow.eps) || 0;
+  // Sort rows by year ascending
+  rows = rows.slice().sort(function(a, b) { return a.year - b.year; });
+  var latest = rows[rows.length - 1];
+  var ticker = hwData.ticker.toUpperCase();
   var price0 = hwData.currentPrice;
-  var irr = eps0 / price0; // expressed as decimal
+  var minRet = hwData.minReturn;
+  var N = hwData.projYears;
+  var reqReturn = minRet / 100;
 
-  // === Step 2: Average ROE ===
-  // ROE = Net Income / Total Equity (both in same unit: Miliar Rp)
-  // Fallback: compute Net Income from EPS * Shares if Net Income column empty
-  //   EPS (Rp/saham) * Shares (juta lembar) / 1000 = Net Income in Miliar Rp
-  var roeList = rows.map(function(r) {
+  // === Step 1: Initial IRR = EPS_latest / Price ===
+  var eps0 = parseFloat(latest.eps);
+  var irr = eps0 / price0;
+  var irrPass = (irr * 100) >= minRet;
+
+  // === Step 2a: Average ROE ===
+  // ROE = Net Income / Total Equity  (both in Miliar Rp — same unit, ratio is pure)
+  // Fallback if netIncome empty: NI = EPS(Rp) * Shares(juta) / 1000 → Miliar Rp
+  var roeList = [];
+  rows.forEach(function(r) {
     var eq = parseFloat(r.equity);
-    if (!eq || eq <= 0) return null;
+    if (!(eq > 0)) return;
     var ni = parseFloat(r.netIncome);
-    if (!ni || ni <= 0) {
-      // derive Net Income: EPS(Rp) * Shares(juta) / 1000 = Miliar Rp
-      var eps_ = parseFloat(r.eps);
-      var sh_ = parseFloat(r.shares);
-      if (eps_ > 0 && sh_ > 0) ni = eps_ * sh_ / 1000;
-      else return null;
+    if (!(ni > 0)) {
+      var e = parseFloat(r.eps), s = parseFloat(r.shares);
+      if (e > 0 && s > 0) ni = (e * s) / 1000; // Rp * juta / 1000 = Miliar
+      else return;
     }
-    var roe = ni / eq; // both Miliar → pure ratio
-    return (roe > 0 && roe < 5) ? roe : null; // sanity: ROE > 500% = bad data
-  }).filter(function(v){ return v !== null; });
-  var avgROE = hw_avg(roeList);
+    var roe = ni / eq;
+    if (roe > 0 && roe < 2) roeList.push(roe); // sanity cap: >200% ROE = data error
+  });
+  var avgROE = roeList.length ? roeList.reduce(function(s,v){return s+v;},0) / roeList.length : 0;
 
-  // === Average DPR (Dividend Payout Ratio) ===
-  // DPR = DPS / EPS, both in Rp/saham
-  // Cap at 1.0: DPR > 100% (bayar dari retained earnings) distorts growth model
+  // === Step 2b: Average DPR = DPS / EPS (cap at 1.0) ===
   var dprWarning = false;
-  var dprList = rows.map(function(r) {
-    var dps_ = parseFloat(r.dps);
-    var eps_ = parseFloat(r.eps);
-    if (!eps_ || eps_ <= 0) return null;
-    if (!dps_ || dps_ < 0) return 0;
-    var v = dps_ / eps_;
-    if (v > 1.0) { dprWarning = true; v = 1.0; } // cap: DPR > 100% = special dividend
-    return (v >= 0) ? v : null;
-  }).filter(function(v){ return v !== null; });
-  var avgDPR = hw_avg(dprList);
+  var dprList = [];
+  rows.forEach(function(r) {
+    var e = parseFloat(r.eps);
+    if (!(e > 0)) return;
+    var d = parseFloat(r.dps);
+    if (isNaN(d) || d < 0) d = 0;
+    var v = d / e;
+    if (v > 1.0) { dprWarning = true; v = 1.0; }
+    dprList.push(v);
+  });
+  var avgDPR = dprList.length ? dprList.reduce(function(s,v){return s+v;},0) / dprList.length : 0;
 
-  // === ROE after payout ===
+  // === Step 2c: ROE after payout ===
   var roeAfterPayout = avgROE * (1 - avgDPR);
 
-  // === Step 3: Current Equity/Share (Rp per saham) ===
-  // equity column = Total Equity in Miliar Rp (×1e9 for Rp)
-  // shares column = Shares in Juta lembar (×1e6 for lembar)
-  // Result: Rp per saham
-  var equityPerShare = (parseFloat(latestRow.equity) * 1e9) / (parseFloat(latestRow.shares) * 1e6);
+  // === Step 3a: Equity per Share (Rp/saham) ===
+  // equity: Miliar Rp → ×1e9 = Rp
+  // shares: Juta lembar → ×1e6 = lembar
+  var equityMiliar = parseFloat(latest.equity);
+  var sharesJuta = parseFloat(latest.shares);
+  var equityPerShare = (equityMiliar * 1e9) / (sharesJuta * 1e6);
 
-  // === Step 3: Future Equity per Share ===
-  var N = hwData.projYears;
+  // === Step 3b: Future Equity per Share ===
   var futureEquityPerShare = equityPerShare * Math.pow(1 + roeAfterPayout, N);
 
   // === Step 4: Future EPS ===
   var futureEPS = futureEquityPerShare * avgROE;
 
   // === Step 5: Average PER ===
-  var perList = rows.map(function(r){ return parseFloat(r.per)||null; }).filter(function(v){ return v && v > 0 && v < 200; });
-  var avgPER = hw_avg(perList);
+  var perList = [];
+  rows.forEach(function(r) {
+    var p = parseFloat(r.per);
+    if (p > 0 && p < 200) perList.push(p);
+  });
+  var avgPER = perList.length ? perList.reduce(function(s,v){return s+v;},0) / perList.length : 0;
 
-  // === Future Stock Price ===
+  // === Future Price ===
   var futurePrice = futureEPS * avgPER;
 
-  // === Harga Wajar (Fair Value = discounted future price) ===
-  var reqReturn = hwData.minReturn / 100;
-  var fairValue = futurePrice / Math.pow(1 + reqReturn, N);
+  // === Harga Wajar = PV of Future Price ===
+  var fairValue = (avgPER > 0 && futureEPS > 0) ? futurePrice / Math.pow(1 + reqReturn, N) : 0;
 
   // === MoS ===
-  var mosPct = (fairValue - price0) / fairValue * 100; // positive = discount (cheap), negative = premium (expensive)
-
-  // === Pass/Fail ===
-  var irrPass = irr * 100 >= hwData.minReturn;
-  var mosPass = mosPct > 0;
+  var mosPct = fairValue > 0 ? (fairValue - price0) / fairValue * 100 : -Infinity;
+  var mosPass = isFinite(mosPct) && mosPct > 0;
   var overallPass = irrPass && mosPass;
 
-  // Render results
-  var ticker = hwData.ticker || '?';
+  // === Render verdict ===
   document.getElementById('hw-ticker-display').textContent = ticker;
-
   var badge = document.getElementById('hw-verdict-badge');
+  var verdCard = document.getElementById('hw-verdict-card');
   if (overallPass) {
-    badge.textContent = '✅ UNDERVALUED — LAYAK BELI';
-    badge.style.background = 'rgba(0,212,170,.15)';
-    badge.style.color = 'var(--green)';
-    badge.style.borderColor = 'rgba(0,212,170,.4)';
-    document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--green)';
+    badge.textContent = '\u2705 UNDERVALUED \u2014 LAYAK BELI';
+    badge.style.cssText += ';background:rgba(0,212,170,.15);color:var(--green);border-color:rgba(0,212,170,.4)';
+    verdCard.style.borderTopColor = 'var(--green)';
   } else if (!irrPass && !mosPass) {
-    badge.textContent = '🚫 OVERVALUED — HINDARI';
-    badge.style.background = 'rgba(255,34,68,.12)';
-    badge.style.color = 'var(--red)';
-    badge.style.borderColor = 'rgba(255,34,68,.3)';
-    document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--red)';
+    badge.textContent = '\ud83d\udeab OVERVALUED \u2014 HINDARI';
+    badge.style.cssText += ';background:rgba(255,34,68,.12);color:var(--red);border-color:rgba(255,34,68,.3)';
+    verdCard.style.borderTopColor = 'var(--red)';
   } else {
-    badge.textContent = '⚠️ PERHATIKAN — BORDERLINE';
-    badge.style.background = 'rgba(255,187,0,.12)';
-    badge.style.color = 'var(--amber)';
-    badge.style.borderColor = 'rgba(255,187,0,.3)';
-    document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--amber)';
+    badge.textContent = '\u26a0\ufe0f PERHATIKAN \u2014 BORDERLINE';
+    badge.style.cssText += ';background:rgba(255,187,0,.12);color:var(--amber);border-color:rgba(255,187,0,.3)';
+    verdCard.style.borderTopColor = 'var(--amber)';
   }
 
-  function fmt(n, dec) { return isNaN(n) ? '—' : n.toLocaleString('id-ID', {maximumFractionDigits: dec||0}); }
-  function fmtPct(n) { return isNaN(n) ? '—' : (n >= 0 ? '+' : '') + n.toFixed(1) + '%'; }
-
-  document.getElementById('hw-fair-price').textContent = 'Rp ' + fmt(fairValue);
+  // === Render numbers ===
+  var mosPctDisplay = isFinite(mosPct) ? fmtPct(mosPct) : (mosPct === -Infinity ? '\u2212\u221e' : '\u221e');
+  document.getElementById('hw-fair-price').textContent = fmtRp(fairValue);
   document.getElementById('hw-fair-price').style.color = mosPass ? 'var(--green)' : 'var(--red)';
-  document.getElementById('hw-current-display').textContent = 'Rp ' + fmt(price0);
-  document.getElementById('hw-mos-pct').textContent = fmtPct(mosPct);
-  document.getElementById('hw-mos-pct').style.color = mosPct > 30 ? 'var(--green)' : mosPct > 0 ? 'var(--amber)' : 'var(--red)';
-  document.getElementById('hw-irr-display').textContent = fmtPct(irr*100);
+  document.getElementById('hw-current-display').textContent = fmtRp(price0);
+  document.getElementById('hw-mos-pct').textContent = mosPctDisplay;
+  document.getElementById('hw-mos-pct').style.color = (isFinite(mosPct) && mosPct > 30) ? 'var(--green)' : (isFinite(mosPct) && mosPct > 0) ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('hw-irr-display').textContent = fmtPct(irr * 100);
   document.getElementById('hw-irr-display').style.color = irrPass ? 'var(--green)' : 'var(--red)';
 
-  // MoS gauge: center=50%, range -100% to +100%
-  var gaugeVal = Math.min(Math.max((mosPct + 100) / 200 * 100, 0), 100);
+  var gaugeVal = isFinite(mosPct) ? Math.min(Math.max((mosPct + 100) / 200 * 100, 0), 100) : (mosPct === -Infinity ? 0 : 100);
   document.getElementById('hw-mos-bar').style.width = gaugeVal + '%';
-  document.getElementById('hw-mos-bar').style.background = mosPct > 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('hw-mos-label').textContent = fmtPct(mosPct);
-  document.getElementById('hw-mos-label').style.color = mosPct > 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('hw-mos-bar').style.background = mosPass ? 'var(--green)' : 'var(--red)';
+  document.getElementById('hw-mos-label').textContent = mosPctDisplay;
+  document.getElementById('hw-mos-label').style.color = mosPass ? 'var(--green)' : 'var(--red)';
 
-  // Metrics
-  document.getElementById('hw-v-roe').textContent = fmtPct(avgROE*100);
-  document.getElementById('hw-v-dpr').textContent = fmtPct(avgDPR*100);
-  document.getElementById('hw-v-per').textContent = fmt(avgPER, 1) + 'x';
-  document.getElementById('hw-v-eps').textContent = 'Rp ' + fmt(eps0);
-  document.getElementById('hw-v-eq').textContent = 'Rp ' + fmt(equityPerShare);
-  document.getElementById('hw-v-feps').textContent = 'Rp ' + fmt(futureEPS);
-  document.getElementById('hw-v-fsp').textContent = 'Rp ' + fmt(futurePrice);
-  document.getElementById('hw-v-roe2').textContent = fmtPct(roeAfterPayout*100);
+  // Metrics panel
+  document.getElementById('hw-v-roe').textContent = fmtPct(avgROE * 100);
+  document.getElementById('hw-v-dpr').textContent = fmtPct(avgDPR * 100);
+  document.getElementById('hw-v-per').textContent = fmtD(avgPER, 1) + 'x';
+  document.getElementById('hw-v-eps').textContent = fmtRp(eps0);
+  document.getElementById('hw-v-eq').textContent = fmtRp(equityPerShare);
+  document.getElementById('hw-v-feps').textContent = fmtRp(futureEPS);
+  document.getElementById('hw-v-fsp').textContent = fmtRp(futurePrice);
+  document.getElementById('hw-v-roe2').textContent = fmtPct(roeAfterPayout * 100);
 
-  // Steps
+  // Steps breakdown
   var stepsCard = document.getElementById('hw-steps-card');
   var stepsBody = document.getElementById('hw-steps-body');
   if (stepsCard && stepsBody) {
     stepsCard.style.display = 'block';
     var steps = [
-      { label: 'Step 1: IRR Awal', val: fmtPct(irr*100) + (irrPass ? ' ✅' : ' ❌'), desc: 'EPS / Harga Saham', ok: irrPass },
-      { label: 'Step 2: Avg ROE', val: fmtPct(avgROE*100), desc: avgROE > 0 ? 'dari ' + roeList.length + ' tahun data' : 'Perlu Net Income', ok: avgROE > 0 },
-      { label: 'Step 2b: Avg DPR', val: fmtPct(avgDPR*100), desc: dprList.length + ' tahun data' + (dprWarning ? ' ⚠️ ada DPS>EPS, di-cap 100%' : ''), ok: true },
-      { label: 'Step 2c: ROE after payout', val: fmtPct(roeAfterPayout*100), desc: 'ROE × (1 - DPR)', ok: roeAfterPayout > 0 },
-      { label: 'Step 3: Equity/Share kini', val: 'Rp '+fmt(equityPerShare), desc: 'Equity ÷ Saham', ok: equityPerShare > 0 },
-      { label: 'Step 3b: Future Eq/Share', val: 'Rp '+fmt(futureEquityPerShare), desc: 'Proyeksi ' + N + ' thn', ok: futureEquityPerShare > 0 },
-      { label: 'Step 4: Future EPS', val: 'Rp '+fmt(futureEPS), desc: 'Future Eq × Avg ROE', ok: futureEPS > 0 },
-      { label: 'Step 5: Future Price', val: 'Rp '+fmt(futurePrice), desc: 'Future EPS × Avg PER', ok: futurePrice > 0 },
-      { label: 'Harga Wajar (PV)', val: 'Rp '+fmt(fairValue), desc: 'Discounted @ ' + hwData.minReturn + '%/thn', ok: fairValue > 0 },
-      { label: 'Margin of Safety', val: fmtPct(mosPct), desc: mosPass ? 'Undervalued ✅' : 'Overvalued ❌', ok: mosPass },
+      { label: 'Step 1 \u2014 IRR Awal', val: fmtPct(irr*100) + (irrPass ? ' \u2705' : ' \u274c'), desc: 'EPS terkini \u00f7 Harga Saham', ok: irrPass },
+      { label: 'Step 2a \u2014 Avg ROE', val: fmtPct(avgROE*100), desc: roeList.length + ' tahun data (NI \u00f7 Equity)', ok: avgROE > 0 },
+      { label: 'Step 2b \u2014 Avg DPR', val: fmtPct(avgDPR*100), desc: dprList.length + ' tahun' + (dprWarning ? ' \u26a0\ufe0f DPS>EPS di-cap 100%' : ''), ok: true },
+      { label: 'Step 2c \u2014 ROE after Payout', val: fmtPct(roeAfterPayout*100), desc: 'ROE \u00d7 (1 \u2212 DPR)', ok: roeAfterPayout > 0 },
+      { label: 'Step 3a \u2014 Equity / Share kini', val: fmtRp(equityPerShare), desc: equityMiliar.toLocaleString('id-ID') + 'M \u00f7 ' + sharesJuta.toLocaleString('id-ID') + 'jt lbr', ok: equityPerShare > 0 },
+      { label: 'Step 3b \u2014 Future Equity/Share', val: fmtRp(futureEquityPerShare), desc: 'Proyeksi ' + N + ' tahun ke depan', ok: futureEquityPerShare > 0 },
+      { label: 'Step 4 \u2014 Future EPS', val: fmtRp(futureEPS), desc: 'Future Equity \u00d7 Avg ROE', ok: futureEPS > 0 },
+      { label: 'Step 5 \u2014 Avg PER', val: fmtD(avgPER, 1) + 'x', desc: perList.length + ' tahun data PER', ok: avgPER > 0 },
+      { label: 'Harga Saham Masa Depan', val: fmtRp(futurePrice), desc: 'Future EPS \u00d7 Avg PER', ok: futurePrice > 0 },
+      { label: 'Harga Wajar (PV)', val: fmtRp(fairValue), desc: 'Discounted ' + N + ' thn @ ' + minRet + '%/thn', ok: fairValue > 0 },
+      { label: 'Margin of Safety', val: mosPctDisplay, desc: mosPass ? 'Undervalued \u2014 saham di bawah nilai wajar' : 'Overvalued \u2014 saham di atas nilai wajar', ok: mosPass },
     ];
     stepsBody.innerHTML = steps.map(function(s) {
-      return '<div style="background:var(--bg3);border-radius:2px;padding:7px 9px;border-left:2px solid '+(s.ok?'var(--green)':'var(--red)')+'">'
-        + '<div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">'+s.label+'</div>'
-        + '<div style="font-size:13px;font-weight:700;font-family:\'IBM Plex Mono\',monospace;color:var(--text);margin:2px 0">'+s.val+'</div>'
-        + '<div style="font-size:9px;color:var(--text3)">'+s.desc+'</div>'
+      return '<div style="background:var(--bg3);border-radius:2px;padding:7px 9px;border-left:2px solid ' + (s.ok ? 'var(--green)' : 'var(--red)') + '">'
+        + '<div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">' + s.label + '</div>'
+        + '<div style="font-size:13px;font-weight:700;font-family:\'IBM Plex Mono\',monospace;color:var(--text);margin:2px 0">' + s.val + '</div>'
+        + '<div style="font-size:9px;color:var(--text3)">' + s.desc + '</div>'
         + '</div>';
     }).join('');
   }
@@ -9318,62 +9330,40 @@ function hw_recalc() {
   // Chart
   hw_renderChart(rows);
 
-  // Reset button state
-  var btn2 = document.getElementById('hw-hitung-btn');
-  if (btn2) { btn2.textContent = '⚡ HITUNG'; btn2.style.opacity = '1'; btn2.disabled = false; }
-
-  // Store result in hwData for saving
-  hwData._result = { fairValue, mosPct, irr: irr*100, futurePrice, futureEPS, avgROE, avgDPR, avgPER, roeAfterPayout, equityPerShare };
-
   // Kesimpulan
-  var conclusionEl = document.getElementById('hw-conclusion');
-  var conclusionText = document.getElementById('hw-conclusion-text');
-  var ticker = (document.getElementById('hw-ticker-input').value.trim() || 'Saham ini').toUpperCase();
-  var N = hwData.projYears;
-  var minRet = hwData.minReturn;
-  var fmtRp = function(v){ return 'Rp ' + Math.round(v).toLocaleString('id-ID'); };
-  var mosAbs = fairValue - hwData.currentPrice;
-  var verdictText, verdictColor, action;
-  if (irrPass && mosPass) {
-    verdictText = 'UNDERVALUED';
-    verdictColor = 'var(--green)';
-    action = 'Layak dipertimbangkan untuk dibeli. Harga saat ini memberikan margin keamanan yang cukup.';
-  } else if (!irrPass && !mosPass) {
-    verdictText = 'OVERVALUED';
-    verdictColor = 'var(--red)';
-    action = 'Tidak disarankan untuk dibeli pada harga ini. Tunggu koreksi harga atau cari saham lain.';
-  } else {
-    verdictText = 'BORDERLINE';
-    verdictColor = 'var(--amber)';
-    action = 'Posisi valuasi berada di batas. Pertimbangkan dengan cermat sebelum mengambil posisi.';
+  var cEl = document.getElementById('hw-conclusion');
+  var cTx = document.getElementById('hw-conclusion-text');
+  if (cEl && cTx) {
+    var verdictLabel, verdictColor, action;
+    if (overallPass) {
+      verdictLabel = 'UNDERVALUED'; verdictColor = 'var(--green)';
+      action = 'Layak dipertimbangkan untuk dibeli. Harga saat ini memberikan margin keamanan yang memadai.';
+    } else if (!irrPass && !mosPass) {
+      verdictLabel = 'OVERVALUED'; verdictColor = 'var(--red)';
+      action = 'Tidak disarankan dibeli pada harga ini. Tunggu koreksi atau cari emiten lain.';
+    } else {
+      verdictLabel = 'BORDERLINE'; verdictColor = 'var(--amber)';
+      action = 'Posisi valuasi di batas. Pertimbangkan dengan cermat sebelum mengambil posisi.';
+    }
+    var mosAbs = fairValue - price0;
+    var mosAbsStr = isFinite(mosAbs) ? fmtRp(Math.abs(mosAbs)) : '\u2014';
+    var lines = [
+      ticker + ' dinilai <b style="color:' + verdictColor + '">' + verdictLabel + '</b> berdasarkan metodologi MoS (9-step).',
+      'Harga wajar: <b>' + fmtRp(fairValue) + '</b> \u00b7 Proyeksi ' + N + ' tahun \u00b7 Min return ' + minRet + '%/thn.',
+      'Harga pasar <b>' + fmtRp(price0) + '</b> berada <b>' + (mosAbs >= 0 ? mosAbsStr + ' di bawah' : mosAbsStr + ' di atas') + '</b> nilai wajar \u2192 MoS <b style="color:' + (mosPass ? 'var(--green)' : 'var(--red)') + '">' + mosPctDisplay + '</b>.',
+      'Initial IRR <b>' + fmtPct(irr*100) + '</b> vs threshold ' + minRet + '% \u2192 <b style="color:' + (irrPass ? 'var(--green)' : 'var(--red)') + '">' + (irrPass ? 'LULUS' : 'TIDAK LULUS') + '</b>.',
+      'Avg ROE: <b>' + fmtPct(avgROE*100) + '</b> \u00b7 Avg DPR: <b>' + fmtPct(avgDPR*100) + '</b> \u00b7 Future EPS: <b>' + fmtRp(futureEPS) + '</b> \u00b7 Future Price: <b>' + fmtRp(futurePrice) + '</b>.',
+      '<b>\u2192 ' + action + '</b>'
+    ];
+    cTx.innerHTML = lines.join('<br>');
+    cEl.style.display = 'block';
+    cEl.style.borderLeftColor = verdictColor;
   }
-  var lines = [
-    ticker + ' dinilai <b style="color:' + verdictColor + '">' + verdictText + '</b> berdasarkan metodologi MoS.',
-    'Harga wajar dihitung sebesar <b>' + fmtRp(fairValue) + '</b> dengan proyeksi ' + N + ' tahun ke depan dan ekspektasi return minimum ' + minRet + '% per tahun.',
-    'Harga pasar saat ini ' + fmtRp(hwData.currentPrice) + ' berada <b>' + (mosAbs >= 0 ? fmtRp(mosAbs) + ' di bawah' : fmtRp(Math.abs(mosAbs)) + ' di atas') + '</b> harga wajar, menghasilkan Margin of Safety <b style="color:' + (mosPass?'var(--green)':'var(--red)') + '">' + fmtPct(mosPct) + '</b>.',
-    'Initial IRR sebesar <b>' + (irr*100).toFixed(1) + '%</b> ' + (irrPass ? '≥ ' : '< ') + minRet + '% minimum return — <b style="color:' + (irrPass?'var(--green)':'var(--red)') + '">' + (irrPass?'LULUS':'TIDAK LULUS') + '</b>.',
-    'ROE rata-rata historis: <b>' + (avgROE*100).toFixed(1) + '%</b>. Proyeksi EPS ' + N + ' tahun ke depan: <b>' + fmtRp(futureEPS) + '</b>. Estimasi harga saham masa depan: <b>' + fmtRp(futurePrice) + '</b>.',
-    '<b>→ ' + action + '</b>'
-  ];
-  conclusionText.innerHTML = lines.join('<br>');
-  conclusionEl.style.display = 'block';
-  conclusionEl.style.borderLeftColor = verdictColor;
-}
 
-var hwChartMode = 'eps';
-function hw_switchChart(mode) {
-  hwChartMode = mode;
-  var btnEps = document.getElementById('hw-chart-btn-eps');
-  var btnEq  = document.getElementById('hw-chart-btn-eq');
-  if (btnEps && btnEq) {
-    var onStyle  = 'font-size:9px;padding:2px 7px;border-color:rgba(255,102,0,.5);color:var(--bb-orange);background:rgba(255,102,0,.12)';
-    var offStyle = 'font-size:9px;padding:2px 7px';
-    btnEps.style.cssText = mode==='eps' ? onStyle : offStyle;
-    btnEq.style.cssText  = mode==='eq'  ? onStyle : offStyle;
-  }
-  if (hwData._lastRows) hw_renderChart(hwData._lastRows);
+  // Save state & reset button
+  hwData._result = { fairValue: fairValue, mosPct: mosPct, irr: irr*100, futurePrice: futurePrice, futureEPS: futureEPS, avgROE: avgROE, avgDPR: avgDPR, avgPER: avgPER, roeAfterPayout: roeAfterPayout, equityPerShare: equityPerShare };
+  done();
 }
-
 function hw_renderChart(rows) {
   hwData._lastRows = rows;
   var chartCard = document.getElementById('hw-chart-card');
