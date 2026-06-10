@@ -1813,45 +1813,12 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 <div id="page-hargawajar" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px">
     <div>
-      <div class="ptitle">💎 Harga Wajar — Analisa Valuasi MoS</div>
-      <div class="psub">Upload laporan keuangan PDF → AI ekstrak data → hitung Margin of Safety otomatis · metodologi: EPS-based IRR + Future Stock Price (9-step)</div>
+      <div class="ptitle">💎 Harga Wajar — Valuasi MoS</div>
+      <div class="psub">Input data keuangan historis → hitung Margin of Safety · metodologi: EPS-based IRR + Future Stock Price (9-step)</div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-blue" onclick="hw_resetAll()" style="font-size:10px">🔄 Reset</button>
       <button class="btn" onclick="hw_saveToStorage()" style="font-size:10px;border-color:rgba(0,212,170,.35);color:var(--green)">💾 Simpan</button>
-    </div>
-  </div>
-
-  <!-- Upload + AI Parse Section -->
-  <div class="card" style="margin-bottom:10px;border-top-color:rgba(0,136,255,.4)">
-    <div class="cheader">
-      <span class="ctitle" style="color:var(--blue)">📄 UPLOAD LAPORAN KEUANGAN (PDF)</span>
-      <span id="hw-ai-status" style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--text3)">Siap upload</span>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-      <div style="flex:1;min-width:200px">
-        <div style="font-size:9px;color:var(--text3);margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase">Kode Saham</div>
-        <input id="hw-ticker-input" type="text" placeholder="e.g. BBCA" maxlength="6"
-          style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px;text-transform:uppercase"
-          oninput="this.value=this.value.toUpperCase()">
-      </div>
-      <div style="flex:2;min-width:240px">
-        <div style="font-size:9px;color:var(--text3);margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase">Upload PDF Laporan Keuangan (Annual/Tahunan)</div>
-        <label id="hw-dropzone" style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px dashed rgba(0,136,255,.4);border-radius:2px;padding:8px 12px;cursor:pointer;transition:all .2s"
-          onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='rgba(0,136,255,.4)'">
-          <span style="font-size:16px">📁</span>
-          <div>
-            <div id="hw-file-name" style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace">Klik untuk pilih file PDF...</div>
-            <div style="font-size:9px;color:var(--text3)">Laporan keuangan tahunan IDX · max 15MB</div>
-          </div>
-          <input type="file" id="hw-pdf-input" accept=".pdf" style="display:none" onchange="hw_onFileSelect(this)">
-        </label>
-      </div>
-      <button id="hw-extract-btn" class="btn btn-blue" onclick="hw_extractWithAI()" style="height:38px;white-space:nowrap" disabled>🤖 Ekstrak dengan AI</button>
-    </div>
-    <!-- Multi-year upload info -->
-    <div style="margin-top:8px;font-size:9px;color:var(--text3);line-height:1.6;border-top:1px solid var(--border);padding-top:8px">
-      💡 <b style="color:var(--text2)">Tips:</b> Upload laporan keuangan tahunan. AI akan mengekstrak: EPS, Total Equity, Jumlah Saham, Dividen/Saham, PER, Net Income per tahun dari dalam PDF. Untuk akurasi optimal, upload laporan 3-5 tahun atau laporan yang mengandung data historis multi-tahun.
     </div>
   </div>
 
@@ -1860,9 +1827,41 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 
     <!-- LEFT: Input Data Keuangan -->
     <div>
-      <!-- Inputs Section -->
+      <!-- Header input: ticker + parameter -->
       <div class="card" style="margin-bottom:10px">
-        <div class="cheader"><span class="ctitle">📊 DATA KEUANGAN (EDIT MANUAL / HASIL AI)</span>
+        <div class="cheader"><span class="ctitle">⚙️ PARAMETER</span></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div style="min-width:120px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Kode Saham</div>
+            <input id="hw-ticker-input" type="text" placeholder="e.g. BBCA" maxlength="6"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px;text-transform:uppercase"
+              oninput="this.value=this.value.toUpperCase();hw_recalc()">
+          </div>
+          <div style="min-width:140px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Harga Saham Saat Ini (Rp)</div>
+            <input id="hw-current-price" type="number" placeholder="e.g. 9500" step="50"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
+              oninput="hw_recalc()">
+          </div>
+          <div style="min-width:120px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Min Return (%/thn)</div>
+            <input id="hw-min-return" type="number" value="6" step="1" min="1" max="30"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
+              oninput="hw_recalc()">
+          </div>
+          <div style="min-width:120px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Proyeksi (tahun)</div>
+            <input id="hw-proj-years" type="number" value="5" step="1" min="1" max="15"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
+              oninput="hw_recalc()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Data table -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="cheader">
+          <span class="ctitle">📊 DATA KEUANGAN HISTORIS</span>
           <button class="btn" onclick="hw_addYear()" style="font-size:9px;padding:3px 8px;border-color:rgba(255,102,0,.3);color:var(--bb-orange)">+ Tambah Tahun</button>
         </div>
         <div style="overflow-x:auto">
@@ -1871,39 +1870,19 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
               <tr>
                 <th>Tahun</th>
                 <th>EPS (Rp)</th>
-                <th>Total Equity (M)</th>
-                <th>Shares (juta)</th>
+                <th>Total Equity (M Rp)</th>
+                <th>Shares (juta lbr)</th>
                 <th>DPS (Rp)</th>
                 <th>PER</th>
-                <th>Net Income (M)</th>
+                <th>Net Income (M Rp)</th>
                 <th></th>
               </tr>
             </thead>
-            <tbody id="hw-data-body">
-              <!-- rows injected by JS -->
-            </tbody>
+            <tbody id="hw-data-body"></tbody>
           </table>
         </div>
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <div style="flex:1;min-width:140px">
-            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Harga Saham Saat Ini (Rp)</div>
-            <input id="hw-current-price" type="number" placeholder="e.g. 9500" step="50"
-              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
-              oninput="hw_recalc()">
-          </div>
-          <div style="flex:1;min-width:120px">
-            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Min Return (%/thn)</div>
-            <input id="hw-min-return" type="number" value="6" step="1" min="1" max="30"
-              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
-              oninput="hw_recalc()">
-          </div>
-          <div style="flex:1;min-width:120px">
-            <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Proyeksi (tahun)</div>
-            <input id="hw-proj-years" type="number" value="5" step="1" min="1" max="15"
-              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
-              oninput="hw_recalc()">
-          </div>
-          <button class="btn btn-blue" onclick="hw_recalc()" style="height:34px;margin-top:14px">⚡ Hitung</button>
+        <div style="margin-top:8px;font-size:9px;color:var(--text3);line-height:1.6">
+          💡 Isi data minimal 3 tahun untuk hasil kalkulasi yang akurat. EPS &amp; DPS dalam Rupiah per saham. Equity &amp; Net Income dalam Miliar Rupiah.
         </div>
       </div>
 
@@ -1955,6 +1934,11 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
           <div style="background:var(--bg4);border-radius:1px;height:8px;overflow:hidden;position:relative">
             <div id="hw-mos-bar" style="height:100%;width:50%;background:var(--text3);transition:all .5s;border-radius:1px"></div>
           </div>
+        </div>
+        <!-- Kesimpulan -->
+        <div id="hw-conclusion" style="display:none;margin-top:12px;padding:10px;background:var(--bg3);border-radius:2px;border-left:3px solid var(--text3)">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">KESIMPULAN</div>
+          <div id="hw-conclusion-text" style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;line-height:1.7"></div>
         </div>
       </div>
 
@@ -9271,6 +9255,40 @@ function hw_recalc() {
 
   // Store result in hwData for saving
   hwData._result = { fairValue, mosPct, irr: irr*100, futurePrice, futureEPS, avgROE, avgDPR, avgPER, roeAfterPayout, equityPerShare };
+
+  // Kesimpulan
+  var conclusionEl = document.getElementById('hw-conclusion');
+  var conclusionText = document.getElementById('hw-conclusion-text');
+  var ticker = (document.getElementById('hw-ticker-input').value.trim() || 'Saham ini').toUpperCase();
+  var N = hwData.projYears;
+  var minRet = hwData.minReturn;
+  var fmtRp = function(v){ return 'Rp ' + Math.round(v).toLocaleString('id-ID'); };
+  var mosAbs = fairValue - hwData.currentPrice;
+  var verdictText, verdictColor, action;
+  if (irrPass && mosPass) {
+    verdictText = 'UNDERVALUED';
+    verdictColor = 'var(--green)';
+    action = 'Layak dipertimbangkan untuk dibeli. Harga saat ini memberikan margin keamanan yang cukup.';
+  } else if (!irrPass && !mosPass) {
+    verdictText = 'OVERVALUED';
+    verdictColor = 'var(--red)';
+    action = 'Tidak disarankan untuk dibeli pada harga ini. Tunggu koreksi harga atau cari saham lain.';
+  } else {
+    verdictText = 'BORDERLINE';
+    verdictColor = 'var(--amber)';
+    action = 'Posisi valuasi berada di batas. Pertimbangkan dengan cermat sebelum mengambil posisi.';
+  }
+  var lines = [
+    ticker + ' dinilai <b style="color:' + verdictColor + '">' + verdictText + '</b> berdasarkan metodologi MoS.',
+    'Harga wajar dihitung sebesar <b>' + fmtRp(fairValue) + '</b> dengan proyeksi ' + N + ' tahun ke depan dan ekspektasi return minimum ' + minRet + '% per tahun.',
+    'Harga pasar saat ini ' + fmtRp(hwData.currentPrice) + ' berada <b>' + (mosAbs >= 0 ? fmtRp(mosAbs) + ' di bawah' : fmtRp(Math.abs(mosAbs)) + ' di atas') + '</b> harga wajar, menghasilkan Margin of Safety <b style="color:' + (mosPass?'var(--green)':'var(--red)') + '">' + fmtPct(mosPct) + '</b>.',
+    'Initial IRR sebesar <b>' + (irr*100).toFixed(1) + '%</b> ' + (irrPass ? '≥ ' : '< ') + minRet + '% minimum return — <b style="color:' + (irrPass?'var(--green)':'var(--red)') + '">' + (irrPass?'LULUS':'TIDAK LULUS') + '</b>.',
+    'ROE rata-rata historis: <b>' + (avgROE*100).toFixed(1) + '%</b>. Proyeksi EPS ' + N + ' tahun ke depan: <b>' + fmtRp(futureEPS) + '</b>. Estimasi harga saham masa depan: <b>' + fmtRp(futurePrice) + '</b>.',
+    '<b>→ ' + action + '</b>'
+  ];
+  conclusionText.innerHTML = lines.join('<br>');
+  conclusionEl.style.display = 'block';
+  conclusionEl.style.borderLeftColor = verdictColor;
 }
 
 function hw_renderChart(rows) {
@@ -9314,6 +9332,8 @@ function hw_clearResults() {
   if (document.getElementById('hw-steps-card')) document.getElementById('hw-steps-card').style.display = 'none';
   if (document.getElementById('hw-chart-card')) document.getElementById('hw-chart-card').style.display = 'none';
   if (document.getElementById('hw-mos-bar')) document.getElementById('hw-mos-bar').style.width = '50%';
+  if (document.getElementById('hw-conclusion')) document.getElementById('hw-conclusion').style.display = 'none';
+  if (document.getElementById('hw-verdict-card')) document.getElementById('hw-verdict-card').style.borderTopColor = 'var(--text3)';
 }
 
 function hw_saveToStorage() {
@@ -9362,110 +9382,6 @@ function hw_clearHistory() {
   if (!confirm('Hapus semua histori analisa?')) return;
   localStorage.removeItem('hw_history');
   hw_renderHistoryList();
-}
-
-function hw_onFileSelect(inp) {
-  var f = inp.files[0];
-  if (!f) return;
-  document.getElementById('hw-file-name').textContent = f.name + ' (' + (f.size/1024).toFixed(0) + ' KB)';
-  document.getElementById('hw-extract-btn').disabled = false;
-  document.getElementById('hw-ai-status').textContent = 'File dipilih · Klik Ekstrak';
-  document.getElementById('hw-ai-status').style.color = 'var(--amber)';
-}
-
-function hw_extractWithAI() {
-  var inp = document.getElementById('hw-pdf-input');
-  var ticker = document.getElementById('hw-ticker-input').value.trim();
-  if (!inp.files[0]) { alert('Pilih file PDF terlebih dahulu'); return; }
-  if (!ticker) { alert('Masukkan kode saham terlebih dahulu'); return; }
-
-  var f = inp.files[0];
-  if (f.size > 15*1024*1024) { alert('File terlalu besar (max 15MB)'); return; }
-
-  var statusEl = document.getElementById('hw-ai-status');
-  var btn = document.getElementById('hw-extract-btn');
-  statusEl.textContent = '🤖 AI sedang membaca PDF...';
-  statusEl.style.color = 'var(--amber)';
-  btn.disabled = true;
-  btn.textContent = '⏳ Mengekstrak...';
-
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var base64 = e.target.result.split(',')[1];
-    hw_callClaudeAPI(base64, ticker, statusEl, btn);
-  };
-  reader.readAsDataURL(f);
-}
-
-async function hw_callClaudeAPI(base64PDF, ticker, statusEl, btn) {
-  var prompt = 'Kamu adalah analis keuangan. Ekstrak data keuangan tahunan dari laporan keuangan PDF ini untuk perusahaan dengan kode saham ' + ticker + '.\n\n'
-    + 'Kembalikan HANYA JSON valid (tanpa preamble, tanpa markdown), format:\n'
-    + '{"ticker":"'+ticker+'","years":[{"year":2024,"eps":350,"total_equity_miliar":45000,"shares_juta":12000,"dps":150,"per":15,"net_income_miliar":4200},...]}\n\n'
-    + 'Catatan penting:\n'
-    + '- EPS dalam Rupiah per saham (bukan juta)\n'
-    + '- total_equity_miliar dalam Miliar Rupiah\n'
-    + '- shares_juta dalam Juta lembar saham\n'
-    + '- DPS (Dividen per Saham) dalam Rupiah\n'
-    + '- PER (Price to Earnings Ratio) kalau tersedia\n'
-    + '- net_income_miliar dalam Miliar Rupiah\n'
-    + '- Ambil semua tahun yang ada dalam laporan (biasanya 2-5 tahun)\n'
-    + '- Jika data tidak tersedia, isi dengan null\n'
-    + '- Jangan tambahkan komentar atau penjelasan apapun, hanya JSON murni';
-
-  try {
-    var resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64PDF } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
-
-    if (!resp.ok) throw new Error('API error: ' + resp.status);
-    var data = await resp.json();
-    var text = (data.content || []).map(function(c){ return c.text||''; }).join('');
-    var clean = text.replace(/```json|```/g, '').trim();
-    var parsed = JSON.parse(clean);
-
-    if (parsed.years && parsed.years.length) {
-      // Convert to hwData format
-      var newRows = parsed.years.map(function(y) {
-        return {
-          year: y.year || 0,
-          eps: y.eps || '',
-          equity: y.total_equity_miliar || '',
-          shares: y.shares_juta || '',
-          dps: y.dps || '',
-          per: y.per || '',
-          netIncome: y.net_income_miliar || ''
-        };
-      });
-      newRows.sort(function(a,b){ return a.year - b.year; });
-      hwData.rows = newRows;
-      hwData.ticker = parsed.ticker || ticker;
-      hw_renderTable();
-      document.getElementById('hw-ticker-input').value = hwData.ticker;
-      statusEl.textContent = '✅ Berhasil ekstrak ' + newRows.length + ' tahun data!';
-      statusEl.style.color = 'var(--green)';
-      hw_recalc();
-    } else {
-      throw new Error('Data years tidak ditemukan dalam respons');
-    }
-  } catch(err) {
-    statusEl.textContent = '❌ Gagal: ' + err.message.substring(0,60);
-    statusEl.style.color = 'var(--red)';
-    console.error('hw AI error:', err);
-  }
-  btn.disabled = false;
-  btn.textContent = '🤖 Ekstrak dengan AI';
 }
 
 // Init on page load
