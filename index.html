@@ -1835,25 +1835,32 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Kode Saham</div>
             <input id="hw-ticker-input" type="text" placeholder="e.g. BBCA" maxlength="6"
               style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px;text-transform:uppercase"
-              oninput="this.value=this.value.toUpperCase();hw_recalc()">
+              oninput="this.value=this.value.toUpperCase()">
           </div>
           <div style="min-width:140px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Harga Saham Saat Ini (Rp)</div>
             <input id="hw-current-price" type="number" placeholder="e.g. 9500" step="50"
               style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
-              oninput="hw_recalc()">
+              >
           </div>
           <div style="min-width:120px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Min Return (%/thn)</div>
             <input id="hw-min-return" type="number" value="6" step="1" min="1" max="30"
               style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
-              oninput="hw_recalc()">
+              >
           </div>
           <div style="min-width:120px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Proyeksi (tahun)</div>
             <input id="hw-proj-years" type="number" value="5" step="1" min="1" max="15"
               style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
-              oninput="hw_recalc()">
+              >
+          </div>
+          <div style="display:flex;align-items:flex-end;padding-bottom:0">
+            <button onclick="hw_recalc()" id="hw-hitung-btn"
+              style="height:38px;padding:0 22px;background:var(--bb-orange);border:none;border-radius:2px;color:#0a0a0f;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.5px;white-space:nowrap;transition:opacity .15s"
+              onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+              ⚡ HITUNG
+            </button>
           </div>
         </div>
       </div>
@@ -9059,10 +9066,10 @@ function hw_renderTable() {
   var html = '';
   hwData.rows.forEach(function(row, i) {
     html += '<tr>';
-    html += '<td><input type="number" value="'+row.year+'" style="width:58px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px" onchange="hwData.rows['+i+'].year=+this.value;hw_recalc()"></td>';
+    html += '<td><input type="number" value="'+row.year+'" data-row="'+i+'" data-field="year" style="width:58px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px"></td>';
     ['eps','equity','shares','dps','per','netIncome'].forEach(function(field) {
       var ph = {eps:'e.g. 350',equity:'e.g. 50000',shares:'e.g. 12000',dps:'e.g. 100',per:'e.g. 15',netIncome:'e.g. 4200'}[field];
-      html += '<td><input type="number" value="'+(row[field]||'')+'" placeholder="'+ph+'" style="width:80px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px" onchange="hwData.rows['+i+'].'+field+'=+this.value||\'\'"></td>';
+      html += '<td><input type="number" value="'+(row[field]||'')+'" placeholder="'+ph+'" data-row="'+i+'" data-field="'+field+'" style="width:80px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:\'IBM Plex Mono\',monospace;font-size:11px;padding:3px 5px;border-radius:1px"></td>';
     });
     html += '<td><button onclick="hw_removeRow('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:0 4px">×</button></td>';
     html += '</tr>';
@@ -9083,7 +9090,7 @@ function hw_addYear() {
 function hw_removeRow(i) {
   hwData.rows.splice(i, 1);
   hw_renderTable();
-  hw_recalc();
+  hw_clearResults();
 }
 
 function hw_resetAll() {
@@ -9098,16 +9105,13 @@ function hw_syncInputs() {
   hwData.currentPrice = parseFloat((document.getElementById('hw-current-price')||{}).value) || 0;
   hwData.minReturn = parseFloat((document.getElementById('hw-min-return')||{}).value) || 6;
   hwData.projYears = parseInt((document.getElementById('hw-proj-years')||{}).value) || 5;
-  // sync table values from DOM
-  var inputs = document.querySelectorAll('#hw-data-body input');
-  var fields = ['year','eps','equity','shares','dps','per','netIncome'];
-  var col = 0; var row = 0;
-  inputs.forEach(function(inp) {
-    if (row < hwData.rows.length) {
+  // sync table values from DOM using data attributes
+  document.querySelectorAll('#hw-data-body input[data-row][data-field]').forEach(function(inp) {
+    var r = parseInt(inp.getAttribute('data-row'));
+    var f = inp.getAttribute('data-field');
+    if (hwData.rows[r] !== undefined) {
       var val = parseFloat(inp.value);
-      hwData.rows[row][fields[col]] = isNaN(val) ? '' : val;
-      col++;
-      if (col >= fields.length) { col = 0; row++; }
+      hwData.rows[r][f] = isNaN(val) ? '' : val;
     }
   });
 }
@@ -9120,8 +9124,41 @@ function hw_avg(arr) {
 
 function hw_recalc() {
   hw_syncInputs();
-  var rows = hwData.rows.filter(function(r){ return r.eps && r.equity && r.shares; });
-  if (rows.length < 2 || !hwData.currentPrice) { hw_clearResults(); return; }
+
+  // Visual feedback: button loading state
+  var btn = document.getElementById('hw-hitung-btn');
+  if (btn) { btn.textContent = '⏳ Menghitung...'; btn.style.opacity = '.7'; btn.disabled = true; }
+
+  // Validation
+  var errors = [];
+  if (!hwData.ticker) errors.push('Kode saham belum diisi');
+  if (!hwData.currentPrice || hwData.currentPrice <= 0) errors.push('Harga saham saat ini belum diisi');
+  var validRows = hwData.rows.filter(function(r){ return r.eps && r.equity && r.shares; });
+  if (validRows.length < 2) errors.push('Minimal 2 baris data lengkap (EPS, Equity, Shares)');
+
+  if (errors.length) {
+    hw_clearResults();
+    // Show error in verdict area
+    var badge = document.getElementById('hw-verdict-badge');
+    if (badge) {
+      badge.textContent = '⚠️ DATA TIDAK LENGKAP';
+      badge.style.background = 'rgba(255,187,0,.12)';
+      badge.style.color = 'var(--amber)';
+      badge.style.borderColor = 'rgba(255,187,0,.3)';
+    }
+    var conclusionEl = document.getElementById('hw-conclusion');
+    var conclusionText = document.getElementById('hw-conclusion-text');
+    if (conclusionEl && conclusionText) {
+      conclusionEl.style.display = 'block';
+      conclusionEl.style.borderLeftColor = 'var(--amber)';
+      conclusionText.innerHTML = '<b style="color:var(--amber)">Lengkapi data berikut sebelum menghitung:</b><br>' + errors.map(function(e){ return '• ' + e; }).join('<br>');
+    }
+    if (btn) { btn.textContent = '⚡ HITUNG'; btn.style.opacity = '1'; btn.disabled = false; }
+    return;
+  }
+
+  var rows = validRows;
+  if (!hwData.currentPrice) { hw_clearResults(); if (btn) { btn.textContent = '⚡ HITUNG'; btn.style.opacity = '1'; btn.disabled = false; } return; }
 
   // === Step 1: Initial IRR ===
   var latestRow = rows[rows.length-1];
@@ -9280,6 +9317,10 @@ function hw_recalc() {
 
   // Chart
   hw_renderChart(rows);
+
+  // Reset button state
+  var btn2 = document.getElementById('hw-hitung-btn');
+  if (btn2) { btn2.textContent = '⚡ HITUNG'; btn2.style.opacity = '1'; btn2.disabled = false; }
 
   // Store result in hwData for saving
   hwData._result = { fairValue, mosPct, irr: irr*100, futurePrice, futureEPS, avgROE, avgDPR, avgPER, roeAfterPayout, equityPerShare };
