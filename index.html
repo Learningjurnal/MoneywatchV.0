@@ -399,7 +399,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
     </div>
     <div class="live"><div class="dot"></div>LIVE</div>
     <!-- Finnhub status badge -->
-    <div id="fh-badge" onclick="openFinnhubSettings()" title="Klik untuk setting Finnhub API"
+    <div id="fh-badge" onclick="openFinnhubSettings()" title="Klik untuk status koneksi Yahoo Finance"
       style="display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:1px;padding:2px 7px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono',monospace;transition:all .15s;letter-spacing:.5px;text-transform:uppercase">
       <span id="fh-dot" style="width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0"></span>
       <span id="fh-label">Simulasi</span>
@@ -3785,41 +3785,43 @@ function toggleMetric(k){
 }
 
 // ============================================================
-// FINNHUB REALTIME ENGINE
+// YAHOO FINANCE REALTIME ENGINE (tanpa API key)
 // ============================================================
 var FH = {
-  key: '',                    // API key tersimpan
-  status: 'off',              // 'off' | 'live' | 'error'
+  status: 'off',              // 'off' | 'live' | 'error' | 'loading'
   timer: null,                // interval handle
-  IHSG_SYM: '^JKSE',         // symbol IHSG di Finnhub
-  USD_SYM:  'OANDA:USD_IDR',  // kurs USD/IDR
-  BASE:     'https://finnhub.io/api/v1',
-  lastFetch: 0,
-  RATE_LIMIT_MS: 1100         // jaga < 60 req/min
+  IHSG_SYM: '%5EJKSE',        // ^JKSE URL-encoded
+  USD_SYM:  'USDIDR%3DX',     // USDIDR=X URL-encoded
+  _stockIdx: 0,
+  _simTimer: null,
+  PROXIES: [
+    function(u){ return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u); },
+    function(u){ return 'https://corsproxy.io/?' + encodeURIComponent(u); },
+    function(u){ return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u); }
+  ]
 };
 
-// ── Load / Save key ──
-var FH_DEFAULT_KEY = 'd8io6hhr01qmfrvi40c0d8io6hhr01qmfrvi40cg';
-function fhLoadKey(){
-  try{ FH.key = localStorage.getItem('fh_api_key')||FH_DEFAULT_KEY; }catch(e){ FH.key = FH_DEFAULT_KEY; }
-}
-function fhSaveKey(k){
-  FH.key = k.trim();
-  try{ localStorage.setItem('fh_api_key', FH.key); }catch(e){}
-}
-
-// ── Core fetch — token di URL saja, tanpa custom header (hindari CORS preflight) ──
-function fhFetch(path, params, cb){
-  var url = FH.BASE + path + '?token=' + encodeURIComponent(FH.key) + (params ? '&' + params.replace(/^&/,'') : '');
-  fetch(url, { method: 'GET', mode: 'cors' })
+// ── Core: fetch Yahoo Finance chart endpoint, mencoba tiap proxy berurutan ──
+function yfFetch(symbol, cb, proxyIdx){
+  proxyIdx = proxyIdx||0;
+  if(proxyIdx >= FH.PROXIES.length){ cb(new Error('ALL_PROXIES_FAILED'), null); return; }
+  var yUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1m&range=1d';
+  var url = FH.PROXIES[proxyIdx](yUrl);
+  fetch(url)
   .then(function(r){
-    if(r.status===401||r.status===403){ cb(new Error('INVALID_KEY'), null); return null; }
-    if(r.status===429){ cb(new Error('RATE_LIMIT'), null); return null; }
-    if(!r.ok){ cb(new Error('HTTP_'+r.status), null); return null; }
+    if(r.status===429){ throw new Error('RATE_LIMIT'); }
+    if(!r.ok){ throw new Error('HTTP_'+r.status); }
     return r.json();
   })
-  .then(function(d){ if(d!==null) cb(null, d); })
-  .catch(function(e){ cb(e, null); });
+  .then(function(d){
+    var result = d && d.chart && d.chart.result && d.chart.result[0];
+    var meta = result && result.meta;
+    if(meta && meta.regularMarketPrice > 0){ cb(null, meta); }
+    else { throw new Error('NO_DATA'); }
+  })
+  .catch(function(){
+    yfFetch(symbol, cb, proxyIdx+1);
+  });
 }
 
 // ── Update badge UI ──
@@ -3837,68 +3839,18 @@ function fhSetBadge(status, text){
   }
 }
 
-// ── Test koneksi sebelum mulai ──
-function fhTestConnection(key, onSuccess, onFail){
-  // Test dengan simbol US yang pasti ada di free tier
-  var url = FH.BASE + '/quote?symbol=AAPL&token=' + key;
-  fetch(url, { method:'GET', headers:{'X-Finnhub-Token': key} })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d && d.c > 0) onSuccess(d);
-    else if(d && d.error) onFail(d.error);
-    else onFail('Response tidak valid');
-  })
-  .catch(function(e){ onFail(e.message||'Network error'); });
-}
-
-// ── Fetch IHSG via Finnhub ──
-// Catatan: ^JKSE tersedia di Finnhub hanya jika market data plan aktif.
-// Free tier pakai Yahoo Finance proxy sebagai fallback jika ^JKSE gagal.
+// ── Fetch IHSG via Yahoo Finance ──
 function fhFetchIHSG(){
-  fhFetch('/quote', 'symbol=^JKSE', function(err, d){
-    if(err){
-      var msg = err.message||'';
-      if(msg==='INVALID_KEY'){ fhSetBadge('error','Key Salah'); return; }
-      if(msg==='RATE_LIMIT'){  fhSetBadge('limit','Rate Limit'); return; }
-      // IHSG gagal — coba simbol alternatif IDR=X
-      fhFetchIHSGFallback();
-      return;
-    }
-    if(!d||!d.c||d.c<=0){ fhFetchIHSGFallback(); return; }
-    fhApplyIHSG(d.c, d.pc||d.c, d.o, d.h, d.l);
+  yfFetch(FH.IHSG_SYM, function(err, meta){
+    if(err){ fhSetBadge('error','IHSG Gagal'); return; }
+    fhApplyIHSG(
+      meta.regularMarketPrice,
+      meta.previousClose||meta.regularMarketPrice,
+      meta.regularMarketOpen||meta.regularMarketPrice,
+      meta.regularMarketDayHigh||meta.regularMarketPrice,
+      meta.regularMarketDayLow||meta.regularMarketPrice
+    );
     fhSetBadge('live','● LIVE');
-  });
-}
-
-// ── Fallback: pakai Yahoo Finance via allorigins proxy jika ^JKSE gagal ──
-function fhFetchIHSGFallback(){
-  var url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5EJKSE?interval=1m&range=1d';
-  var proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-  fetch(proxy)
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    var meta = d&&d.chart&&d.chart.result&&d.chart.result[0]&&d.chart.result[0].meta;
-    if(meta && meta.regularMarketPrice > 0){
-      fhApplyIHSG(
-        meta.regularMarketPrice,
-        meta.previousClose||meta.regularMarketPrice,
-        meta.regularMarketOpen||meta.regularMarketPrice,
-        meta.regularMarketDayHigh||meta.regularMarketPrice,
-        meta.regularMarketDayLow||meta.regularMarketPrice
-      );
-      fhSetBadge('live','● LIVE (YF)');
-    } else {
-      fhSetBadge('error','IHSG Gagal');
-    }
-  })
-  .catch(function(){
-    fhSetBadge('error','No Data');
-    ihsgCur += (Math.random()-.48)*25;
-    ihsgCur = Math.max(5900, Math.min(6500, ihsgCur));
-    ihsgHist.push(Math.round(ihsgCur*100)/100);
-    if(ihsgHist.length>120) ihsgHist.shift();
-    updateTopbar();
-    if(currentPage==='dashboard') buildIhsgChart('1H');
   });
 }
 
@@ -3907,7 +3859,6 @@ function fhApplyIHSG(price, prev, open, high, low){
   ihsgBase = prev||price;
   ihsgHist.push(Math.round(price*100)/100);
   if(ihsgHist.length>120) ihsgHist.shift();
-  // Update stats bar
   if(open>0){ var e=el('ihsg-op'); if(e) e.textContent=open.toLocaleString('id-ID',{minimumFractionDigits:2}); }
   if(high>0){ var e=el('ihsg-hi'); if(e) e.textContent=high.toLocaleString('id-ID',{minimumFractionDigits:2}); }
   if(low>0){  var e=el('ihsg-lo'); if(e) e.textContent=low.toLocaleString('id-ID',{minimumFractionDigits:2}); }
@@ -3915,10 +3866,10 @@ function fhApplyIHSG(price, prev, open, high, low){
   if(currentPage==='dashboard') buildIhsgChart('1H');
 }
 
-// ── Fetch harga saham IDX ── 
-// Rate limit: 2 saham per batch, jeda 2 detik antar batch
+// ── Fetch harga saham IDX via Yahoo Finance ──
+// Batch kecil + jeda agar tidak membanjiri proxy publik
 function fhFetchStocks(){
-  var porto = getPortfolio(); // hanya saham yang ada di portofolio user
+  var porto = getPortfolio();
   var codes = porto.length > 0
     ? porto.map(function(p){ return p.ticker; })
     : XLSX_DATA.stocks.slice(0,10).map(function(s){ return s.code; });
@@ -3929,69 +3880,39 @@ function fhFetchStocks(){
   FH._stockIdx = (idx+batchSize) >= codes.length ? 0 : idx+batchSize;
   batch.forEach(function(code, i){
     setTimeout(function(){
-      fhFetch('/quote','symbol='+code+'.JK', function(err,d){
-        if(!err && d && d.c > 0) prices[code] = d.c;
+      yfFetch(code+'.JK', function(err, meta){
+        if(!err && meta && meta.regularMarketPrice > 0) prices[code] = meta.regularMarketPrice;
       });
-    }, i*600);
+    }, i*1500);
   });
 }
 
-// ── Fetch kurs USD/IDR via Finnhub forex ──
+// ── Fetch kurs USD/IDR via Yahoo Finance ──
 function fhFetchKurs(){
-  // Coba forex rates Finnhub dulu
-  fhFetch('/forex/rates','base=USD', function(err,d){
-    if(!err && d && d.quote && d.quote.IDR > 10000){
-      usdIdr = d.quote.IDR;
-      return;
-    }
-    // Fallback: Yahoo Finance USDIDR=X
-    var url = 'https://query1.finance.yahoo.com/v8/finance/chart/USDIDR%3DX?interval=1d&range=1d';
-    var proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-    fetch(proxy)
-    .then(function(r){ return r.json(); })
-    .then(function(d2){
-      var meta = d2&&d2.chart&&d2.chart.result&&d2.chart.result[0]&&d2.chart.result[0].meta;
-      if(meta && meta.regularMarketPrice > 10000) usdIdr = meta.regularMarketPrice;
-    })
-    .catch(function(){});
+  yfFetch(FH.USD_SYM, function(err, meta){
+    if(!err && meta && meta.regularMarketPrice > 10000) usdIdr = meta.regularMarketPrice;
   });
 }
 
-// ── Start Finnhub ──
+// ── Start Yahoo Finance realtime engine ──
 function fhStart(){
-  if(!FH.key){ fhStop(); return; }
-  // Stop simulasi dulu
   if(FH._simTimer){ clearInterval(FH._simTimer); FH._simTimer=null; }
-  fhSetBadge('loading','Testing...');
-  // Test koneksi dengan AAPL dulu sebelum mulai
-  fhTestConnection(FH.key,
-    function(){ // SUCCESS
-      fhSetBadge('loading','Menghubungkan...');
-      fhFetchIHSG();
-      setTimeout(fhFetchKurs,   2000);
-      setTimeout(fhFetchStocks, 4000);
-      if(FH.timer) clearInterval(FH.timer);
-      var tick = 0;
-      FH.timer = setInterval(function(){
-        tick++;
-        fhFetchIHSG();
-        if(tick%8===0)  fhFetchStocks();   // tiap 2 menit
-        if(tick%40===0) fhFetchKurs();     // tiap 10 menit
-        if(tick%4===0)  renderPage(currentPage);
-      }, 15000);
-    },
-    function(errMsg){ // FAIL
-      fhSetBadge('error','Error');
-      // Tampilkan error di modal jika terbuka
-      var ms = el('fh-modal-status');
-      if(ms) ms.innerHTML = '<span style="color:var(--red)">● Gagal: '+errMsg+'</span>';
-      // Tetap coba fallback IHSG via Yahoo
-      fhFetchIHSGFallback();
-    }
-  );
+  fhSetBadge('loading','Menghubungkan...');
+  fhFetchIHSG();
+  setTimeout(fhFetchKurs,   2000);
+  setTimeout(fhFetchStocks, 4000);
+  if(FH.timer) clearInterval(FH.timer);
+  var tick = 0;
+  FH.timer = setInterval(function(){
+    tick++;
+    fhFetchIHSG();                       // IHSG tiap 15 detik
+    if(tick%8===0)  fhFetchStocks();     // saham tiap 2 menit
+    if(tick%40===0) fhFetchKurs();       // kurs tiap 10 menit
+    if(tick%4===0)  renderPage(currentPage);
+  }, 15000);
 }
 
-// ── Stop Finnhub (fallback ke simulasi) ──
+// ── Stop (fallback ke simulasi) ──
 function fhStop(){
   if(FH.timer){ clearInterval(FH.timer); FH.timer=null; }
   fhSetBadge('off','Simulasi');
@@ -4022,74 +3943,47 @@ function updatePrices(){
 
 // ── Settings Modal ──
 function openFinnhubSettings(){
-  el('m-title').textContent = '🔌 Finnhub API — Harga Realtime';
+  el('m-title').textContent = '📡 Yahoo Finance — Harga Realtime';
   el('m-title').style.color = 'var(--accent)';
   var sc = FH.status==='live'?'var(--green)':FH.status==='error'?'var(--red)':'var(--text3)';
-  var st = FH.status==='live'?'● Terhubung':FH.status==='error'?'● Error':'○ Simulasi';
+  var st = FH.status==='live'?'● Live':FH.status==='error'?'● Error':FH.status==='loading'?'⏳ Menghubungkan...':'○ Simulasi';
   el('m-body').innerHTML =
     '<div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.7">'+
-      'Hubungkan ke <strong style="color:var(--accent)">Finnhub</strong> untuk harga realtime.<br>'+
-      'Gratis di <a href="https://finnhub.io" target="_blank" style="color:var(--accent)">finnhub.io</a> — daftar 1 menit, 60 req/menit.'+
-    '</div>'+
-    '<div class="fg" style="margin-bottom:8px">'+
-      '<label class="flabel">API Key Finnhub</label>'+
-      '<input class="finput" type="text" id="fh-key-input" placeholder="cg_xxxxxxxxxxxxxx" '+
-        'value="'+FH.key+'" style="font-family:\'IBM Plex Mono\',monospace;letter-spacing:.5px" oninput="el(\'fh-test-result\').textContent=\'\'">'+
-    '</div>'+
-    '<div style="display:flex;gap:8px;align-items:center;margin-bottom:11px">'+
-      '<button class="btn btn-ghost btn-sm" onclick="fhTestFromModal()">🔍 Test Koneksi</button>'+
-      '<span id="fh-test-result" style="font-size:11px;font-family:\'IBM Plex Mono\',monospace;color:var(--text3)"></span>'+
+      'Data harga realtime diambil langsung dari <strong style="color:var(--accent)">Yahoo Finance</strong> — tidak perlu API key.<br>'+
+      'Request diteruskan via CORS proxy publik (allorigins → corsproxy.io → codetabs), otomatis pindah jika satu proxy gagal.'+
     '</div>'+
     '<div style="background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.15);border-radius:8px;padding:9px 12px;margin-bottom:11px;font-size:11px;color:var(--text2);line-height:1.65">'+
       '<div style="font-weight:700;color:var(--accent);margin-bottom:3px">📊 Data realtime:</div>'+
-      '• IHSG — Finnhub ^JKSE + Yahoo Finance fallback otomatis<br>'+
+      '• IHSG — tiap 15 detik<br>'+
       '• Saham IDX portofolio — tiap 2 menit<br>'+
-      '• USD/IDR — tiap 10 menit<br>'+
-      '<span style="color:var(--amber)">⚡ IHSG tiap 15 detik</span>'+
+      '• USD/IDR — tiap 10 menit'+
     '</div>'+
     '<div style="background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.15);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.65">'+
       '<div style="font-weight:700;color:var(--red);margin-bottom:3px">⚠️ Jika Error:</div>'+
-      '1. Verify API key di <strong>finnhub.io/dashboard</strong><br>'+
-      '2. IHSG tetap update via Yahoo Finance meski Finnhub gagal<br>'+
-      '3. Free tier: saham IDX mungkin delayed atau tidak tersedia'+
+      '1. Semua proxy publik mungkin sedang rate-limited — sistem otomatis fallback ke simulasi<br>'+
+      '2. Klik "Coba Lagi" untuk reconnect manual'+
     '</div>'+
     '<div style="display:flex;justify-content:space-between;align-items:center">'+
       '<span style="font-size:11px;font-family:\'IBM Plex Mono\',monospace">Status: <span id="fh-modal-status" style="color:'+sc+'">'+st+'</span></span>'+
       '<div style="display:flex;gap:7px">'+
-        '<button class="btn btn-ghost" onclick="fhDisconnect()">Putuskan</button>'+
-        '<button class="btn btn-blue" onclick="fhConnect()">🔌 Hubungkan</button>'+
+        '<button class="btn btn-ghost" onclick="fhDisconnect()">Pakai Simulasi</button>'+
+        '<button class="btn btn-blue" onclick="fhConnect()">📡 Coba Lagi</button>'+
       '</div>'+
     '</div>';
   el('modal').classList.add('on');
 }
 
-function fhTestFromModal(){
-  var key=(el('fh-key-input')&&el('fh-key-input').value||'').trim();
-  var res=el('fh-test-result');
-  if(!key){if(res)res.textContent='⚠️ Masukkan API key dulu';return;}
-  if(res)res.innerHTML='<span style="color:var(--amber)">⏳ Testing...</span>';
-  fhTestConnection(key,
-    function(d){if(res)res.innerHTML='<span style="color:var(--green)">✅ Valid! AAPL='+d.c.toFixed(2)+'</span>';},
-    function(e){if(res)res.innerHTML='<span style="color:var(--red)">❌ '+e+'</span>';}
-  );
-}
-
 function fhConnect(){
-  var k = el('fh-key-input')&&el('fh-key-input').value.trim();
-  if(!k){ alert('Masukkan API Key Finnhub terlebih dahulu.'); return; }
-  fhSaveKey(k);
-  if(FH._simTimer){ clearInterval(FH._simTimer); FH._simTimer=null; }
   closeModal();
   fhStart();
-  showSaveStatus('✓ Finnhub terhubung — data realtime aktif');
+  showSaveStatus('Menghubungkan ke Yahoo Finance...');
 }
 
 function fhDisconnect(){
-  fhSaveKey('');
   if(FH.timer){ clearInterval(FH.timer); FH.timer=null; }
   closeModal();
   fhStop();
-  showSaveStatus('Finnhub diputus — kembali ke simulasi');
+  showSaveStatus('Mode simulasi aktif');
 }
 
 function updateTopbar(){
@@ -7387,16 +7281,8 @@ document.addEventListener('DOMContentLoaded',function(){
   buildTickerTape();
   fsInit();
 
-  // ── Finnhub / Simulasi init ──
-  fhLoadKey();
-  if(FH.key){
-    // Ada API key → langsung connect realtime
-    fhStart();
-  } else {
-    // Tidak ada key → simulasi + banner satu kali
-    updatePrices();
-    fhStop();
-  }
+  // ── Yahoo Finance realtime init ──
+  fhStart();
 
   // Wire buttons
   el('btn-setor').onclick=function(){openModal('setor')};
