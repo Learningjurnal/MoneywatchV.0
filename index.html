@@ -14,7 +14,7 @@
   /* Bloomberg Terminal palette — deep charcoal + electric orange accent */
   --bg:#0a0a0f;--bg2:#0f0f17;--bg3:#141420;--bg4:#1a1a2a;--bg5:#1e1e30;
   --accent:#ff6600;--accent2:#ff8833;--green:#00d4aa;--red:#ff2244;--amber:#ffbb00;--purple:#9b7fe8;--coral:#ff5566;--teal:#00b4c8;--blue:#0088ff;
-  --text:#e8e8f0;--text2:#8888aa;--text3:#44445a;
+  --text:#f5f5fa;--text2:#b8bdd4;--text3:#8a90ad;
   --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
   --bb-orange:#ff6600;--bb-grid:rgba(255,102,0,0.08);
   --scanline:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
@@ -3935,7 +3935,7 @@ function updatePrices(){
     }
   });
   ihsgCur += (Math.random()-.48)*25;
-  ihsgCur  = Math.max(5900, Math.min(6500, ihsgCur));
+  ihsgCur  = Math.max(ihsgBase*0.92, Math.min(ihsgBase*1.08, ihsgCur));
   ihsgHist.push(Math.round(ihsgCur*100)/100);
   if(ihsgHist.length>120) ihsgHist.shift();
   updateTopbar();
@@ -4045,9 +4045,9 @@ function buildTickerTape(){
 // CHARTS
 // ============================================================
 function kc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-var TC={color:'#44445a',font:{family:'IBM Plex Mono',size:9}};
+var TC={color:'#8a90ad',font:{family:'IBM Plex Mono',size:9}};
 var GC='rgba(255,102,0,.07)';
-var TT={backgroundColor:'#0a0a0f',titleColor:'#8888aa',bodyColor:'#e8e8f0',borderColor:'rgba(255,102,0,.25)',borderWidth:1,titleFont:{family:'IBM Plex Mono'},bodyFont:{family:'IBM Plex Mono',size:11}};
+var TT={backgroundColor:'#0a0a0f',titleColor:'#b8bdd4',bodyColor:'#f5f5fa',borderColor:'rgba(255,102,0,.25)',borderWidth:1,titleFont:{family:'IBM Plex Mono'},bodyFont:{family:'IBM Plex Mono',size:11}};
 
 function genIHSG(n){
   // Simulate realistic intraday IHSG from Open 6210 → Close 6195
@@ -4121,33 +4121,57 @@ function buildIhsgChart(tf){
   var data,labels,lineColor='#ff6600';
 
   function genIntra(nPts,baseVal,vol){
-    var arr=[baseVal||6195];
+    baseVal = baseVal||6195;
+    var lo=baseVal*0.92, hi=baseVal*1.08;
+    var arr=[baseVal];
     for(var i=1;i<nPts;i++){
       var v=arr[arr.length-1]*(1+(Math.random()*vol*2-vol));
-      arr.push(Math.max(5500,Math.min(7200,v)));
+      arr.push(Math.max(lo,Math.min(hi,v)));
     }
     return arr;
   }
   function genDaily(nDays,baseVal,drift){
-    var arr=[baseVal||6050];
+    baseVal = baseVal||6050;
+    var lo=baseVal*0.75, hi=baseVal*1.4;
+    var arr=[baseVal];
     for(var i=1;i<nDays;i++){
       var v=arr[arr.length-1]*(1+drift+(Math.random()*0.018-0.009));
-      arr.push(Math.max(4500,Math.min(8500,v)));
+      arr.push(Math.max(lo,Math.min(hi,v)));
     }
     return arr;
   }
   var months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
   if(tf==='1H'){
-    data=genIntra(60,6195,0.0006);
-    labels=data.map(function(_,i){return '09:'+('0'+i).slice(-2);});
+    if(ihsgHist.length>=2){
+      data=ihsgHist.slice(-60);
+      var now1=new Date();
+      labels=data.map(function(_,i){
+        var minsAgo=(data.length-1-i)*1; // tiap tick ~15s, label per menit dr sekarang
+        var d=new Date(now1.getTime()-minsAgo*15000);
+        return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+      });
+    } else {
+      data=genIntra(60,ihsgCur,0.0006);
+      labels=data.map(function(_,i){return '09:'+('0'+i).slice(-2);});
+    }
     lineColor='#ff6600';
   } else if(tf==='3H'){
-    data=genIntra(180,6195,0.0006);
-    labels=data.map(function(_,i){var h=9+Math.floor(i/60);var m=i%60;return h+':'+('0'+m).slice(-2);});
+    if(ihsgHist.length>=2){
+      data=ihsgHist.slice(-180);
+      var now2=new Date();
+      labels=data.map(function(_,i){
+        var secAgo=(data.length-1-i)*15;
+        var d=new Date(now2.getTime()-secAgo*1000);
+        return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+      });
+    } else {
+      data=genIntra(180,ihsgCur,0.0006);
+      labels=data.map(function(_,i){var h=9+Math.floor(i/60);var m=i%60;return h+':'+('0'+m).slice(-2);});
+    }
     lineColor='#ff8833';
   } else if(tf==='1M'){
-    data=genDaily(22,6050,0.001);
+    data=genDaily(22,ihsgCur,0.001);
     var now=new Date();
     labels=data.map(function(_,i){
       var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-22+i+1);
@@ -4155,7 +4179,7 @@ function buildIhsgChart(tf){
     });
     lineColor='#00d4aa';
   } else if(tf==='1Y'){
-    var raw=genDaily(252,5800,0.0003);
+    var raw=genDaily(252,ihsgCur*0.94,0.0003);
     // Resample to 12 monthly averages
     var monthly=[],mlabels=[];
     for(var m2=0;m2<12;m2++){
@@ -4168,8 +4192,13 @@ function buildIhsgChart(tf){
     data=monthly;labels=mlabels;
     lineColor='#9b7fe8';
   } else {
-    data=genIntra(60,6195,0.0006);
-    labels=data.map(function(_,i){return '09:'+('0'+i).slice(-2);});
+    if(ihsgHist.length>=2){
+      data=ihsgHist.slice(-60);
+      labels=data.map(function(_,i){return ''+i;});
+    } else {
+      data=genIntra(60,ihsgCur,0.0006);
+      labels=data.map(function(_,i){return '09:'+('0'+i).slice(-2);});
+    }
   }
 
   var ctx=cv.getContext('2d');
@@ -4183,8 +4212,8 @@ function buildIhsgChart(tf){
     data:{labels:labels,datasets:[{data:data,borderColor:lineColor,borderWidth:1.5,backgroundColor:g,fill:true,tension:.35,pointRadius:0,pointHoverRadius:3,pointHoverBackgroundColor:lineColor}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:Object.assign({},TT,{mode:'index',intersect:false,callbacks:{label:function(c){return 'IHSG: '+c.parsed.y.toFixed(2).replace('.',',')}}})},
-      scales:{x:{grid:{color:'rgba(255,102,0,.07)'},ticks:Object.assign({},TC,{maxTicksLimit:8,color:'#44445a'})},
-              y:{grid:{color:'rgba(255,102,0,.07)'},ticks:Object.assign({},TC,{color:'#44445a',callback:function(v){return v.toLocaleString('id-ID')}}),position:'right'}}}});
+      scales:{x:{grid:{color:'rgba(255,102,0,.07)'},ticks:Object.assign({},TC,{maxTicksLimit:8,color:'#8a90ad'})},
+              y:{grid:{color:'rgba(255,102,0,.07)'},ticks:Object.assign({},TC,{color:'#8a90ad',callback:function(v){return v.toLocaleString('id-ID')}}),position:'right'}}}});
 }
 
 function buildDonut(porto){
@@ -5617,7 +5646,7 @@ function renderCrypto(){
     }
     if(isBuy){pos3[tx.coin].qty+=tx.qty;pos3[tx.coin].cost+=tx.total;}
     var qtyDisp2 = tx.qty<0.001?tx.qty.toFixed(6):tx.qty<1?tx.qty.toFixed(4):tx.qty.toFixed(2);
-    return '<tr><td class="mono" style="color:var(--text2);font-size:11px">'+tx.date+'</td><td><span class="badge '+(isBuy?'b-up':'b-dn')+'">'+tx.type+'</span></td><td><span class="tp">'+ tx.coin+'</span></td><td class="mono">'+qtyDisp2+'</td><td class="mono">Rp '+fmt(Math.round(tx.priceIdr))+'</td><td class="mono">Rp '+fmtK(tx.total)+'</td><td>'+pnlHtml+'</td><td><button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delCryptoTx('+tx.id+')">✕</button></td></tr>';
+    return '<tr><td class="mono" style="color:var(--text2);font-size:11px">'+tx.date+'</td><td><span class="badge '+(isBuy?'b-up':'b-dn')+'">'+tx.type+'</span></td><td><span class="tp">'+ tx.coin+'</span></td><td class="mono">'+qtyDisp2+'</td><td class="mono">Rp '+fmt(Math.round(tx.priceIdr))+'</td><td class="mono">Rp '+fmtK(tx.total)+'</td><td>'+pnlHtml+'</td><td><button class="btn btn-ghost btn-xs" style="color:var(--accent)" onclick="editCryptoTx('+tx.id+')" title="Edit transaksi">✎</button> <button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delCryptoTx('+tx.id+')" title="Hapus transaksi">✕</button></td></tr>';
   }).join('')||'<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:14px">Belum ada transaksi</td></tr>';
 }
 
@@ -5628,6 +5657,62 @@ function delCryptoTx(id){
     showSaveStatus('✓ Transaksi crypto dihapus');
     renderCrypto();
   }
+}
+
+function editCryptoTx(id){
+  var tx = cryptoTx.find(function(t){ return t.id === id; });
+  if(!tx) return;
+  var isBuy = tx.type==='BUY';
+  var coinOpts = Object.keys(CRYPTO_DB).map(function(c){
+    return '<option value="'+c+'"'+(c===tx.coin?' selected':'')+'>'+c+' — '+CRYPTO_DB[c].name+'</option>';
+  }).join('');
+
+  el('m-title').textContent = 'Edit Transaksi Crypto — '+tx.coin;
+  el('m-title').style.color = isBuy?'var(--green)':'var(--red)';
+  el('m-body').innerHTML =
+    '<div style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.2);border-radius:7px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:var(--amber)">'+
+      '⚠️ Mengedit transaksi akan menghitung ulang posisi & P&L crypto secara otomatis.'+
+    '</div>'+
+    '<div class="fgrid">'+
+      '<div class="fg ffull"><label class="flabel">Tanggal</label><input class="finput" type="date" id="ecr-date" value="'+tx.date+'"></div>'+
+      '<div class="fg"><label class="flabel">Tipe</label><select class="finput fsel" id="ecr-type"><option value="BUY"'+(isBuy?' selected':'')+'>BUY — Beli</option><option value="SELL"'+(!isBuy?' selected':'')+'>SELL — Jual</option></select></div>'+
+      '<div class="fg"><label class="flabel">Koin</label><select class="finput fsel" id="ecr-coin">'+coinOpts+'</select></div>'+
+      '<div class="fg"><label class="flabel">Jumlah Koin</label><input class="finput" type="number" id="ecr-qty" value="'+tx.qty+'" step="0.0001" oninput="ecrCalcLive()"></div>'+
+      '<div class="fg"><label class="flabel">Harga per Unit (IDR)</label><input class="finput" type="number" id="ecr-price" value="'+tx.priceIdr+'" oninput="ecrCalcLive()"></div>'+
+    '</div>'+
+    '<div class="taxbox">'+
+      '<div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-bottom:7px">PREVIEW SETELAH EDIT</div>'+
+      '<div class="taxrow"><span>Total Transaksi</span><span class="mono" id="ecr-tot">Rp '+fmt(Math.round(tx.total))+'</span></div>'+
+    '</div>'+
+    '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'+
+      '<button class="btn btn-ghost" onclick="closeModal()">Batal</button>'+
+      '<button class="btn btn-amber" onclick="updateCryptoTx('+id+')">💾 Simpan Perubahan</button>'+
+    '</div>';
+  el('modal').classList.add('on');
+}
+
+function ecrCalcLive(){
+  var qty=parseFloat(el('ecr-qty')&&el('ecr-qty').value||0);
+  var price=parseFloat(el('ecr-price')&&el('ecr-price').value||0);
+  if(el('ecr-tot'))el('ecr-tot').textContent='Rp '+fmt(Math.round(qty*price));
+}
+
+function updateCryptoTx(id){
+  var date=el('ecr-date').value;
+  var type=el('ecr-type').value;
+  var coin=el('ecr-coin').value;
+  var qty=parseFloat(el('ecr-qty').value||0);
+  var price=parseFloat(el('ecr-price').value||0);
+  if(!date||!coin||qty<=0||price<=0){ alert('Lengkapi semua data!'); return; }
+
+  var idx = cryptoTx.findIndex(function(t){ return t.id === id; });
+  if(idx === -1){ alert('Transaksi tidak ditemukan'); return; }
+  cryptoTx[idx] = {id:id, date:date, type:type, coin:coin, qty:qty, priceIdr:price, total:qty*price};
+
+  saveData();
+  showSaveStatus('✓ Transaksi crypto diperbarui');
+  closeModal();
+  renderCrypto();
 }
 
 function openCryptoModal(type){
@@ -9334,9 +9419,9 @@ function hw_renderChart(rows) {
   if (!ctx) return;
   if (hwHistChart) { hwHistChart.destroy(); hwHistChart = null; }
   var labels = rows.map(function(r){ return r.year; });
-  var tickStyle = { color: '#8888aa', font: { size: 9, family: 'IBM Plex Mono' } };
+  var tickStyle = { color: '#b8bdd4', font: { size: 9, family: 'IBM Plex Mono' } };
   var gridStyle = { color: 'rgba(255,255,255,.05)' };
-  var legendOpts = { labels: { color: '#8888aa', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 10, padding: 10 } };
+  var legendOpts = { labels: { color: '#b8bdd4', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 10, padding: 10 } };
 
   var datasets, scales;
   if (hwChartMode === 'eps') {
