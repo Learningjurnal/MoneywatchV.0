@@ -3894,6 +3894,20 @@ function fhFetchKurs(){
   });
 }
 
+// ── Fetch harga crypto LANGSUNG dalam IDR via Yahoo Finance (pair -IDR) ──
+function fhFetchCrypto(){
+  var codes = Object.keys(CRYPTO_DB);
+  codes.forEach(function(code, i){
+    setTimeout(function(){
+      yfFetch(code+'-IDR', function(err, meta){
+        if(!err && meta && meta.regularMarketPrice > 0){
+          cryptoPrices[code] = meta.regularMarketPrice;
+        }
+      });
+    }, i*1500);
+  });
+}
+
 // ── Start Yahoo Finance realtime engine ──
 function fhStart(){
   if(FH._simTimer){ clearInterval(FH._simTimer); FH._simTimer=null; }
@@ -3901,12 +3915,14 @@ function fhStart(){
   fhFetchIHSG();
   setTimeout(fhFetchKurs,   2000);
   setTimeout(fhFetchStocks, 4000);
+  setTimeout(fhFetchCrypto, 6000);
   if(FH.timer) clearInterval(FH.timer);
   var tick = 0;
   FH.timer = setInterval(function(){
     tick++;
     fhFetchIHSG();                       // IHSG tiap 15 detik
     if(tick%8===0)  fhFetchStocks();     // saham tiap 2 menit
+    if(tick%8===0)  fhFetchCrypto();     // crypto tiap 2 menit
     if(tick%40===0) fhFetchKurs();       // kurs tiap 10 menit
     if(tick%4===0)  renderPage(currentPage);
   }, 15000);
@@ -5502,12 +5518,12 @@ function loadSampleCrypto(){
       CRYPTO_DB[c.code] = {
         name: c.name || c.code,
         category: 'Layer 1',
-        baseUSD: Math.round(c.price_idr / usdIdr) || 1,
+        baseIDR: c.price_idr || avgIdr || 1,
         color: c.code==='BTC' ? '#f7931a' : '#0033ad',
         icon: c.code[0]
       };
-      // Set current price
-      cryptoPrices[c.code] = c.price_idr / usdIdr;
+      // Set current price — LANGSUNG DALAM IDR (tanpa kurs USD)
+      cryptoPrices[c.code] = c.price_idr;
     }
   });
 }
@@ -5544,10 +5560,9 @@ function loadSampleRd(){
 // ============================================================
 function updateCryptoPrices(){
   Object.keys(CRYPTO_DB).forEach(function(c){
-    var base = CRYPTO_DB[c].baseUSD;
+    var base = CRYPTO_DB[c].baseIDR || cryptoPrices[c] || (CRYPTO_DB[c].baseUSD ? CRYPTO_DB[c].baseUSD*usdIdr : 1);
     cryptoPrices[c] = base * (1 + (Math.random()*0.05 - 0.025));
   });
-  usdIdr = 16150 + (Math.random()*200 - 100);
 }
 
 function addCryptoTx(date,type,coin,qty,priceIdr){
@@ -5569,9 +5584,9 @@ function getCryptoPortfolio(){
     }
   });
   return Object.values(pos).filter(function(p){return p.qty>0.000001}).map(function(p){
-    var info = CRYPTO_DB[p.coin] || {name:p.coin, category:'Lainnya', baseUSD:0, color:'#4a5e82'};
-    var priceUSD = cryptoPrices[p.coin] || info.baseUSD;
-    var priceIdr = priceUSD * usdIdr;
+    var info = CRYPTO_DB[p.coin] || {name:p.coin, category:'Lainnya', baseIDR:0, color:'#4a5e82'};
+    var priceIdr = cryptoPrices[p.coin] || info.baseIDR || (info.baseUSD ? info.baseUSD*usdIdr : 0) || 0;
+    var priceUSD = usdIdr>0 ? priceIdr / usdIdr : 0;
     var mv = p.qty * priceIdr;
     var avg = p.qty>0 ? p.cost/p.qty : 0;
     var unreal = mv - p.cost;
@@ -5616,10 +5631,10 @@ function renderCrypto(){
   var cvP = el('cryptoPriceChart');
   if(cvP){
     var labels = Array.from({length:24},function(_,i){return i+1+'h'});
-    var btcBase = (cryptoPrices['BTC']||67000)*usdIdr/1e6;
-    var btcData = labels.map(function(){return +(btcBase*(1+(Math.random()*0.04-0.02))).toFixed(0)});
-    var ethBase = (cryptoPrices['ETH']||3200)*usdIdr/1e6;
-    var ethData = labels.map(function(){return +(ethBase*(1+(Math.random()*0.04-0.02))).toFixed(0)});
+    var btcBase = (cryptoPrices['BTC']||1.3e9)/1e6;
+    var btcData = labels.map(function(){return +(btcBase*(1+(Math.random()*0.04-0.02))).toFixed(2)});
+    var ethBase = (cryptoPrices['ETH']||(3200*usdIdr))/1e6;
+    var ethData = labels.map(function(){return +(ethBase*(1+(Math.random()*0.04-0.02))).toFixed(2)});
     charts['cryptoPrice'] = new Chart(cvP,{type:'line',data:{labels:labels,datasets:[{label:'BTC (jt)',data:btcData,borderColor:'#f7931a',borderWidth:2,fill:false,tension:.4,pointRadius:0},{label:'ETH (jt)',data:ethData,borderColor:'#627eea',borderWidth:2,fill:false,tension:.4,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8fa3c8',font:{size:9}}},tooltip:Object.assign({},TT)},scales:{x:{grid:{color:GC},ticks:Object.assign({},TC,{maxTicksLimit:8})},y:{grid:{color:GC},ticks:Object.assign({},TC,{callback:function(v){return 'Rp '+fmtK(v*1e6)}}),position:'right'}}}});
   }
 
@@ -5721,7 +5736,7 @@ function openCryptoModal(type){
   var overlay = el('modal');
   el('m-title').textContent = isBuy?'Beli Aset Crypto':'Jual Aset Crypto';
   el('m-title').style.color = isBuy?'var(--green)':'var(--red)';
-  el('m-body').innerHTML = '<div class="fgrid"><div class="fg ffull"><label class="flabel">Tanggal</label><input class="finput" type="date" id="mf-date" value="'+today()+'"></div><div class="fg"><label class="flabel">Koin</label><select class="finput fsel" id="cr-coin" onchange="crCalcLive()">'+coinOpts+'</select></div><div class="fg"><label class="flabel">Jumlah Koin</label><input class="finput" type="number" id="cr-qty" placeholder="0.01" step="0.0001" oninput="crCalcLive()"></div><div class="fg ffull"><label class="flabel">Harga per Unit (IDR)</label><input class="finput" type="number" id="cr-price" placeholder="Misal: 1050000000" oninput="crCalcLive()"></div></div><div class="taxbox"><div style="font-size:9px;color:var(--text3);font-family:\'IBM Plex Mono\',monospace;margin-bottom:7px">ESTIMASI KURS USD/IDR: Rp '+fmt(Math.round(usdIdr))+'</div><div class="taxrow"><span>Total Transaksi</span><span class="mono" id="cr-tot">Rp 0</span></div></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn '+(isBuy?'btn-green':'btn-red')+'" onclick="submitCryptoModal(\''+type+'\')">Konfirmasi '+(isBuy?'Beli':'Jual')+'</button></div>';
+  el('m-body').innerHTML = '<div class="fgrid"><div class="fg ffull"><label class="flabel">Tanggal</label><input class="finput" type="date" id="mf-date" value="'+today()+'"></div><div class="fg"><label class="flabel">Koin</label><select class="finput fsel" id="cr-coin" onchange="crCalcLive()">'+coinOpts+'</select></div><div class="fg"><label class="flabel">Jumlah Koin</label><input class="finput" type="number" id="cr-qty" placeholder="0.01" step="0.0001" oninput="crCalcLive()"></div><div class="fg ffull"><label class="flabel">Harga per Unit (IDR)</label><input class="finput" type="number" id="cr-price" placeholder="Misal: 1050000000" oninput="crCalcLive()"></div></div><div class="taxbox"><div class="taxrow"><span>Total Transaksi</span><span class="mono" id="cr-tot">Rp 0</span></div></div><div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Batal</button><button class="btn '+(isBuy?'btn-green':'btn-red')+'" onclick="submitCryptoModal(\''+type+'\')">Konfirmasi '+(isBuy?'Beli':'Jual')+'</button></div>';
   overlay.classList.add('on');
 }
 
