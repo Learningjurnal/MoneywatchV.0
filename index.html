@@ -2422,7 +2422,7 @@ body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointe
 </div>
 
 </div><!-- /pages --><!-- ===== BACKUP MODAL ===== -->
-<div id="backup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+<div id="backup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div>
@@ -3554,6 +3554,7 @@ var LS_KEY = 'ihsg_pro_master_v5'; // bump: start fresh, manual entry only
 
 var tradeStrategy = {};
 function saveData(){
+  if(typeof _invalidatePortoCache==='function') _invalidatePortoCache();
   try {
     var payload = {
       transactions: transactions,
@@ -4026,7 +4027,11 @@ function addDiv(date,ticker,shares,dps){
 // ============================================================
 // PORTFOLIO CALC
 // ============================================================
+var _portoCache=null, _portoCacheKey='';
+function _invalidatePortoCache(){ _portoCache=null; _portoCacheKey=''; }
 function getPortfolio(){
+  var cacheKey=transactions.length+'|'+(prices&&Object.keys(prices).length||0);
+  if(_portoCache && _portoCacheKey===cacheKey) return _portoCache;
   var pos={};
   transactions.slice().sort(function(a,b){return a.date.localeCompare(b.date)}).forEach(function(tx){
     if(!pos[tx.ticker])pos[tx.ticker]={ticker:tx.ticker,lot:0,cost:0,shares:0};
@@ -4038,7 +4043,7 @@ function getPortfolio(){
       p.lot-=tx.lot;p.shares-=sold;p.cost=Math.max(0,p.cost-avg*sold);
     }
   });
-  return Object.values(pos).filter(function(p){return p.lot>0}).map(function(p){
+  var result=Object.values(pos).filter(function(p){return p.lot>0}).map(function(p){
     var info=DB[p.ticker]||{name:p.ticker,sector:'Lainnya',beta:1.0};
     var mp=prices[p.ticker]||info.base||0;
     var mv=mp*p.shares;
@@ -4047,6 +4052,8 @@ function getPortfolio(){
     var ret=p.cost>0?(unreal/p.cost)*100:0;
     return Object.assign({},p,{mp:mp,price:mp,mv:mv,avg:avg,unreal:unreal,ret:ret,info:info});
   });
+  _portoCache=result; _portoCacheKey=cacheKey;
+  return result;
 }
 
 function getRealizedPnl(){
@@ -4213,7 +4220,10 @@ function fhApplyIHSG(price, prev, open, high, low){
   if(high>0){ var e=el('ihsg-hi'); if(e) e.textContent=high.toLocaleString('id-ID',{minimumFractionDigits:2}); }
   if(low>0){  var e=el('ihsg-lo'); if(e) e.textContent=low.toLocaleString('id-ID',{minimumFractionDigits:2}); }
   updateTopbar();
-  if(currentPage==='dashboard') buildIhsgChart('1H');
+  if(typeof currentPage!=='undefined' && currentPage==='dashboard'){
+    try{ buildIhsgChart('1H'); }catch(e){}
+    try{ renderPage('dashboard'); }catch(e){}
+  }
 }
 
 // ── Fetch harga saham IDX via Yahoo Finance ──
@@ -4310,6 +4320,9 @@ function updatePrices(){
   ihsgHist.push(Math.round(ihsgCur*100)/100);
   if(ihsgHist.length>120) ihsgHist.shift();
   updateTopbar();
+  if(typeof currentPage!=='undefined' && (currentPage==='portfolio'||currentPage==='dashboard')){
+    try{ renderPage(currentPage); }catch(e){}
+  }
 }
 
 // ── Settings Modal ──
@@ -4379,21 +4392,30 @@ function updateClock(){el('clock').textContent=new Date().toLocaleTimeString('id
 
 // ── Bloomberg Ticker Tape ──
 function buildTickerTape(){
+  // Use live prices where available, fallback to static
+  var _tp=function(sym,def){ var p=typeof prices!=='undefined'&&prices[sym]; return p&&p>0?p.toLocaleString('id-ID'):def; };
+  var _chg=function(sym,defChg,defUp){
+    var base=typeof DB!=='undefined'&&DB[sym]&&DB[sym].base;
+    var cur=typeof prices!=='undefined'&&prices[sym];
+    if(base&&cur){ var d=(cur-base)/base*100; return {chg:(d>=0?'+':'')+d.toFixed(2)+'%',up:d>=0}; }
+    return {chg:defChg,up:defUp};
+  };
+  var _ihsgChg=(function(){ var d=ihsgCur-ihsgBase; var p=(d/(ihsgBase||1)*100); return {chg:(d>=0?'+':'')+p.toFixed(2)+'%',up:d>=0}; })();
   var items=[
-    {sym:'IHSG',   val:'6.195', chg:'+1.11%', up:true},
-    {sym:'BBRI',   val:'2.950', chg:'-1.33%', up:false},
-    {sym:'BBCA',   val:'5.700', chg:'+0.88%', up:true},
-    {sym:'BMRI',   val:'4.080', chg:'+1.24%', up:true},
-    {sym:'PGEO',   val:'895',   chg:'-2.07%', up:false},
-    {sym:'ADRO',   val:'2.300', chg:'-0.86%', up:false},
-    {sym:'TLKM',   val:'3.150', chg:'+0.32%', up:true},
+    {sym:'IHSG',   val:(typeof ihsgCur!=='undefined'?ihsgCur.toLocaleString('id-ID',{minimumFractionDigits:2}):'6.195'), chg:_ihsgChg.chg, up:_ihsgChg.up},
+    Object.assign({sym:'BBRI'},   {val:_tp('BBRI','2.950')},   _chg('BBRI','-1.33%',false)),
+    Object.assign({sym:'BBCA'},   {val:_tp('BBCA','5.700')},   _chg('BBCA','+0.88%',true)),
+    Object.assign({sym:'BMRI'},   {val:_tp('BMRI','4.080')},   _chg('BMRI','+1.24%',true)),
+    Object.assign({sym:'PGEO'},   {val:_tp('PGEO','895')},     _chg('PGEO','-2.07%',false)),
+    Object.assign({sym:'ADRO'},   {val:_tp('ADRO','2.300')},   _chg('ADRO','-0.86%',false)),
+    Object.assign({sym:'TLKM'},   {val:_tp('TLKM','3.150')},   _chg('TLKM','+0.32%',true)),
     {sym:'BTC/IDR',val:'1,30T', chg:'-0.42%', up:false},
     {sym:'ADA/IDR',val:'4.143', chg:'+3.12%', up:true},
     {sym:'USD/IDR',val:'17.823',chg:'+0.12%', up:true},
-    {sym:'ARCI',   val:'1.215', chg:'-2.40%', up:false},
-    {sym:'ANTM',   val:'1.760', chg:'+1.73%', up:true},
-    {sym:'UNVR',   val:'1.710', chg:'-0.58%', up:false},
-    {sym:'GOTO',   val:'86',    chg:'+2.38%', up:true},
+    Object.assign({sym:'ARCI'},   {val:_tp('ARCI','1.215')},   _chg('ARCI','-2.40%',false)),
+    Object.assign({sym:'ANTM'},   {val:_tp('ANTM','1.760')},   _chg('ANTM','+1.73%',true)),
+    Object.assign({sym:'UNVR'},   {val:_tp('UNVR','1.710')},   _chg('UNVR','-0.58%',false)),
+    Object.assign({sym:'GOTO'},   {val:_tp('GOTO','86')},      _chg('GOTO','+2.38%',true)),
     {sym:'COAL-IDX',val:'+0.7%',chg:'sektor', up:true},
     {sym:'BANK-IDX',val:'-0.4%',chg:'sektor', up:false},
   ];
@@ -6710,7 +6732,8 @@ function txClearAll(){
 
 function rebuildRdnBalance(){
   // Recalculate balance for all mutations in date order
-  rdnMutations.sort(function(a,b){return a.date.localeCompare(b.date)||a.id-b.id});
+  if(!Array.isArray(rdnMutations)) rdnMutations=[];
+  rdnMutations.sort(function(a,b){return (a.date||'').localeCompare(b.date||'')||((a.id||0)-(b.id||0))});
   var bal = 0;
   rdnMutations.forEach(function(r){ bal += r.amount; r.balance = bal; });
   rdnBalance = bal;
@@ -6718,6 +6741,8 @@ function rebuildRdnBalance(){
 
 function delTx(id){
   if(!confirm('Hapus transaksi ini?\nMutasi RDN terkait juga akan dihapus dan saldo akan dihitung ulang.')) return;
+  if(!Array.isArray(transactions)) transactions=[];
+  if(!Array.isArray(rdnMutations)) rdnMutations=[];
   transactions = transactions.filter(function(t){ return t.id !== id; });
   rdnMutations = rdnMutations.filter(function(r){ return r.linkedTxId !== id; });
   rebuildRdnBalance();
@@ -6914,6 +6939,8 @@ function importMutasiUI(){
     : 'Impor '+fmt(MUTASI_DATA.totals.n)+' transaksi saham historis (2018–2026)?\n\nPajak diambil per-transaksi (termasuk diskon 0,18%/0,28%); program pajak global tidak diterapkan.';
   if(!confirm(msg)) return;
   importMutasi(true);
+  if(typeof rebuildRdnBalance==='function') rebuildRdnBalance();
+  if(typeof saveData==='function') saveData();
   if(typeof showSaveStatus==='function') showSaveStatus('✓ '+fmt(MUTASI_DATA.totals.n)+' transaksi mutasi diimpor','#00e5a0');
   if(typeof updatePrices==='function') updatePrices();
   renderTransaksi();
@@ -7518,10 +7545,12 @@ function importDividends(force){
     for(var i=0;i<years;i++){
       var amt=(i===years-1)?(total-acc):per; acc+=amt;
       var y=endY-(years-1)+i;
+      // _src:'lampiran' — tidak menambah saldo RDN (realisasi historis)
       dividends.push({id:nextDivId++,date:y+'-12-30',ticker:e.code,shares:0,dps:0,
         gross:amt,tax:0,net:amt,pphRate:0,_src:'lampiran'});
     }
   });
+  // lampiran tidak rebuild RDN balance — hanya metadata historis
   saveData();
   return true;
 }
@@ -7582,6 +7611,10 @@ function resetSekTax(){
 
 var currentPage='dashboard';
 function goPage(name,btn){
+  // Auth guard — redirect to login if session expired
+  if(typeof authLoadSession==='function' && !authLoadSession() && name!=='dashboard'){
+    try{ authShowLogin(); }catch(e){} return;
+  }
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
   // Remove active state from all nav items (including dropdown buttons)
   document.querySelectorAll('.nav button, .nav-dd-btn, .nav-dd-menu button').forEach(function(b){b.classList.remove('on')});
@@ -7672,7 +7705,8 @@ var PORTO_DATA = [
 ];
 
 function importPortfolioData(){
-  if(localStorage.getItem('porto_imported_v1')) return; // sudah pernah diimpor
+  if(window._portoImportDone) return; // in-session guard
+  if(localStorage.getItem('porto_imported_v1')){ window._portoImportDone=true; return; } // sudah pernah diimpor
   var today2 = new Date().toISOString().slice(0,10);
   var sec = 'Stockbit';
   // Pastikan semua ticker ada di DB dengan sektor yang benar
@@ -7695,6 +7729,7 @@ function importPortfolioData(){
       ket:'Beli '+p.lot+' lot '+p.ticker+' @ Rp '+fmt(p.price),
       amount:-c.net,balance:rdnBalance,sekuritas:sec,linkedTxId:txId});
   });
+  window._portoImportDone=true;
   localStorage.setItem('porto_imported_v1','1');
   saveData();
   console.log('✅ Porto import selesai: '+PORTO_DATA.length+' emiten, total lot: '+
@@ -7808,6 +7843,8 @@ XLSX_DATA.stocks.forEach(function(s){
     FS_UNIV.push({t:s.code,n:s.code,s:s.sector||'IHSG',cap:Math.round(s.amount/1e9)||1});
   }
 });
+// Dedup FS_UNIV by ticker
+(function(){ var seen={}; FS_UNIV=FS_UNIV.filter(function(u){ if(seen[u.t]) return false; seen[u.t]=true; return true; }); })();
 
 var FS_G={tk:'BBCA',days:30,data:null,a:null};
 var FS_WL=[];
@@ -7982,7 +8019,7 @@ function fsRunAnalysis(){
   fsRenderDailyTable();
   // Render VWAP jika tab sedang terbuka
   var vwapTab = document.getElementById('fs-st-vwap');
-  if(vwapTab && vwapTab.style.display !== 'none') fsRenderVWAP();
+  try{ fsRenderVWAP(); }catch(e){} // always render so VWAP data is ready
 
   // Hanya reset AI box jika ticker berubah (bukan hanya period change)
   var prevTk = FS_G._prevTk;
@@ -8540,6 +8577,8 @@ document.addEventListener('click', function(e){
 });
 
 function fsInit(){
+  // Re-dedup FS_UNIV (may have received duplicates from dynamic portfolio push)
+  (function(){ var seen={}; FS_UNIV=FS_UNIV.filter(function(u){ if(seen[u.t]) return false; seen[u.t]=true; return true; }); })();
   FS_RD=FS_UNIV.map(function(u){
     var data=fsGenData(u.t,60);
     var a=fsProcess(data);
@@ -8632,6 +8671,8 @@ function authShowApp(username){
   // Start session countdown bar
   AUTH._sesStart = Date.now();
   authStartTimeoutBar();
+  // Rebuild ticker tape after login (data may now be loaded)
+  try{ buildTickerTape(); }catch(e){}
   // Activity listeners reset timer
   ['click','keydown','mousemove'].forEach(function(ev){
     document.addEventListener(ev, authBumpSession, {passive:true});
@@ -8655,7 +8696,7 @@ function authStartTimeoutBar(){
     var pct = Math.max(0, (remaining / AUTH.SESSION_MS) * 100);
     bar.style.width = pct + '%';
     bar.style.background = pct < 20 ? '#ff3d5a' : pct < 50 ? '#ffc107' : 'var(--accent)';
-  }, 5000);
+  }, 1000);
 }
 
 // ── UI navigation ──
@@ -8726,6 +8767,7 @@ function authDoLogin(){
       acc.lastLogin = new Date().toISOString();
       authSaveAcc(acc);
       authSaveSession(acc.username);
+      var _pw=document.getElementById('auth-password'); if(_pw) _pw.value='';
       authShowApp(acc.username);
     } else {
       // ❌ Gagal
@@ -9020,8 +9062,9 @@ function diAnalyze(){
     var dpsByYear={}, grossByYear={}, netByYear={};
     pmts.forEach(function(p){
       var y=p.date.slice(0,4);
-      // Untuk lampiran (dps=0), hitung DPS dari gross/shares bila shares>0
-      var dps = p.dps>0 ? p.dps : (p.shares>0 ? p.gross/p.shares : 0);
+      // Untuk lampiran (dps=0), hitung DPS dari gross/shares bila shares>0; skip jika keduanya 0
+      var dps = p.dps>0 ? p.dps : (p.shares>0 ? p.gross/p.shares : (p._src==='lampiran' ? 0 : 0));
+      if(p._src==='lampiran' && dps===0 && p.gross>0) dps=0; // lampiran tanpa shares tidak masuk DPS
       dpsByYear[y]  = (dpsByYear[y]||0) + dps;
       grossByYear[y]= (grossByYear[y]||0)+ (p.gross||0);
       netByYear[y]  = (netByYear[y]||0)  + (p.net||0);
@@ -9385,7 +9428,7 @@ function renderDivHistoryChart(){
 }
 
 // Init divInvest on load
-(function(){ try{ diLoadData(); }catch(e){} })();
+(function(){ try{ if(!window._diInited){ window._diInited=true; diLoadData(); } }catch(e){} })();
 
 // ==========================================
 // HARGA WAJAR — MoS Valuation Engine
@@ -9425,6 +9468,7 @@ function hw_init() {
 function hw_renderTable() {
   var tbody = document.getElementById('hw-data-body');
   if (!tbody) return;
+  if (!hwData.rows || !hwData.rows.length) hwData.rows = hw_defaultRows();
   // Use DOM API to avoid any attribute escaping issues
   tbody.innerHTML = '';
   var inpStyle = 'background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:"IBM Plex Mono",monospace;font-size:11px;padding:3px 5px;border-radius:1px;box-sizing:border-box;width:100%';
@@ -9827,6 +9871,7 @@ function hw_renderChart(rows) {
     };
   }
 
+  if(hwHistChart){ try{ hwHistChart.destroy(); }catch(e){} hwHistChart=null; }
   hwHistChart = new Chart(ctx, {
     type: 'bar',
     data: { labels: labels, datasets: datasets },
@@ -9922,7 +9967,7 @@ function hw_clearHistory() {
 }
 
 // Init on page load
-(function(){ try { if(document.getElementById('hw-data-body')) hw_init(); } catch(e){} })();
+(function(){ try { if(document.getElementById('hw-data-body') && !window._hwInited){ window._hwInited=true; hw_init(); } } catch(e){} })();
 // Also init when tab is clicked
 var _hw_origGoPage = typeof goPage === 'function' ? goPage : null;
 
@@ -9970,6 +10015,7 @@ window.goPage = function(page, btn){
   if(page === 'correlation')  corrRender();
   if(page === 'monthly-returns') mrRender();
   if(page === 'pairs')        { /* wait */ }
+  if(page === 'harga-wajar')  { if(!window._hwInited){ window._hwInited=true; try{hw_init();}catch(e){} } else { try{hw_renderTable();}catch(e){} } }
 };
 
 // ── Yahoo Finance live fetch helper (wrapper around existing FH engine) ──
@@ -10677,7 +10723,7 @@ function pairsAnalyzeWith(a,b,dataA,dataB){
     QT.btCharts['pt-price']=new Chart(cvP.getContext('2d'),{type:'line',data:{labels:sD,datasets:[
       {data:sNA,borderColor:'#00d4aa',borderWidth:2,fill:false,tension:.3,pointRadius:0,label:a},
       {data:sNB,borderColor:'#ff6600',borderWidth:2,fill:false,tension:.3,pointRadius:0,label:b}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'IBM Plex Mono',size:10}}}},settings:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,102,0,.05)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return v.toFixed(0);}},grid:{color:'rgba(255,102,0,.05)'}}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,102,0,.05)'}},y:{ticks:{color:'#8a90ad',font:{size:9}},grid:{color:'rgba(255,102,0,.05)'}}}}});
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'IBM Plex Mono',size:10}}}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,102,0,.05)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return v.toFixed(0);}},grid:{color:'rgba(255,102,0,.05)'}}}}});
   }
 }
 
