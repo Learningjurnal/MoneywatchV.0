@@ -1,256 +1,249 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Money Watch — Jurnal & Analisa Investasi</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* Stockbit-style — dark navy, clean green, Inter font */
-  --bg:#0e1117;--bg2:#161b27;--bg3:#1c2333;--bg4:#212940;--bg5:#273045;
-  --accent:#00AA6C;--accent2:#00c97c;--accent-dim:rgba(0,170,108,.12);
-  --green:#00AA6C;--green2:#00c97c;--red:#E84040;--red2:#ff5252;
-  --amber:#F59E0B;--purple:#8B5CF6;--blue:#3B82F6;--teal:#06B6D4;--coral:#F97316;
-  --text:#E8EDF5;--text2:#94A3B8;--text3:#64748B;--text4:#3d4f6b;
-  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.10);--border3:rgba(255,255,255,0.16);
-  --sb-green:#00AA6C;--sb-grid:rgba(0,170,108,0.06);
-  --radius:8px;--radius-sm:6px;--radius-xs:4px;
-  --shadow:0 2px 12px rgba(0,0,0,.4);--shadow-lg:0 8px 32px rgba(0,0,0,.5);
+  /* Bloomberg Terminal palette — deep charcoal + electric orange accent */
+  --bg:#0a0a0f;--bg2:#0f0f17;--bg3:#141420;--bg4:#1a1a2a;--bg5:#1e1e30;
+  --accent:#ff6600;--accent2:#ff8833;--green:#00d4aa;--red:#ff2244;--amber:#ffbb00;--purple:#9b7fe8;--coral:#ff5566;--teal:#00b4c8;--blue:#0088ff;
+  --text:#f5f5fa;--text2:#b8bdd4;--text3:#8a90ad;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
+  --bb-orange:#ff6600;--bb-grid:rgba(255,102,0,0.08);
+  --scanline:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter','Space Grotesk',sans-serif;font-size:13px;overflow:hidden}
-::-webkit-scrollbar{width:4px;height:4px}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;overflow:hidden}
+/* Bloomberg scanline overlay on body */
+body::before{content:'';position:fixed;inset:0;background:var(--scanline);pointer-events:none;z-index:9998;opacity:.4}
+::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(148,163,184,.2);border-radius:var(--radius-xs)}
-::-webkit-scrollbar-thumb:hover{background:rgba(148,163,184,.35)}
-
+::-webkit-scrollbar-thumb{background:rgba(255,102,0,.3);border-radius:1px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,102,0,.5)}
 /* TICKER TAPE */
-.ticker-wrap{background:var(--bg2);border-bottom:1px solid var(--border);height:28px;overflow:hidden;display:flex;align-items:center;flex-shrink:0;position:relative}
-.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:48px;z-index:2;pointer-events:none}
-.ticker-wrap::before{left:0;background:linear-gradient(90deg,var(--bg2),transparent)}
-.ticker-wrap::after{right:0;background:linear-gradient(270deg,var(--bg2),transparent)}
+.ticker-wrap{background:#0a0a0f;border-bottom:1px solid rgba(255,102,0,.2);height:22px;overflow:hidden;display:flex;align-items:center;flex-shrink:0;position:relative}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;pointer-events:none}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,#0a0a0f,transparent)}
+.ticker-wrap::after{right:0;background:linear-gradient(270deg,#0a0a0f,transparent)}
 .ticker-inner{display:flex;gap:0;white-space:nowrap;animation:ticker 60s linear infinite}
 .ticker-inner:hover{animation-play-state:paused}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.tick-item{display:inline-flex;align-items:center;gap:8px;padding:0 20px;font-size:11px;border-right:1px solid var(--border)}
-.tick-sym{color:var(--text);font-weight:600;letter-spacing:.2px}
-.tick-val{color:var(--text2);font-weight:500}
-.tick-chg{font-weight:600;font-size:11px}
+.tick-item{display:inline-flex;align-items:center;gap:6px;padding:0 18px;font-family:'IBM Plex Mono',monospace;font-size:10px;border-right:1px solid rgba(255,255,255,.05)}
+.tick-sym{color:var(--text2);font-weight:700;letter-spacing:.5px}
+.tick-val{color:var(--text);font-weight:600}
+.tick-chg{font-weight:600}
 .app{display:flex;flex-direction:column;height:100vh}
 
-/* TOPBAR — Stockbit style */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100;gap:12px;position:relative}
-.logo{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px;flex-shrink:0}
-.logo span{color:var(--sb-green)}
-.nav-wrap{flex:1;min-width:0;position:static}
+/* TOPBAR — Bloomberg Terminal */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:44px;background:#0a0a0f;border-bottom:2px solid var(--bb-orange);flex-shrink:0;z-index:100;gap:10px;position:relative}
+.topbar::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:rgba(255,102,0,.15)}
+.logo{font-size:14px;font-weight:700;color:var(--bb-orange);letter-spacing:3px;font-family:'IBM Plex Mono',monospace;flex-shrink:0;text-transform:uppercase}
+.logo span{color:var(--text3)}
+.nav-wrap{flex:1;min-width:0;padding:2px 0;position:static}
 .nav-wrap::-webkit-scrollbar{height:2px}
-.nav{display:flex;gap:2px;background:transparent;padding:0;overflow-x:auto;overflow-y:visible}
-.nav button{padding:6px 14px;border-radius:var(--radius-xs);font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);background:none;border:none;font-family:'Inter',sans-serif;letter-spacing:0;transition:all .15s;white-space:nowrap}
-.nav button:hover{color:var(--text);background:rgba(255,255,255,.05)}
-.nav button.on{color:#fff;background:rgba(0,170,108,.15);font-weight:600}
-.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.live{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-weight:500}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite;flex-shrink:0}
-@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,170,108,.5)}50%{opacity:.5;box-shadow:0 0 0 5px rgba(0,170,108,0)}}
-.ihsg-bar{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 12px}
-.ibar-val{font-size:13px;font-weight:700;color:var(--text)}
-.ibar-chg{font-size:11px;font-weight:600}
-.rdn-bar{display:flex;align-items:center;gap:6px;background:rgba(0,170,108,.08);border:1px solid rgba(0,170,108,.2);border-radius:var(--radius-sm);padding:5px 12px}
-.rdn-label{font-size:10px;color:var(--green);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.rdn-val{font-size:13px;font-weight:700;color:var(--green)}
-.clock{font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums;font-weight:500}
+.nav-wrap::-webkit-scrollbar-thumb{background:var(--bg5)}
+.nav{display:flex;gap:1px;background:transparent;padding:2px;overflow-x:auto;overflow-y:visible}
+.nav button{padding:4px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text3);background:none;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.nav button:hover{color:var(--text2);background:rgba(255,102,0,.08);border-color:rgba(255,102,0,.3)}
+.nav button.on{background:rgba(255,102,0,.15);color:var(--bb-orange);border-color:rgba(255,102,0,.5)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.live{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,212,170,.6)}50%{opacity:.4;box-shadow:0 0 0 4px rgba(0,212,170,0)}}
+.ihsg-bar{display:flex;align-items:center;gap:7px;background:rgba(255,102,0,.08);border:1px solid rgba(255,102,0,.35);border-radius:2px;padding:3px 10px}
+.ibar-val{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--bb-orange)}
+.ibar-chg{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600}
+.rdn-bar{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.25);border-radius:2px;padding:3px 10px}
+.rdn-label{font-size:8px;color:var(--green);font-family:'IBM Plex Mono',monospace;letter-spacing:1.5px;text-transform:uppercase}
+.rdn-val{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--green)}
+.clock{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px}
 
 /* PAGES */
-.pages{flex:1;overflow:hidden;position:relative;background:var(--bg)}
-.page{display:none;height:100%;overflow-y:auto;padding:20px 24px;position:absolute;inset:0}
-.page.on{display:block;background:var(--bg)}
-.ptitle{font-size:18px;font-weight:700;margin-bottom:2px;color:var(--text);letter-spacing:-.3px}
-.psub{font-size:12px;color:var(--text3);margin-bottom:16px}
+.pages{flex:1;overflow:hidden;position:relative}
+.page{display:none;height:100%;overflow-y:auto;padding:12px 16px;position:absolute;inset:0}
+.page.on{display:block}
+.ptitle{font-size:14px;font-weight:700;margin-bottom:2px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--bb-orange)}
+.psub{font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-bottom:12px;letter-spacing:.3px}
 
 /* GRID */
-.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
-.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
-.row5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
-.g2{display:grid;grid-template-columns:1fr 300px;gap:14px;margin-bottom:14px}
-.g2b{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-bottom:14px}
-.g2c{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.row5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 280px;gap:10px;margin-bottom:10px}
+.g2b{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin-bottom:10px}
+.g2c{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
 
-/* METRIC — Stockbit clean card */
-.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;transition:all .15s}
-.metric:hover{border-color:var(--border2)}
-.mlabel{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:6px}
-.mval{font-size:20px;font-weight:700;line-height:1.1;color:var(--text);letter-spacing:-.4px;font-variant-numeric:tabular-nums}
-.mval.lg{font-size:24px;letter-spacing:-.6px}
-.msub{font-size:11px;margin-top:5px;color:var(--text3)}
+/* METRIC — Bloomberg data terminal card */
+.metric{background:var(--bg2);border:1px solid var(--border);border-top:2px solid rgba(255,102,0,.4);border-radius:2px;padding:10px 12px;position:relative}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,102,0,.3),transparent)}
+.mlabel{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;margin-bottom:4px}
+.mval{font-size:17px;font-weight:700;font-family:'IBM Plex Mono',monospace;line-height:1}
+.mval.lg{font-size:21px}
+.msub{font-size:9px;margin-top:4px;font-family:'IBM Plex Mono',monospace}
 .up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--text2)}.amb{color:var(--amber)}
 
-/* CARD */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border-color .15s}
-.card:hover{border-color:var(--border2)}
-.ctitle{font-size:12px;color:var(--text2);font-weight:600}
-.cheader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+/* CARD — Bloomberg panel */
+.card{background:var(--bg2);border:1px solid var(--border);border-top:1px solid rgba(255,102,0,.25);border-radius:2px;padding:12px}
+.ctitle{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-family:'IBM Plex Mono',monospace;font-weight:600}
+.cheader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 
 /* BTN */
-.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:'Inter',sans-serif;letter-spacing:0;transition:all .15s}
-.btn:hover{filter:brightness(1.1)}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px;text-transform:uppercase;transition:all .15s}
+.btn:hover{filter:brightness(1.15)}
 .btn:active{transform:scale(.97)}
 .btn-blue{background:var(--blue);color:#fff;border-color:var(--blue)}
-.btn-green{background:rgba(0,170,108,.15);color:var(--green);border-color:rgba(0,170,108,.3)}
-.btn-red{background:rgba(232,64,64,.12);color:var(--red);border-color:rgba(232,64,64,.3)}
-.btn-amber{background:rgba(245,158,11,.12);color:var(--amber);border-color:rgba(245,158,11,.3)}
-.btn-purple{background:rgba(139,92,246,.12);color:var(--purple);border-color:rgba(139,92,246,.3)}
+.btn-green{background:rgba(0,212,170,.15);color:var(--green);border-color:rgba(0,212,170,.4)}
+.btn-red{background:rgba(255,34,68,.15);color:var(--red);border-color:rgba(255,34,68,.4)}
+.btn-amber{background:rgba(255,187,0,.15);color:var(--amber);border-color:rgba(255,187,0,.4)}
+.btn-purple{background:rgba(155,127,232,.15);color:var(--purple);border-color:rgba(155,127,232,.4)}
 .btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
-.btn-ghost:hover{background:rgba(255,255,255,.05);color:var(--text)}
-.btn-sm{padding:4px 10px;font-size:11px}
-.btn-xs{padding:3px 8px;font-size:11px}
-.btn-bb{background:rgba(0,170,108,.12);color:var(--sb-green);border-color:rgba(0,170,108,.25)}
-.btn-bb:hover{background:rgba(0,170,108,.2)}
+.btn-ghost:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.btn-sm{padding:4px 9px;font-size:9px}
+.btn-xs{padding:2px 7px;font-size:9px}
+.btn-bb{background:rgba(255,102,0,.15);color:var(--bb-orange);border-color:rgba(255,102,0,.4)}
+.btn-bb:hover{background:rgba(255,102,0,.25)}
 
 /* BADGE */
-.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;line-height:1.6;letter-spacing:.2px}
-.b-up{background:rgba(0,170,108,.12);color:var(--green)}
-.b-dn{background:rgba(232,64,64,.12);color:var(--red)}
-.b-neu{background:rgba(59,130,246,.1);color:#60a5fa}
-.b-amb{background:rgba(245,158,11,.1);color:var(--amber)}
-.b-pur{background:rgba(139,92,246,.12);color:var(--purple)}
-.b-teal{background:rgba(6,182,212,.12);color:var(--teal)}
-.b-gray{background:rgba(255,255,255,.06);color:var(--text2)}
+.badge{display:inline-block;padding:1px 6px;border-radius:1px;font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:600;line-height:1.5;letter-spacing:.5px;text-transform:uppercase}
+.b-up{background:rgba(0,212,170,.12);color:var(--green);border:1px solid rgba(0,212,170,.25)}
+.b-dn{background:rgba(255,34,68,.12);color:var(--red);border:1px solid rgba(255,34,68,.25)}
+.b-neu{background:rgba(0,136,255,.1);color:#4da6ff;border:1px solid rgba(0,136,255,.2)}
+.b-amb{background:rgba(255,187,0,.1);color:var(--amber);border:1px solid rgba(255,187,0,.2)}
+.b-pur{background:rgba(155,127,232,.12);color:var(--purple);border:1px solid rgba(155,127,232,.2)}
+.b-teal{background:rgba(0,180,200,.12);color:var(--teal);border:1px solid rgba(0,180,200,.2)}
+.b-gray{background:rgba(255,255,255,.05);color:var(--text2);border:1px solid var(--border2)}
 
 /* SIGNAL */
-.sig{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.2px}
-.sig-buy{background:rgba(0,170,108,.12);color:var(--green)}
-.sig-sell{background:rgba(232,64,64,.12);color:var(--red)}
-.sig-hold{background:rgba(245,158,11,.1);color:var(--amber)}
+.sig{display:inline-flex;align-items:center;padding:2px 7px;border-radius:1px;font-size:9px;font-family:'IBM Plex Mono',monospace;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.sig-buy{background:rgba(0,212,170,.12);color:var(--green);border:1px solid rgba(0,212,170,.3)}
+.sig-sell{background:rgba(255,34,68,.12);color:var(--red);border:1px solid rgba(255,34,68,.3)}
+.sig-hold{background:rgba(255,187,0,.1);color:var(--amber);border:1px solid rgba(255,187,0,.25)}
 
 /* TABLE */
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:11px;color:var(--text3);padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:600;white-space:nowrap;background:rgba(255,255,255,.02)}
-.tbl td{padding:10px 10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;white-space:nowrap}
+.tbl th{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border-bottom:1px solid rgba(255,102,0,.25);text-align:left;font-weight:600;white-space:nowrap;background:rgba(255,102,0,.04)}
+.tbl td{padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;vertical-align:middle;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
 .tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:rgba(255,255,255,.025)}
-.mono{font-variant-numeric:tabular-nums}
+.tbl tr:hover td{background:rgba(255,102,0,.04)}
+.mono{font-family:'IBM Plex Mono',monospace}
 
 /* FORM */
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fg{display:flex;flex-direction:column;gap:4px}
-.flabel{font-size:11px;color:var(--text2);font-weight:500;letter-spacing:.1px}
-.finput{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:border .15s;width:100%}
-.finput:focus{border-color:var(--sb-green);box-shadow:0 0 0 3px rgba(0,170,108,.12)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.flabel{font-size:9px;color:var(--text2);font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase}
+.finput{background:var(--bg3);border:1px solid var(--border2);border-radius:2px;padding:7px 10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;outline:none;transition:border .15s;width:100%}
+.finput:focus{border-color:var(--bb-orange);box-shadow:0 0 0 2px rgba(255,102,0,.1)}
 .finput option{background:var(--bg3);color:var(--text)}
-.fsel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%2364748B' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;-webkit-appearance:none;appearance:none}
+.fsel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238888aa' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;-webkit-appearance:none;appearance:none}
 .ffull{grid-column:1/-1}
-.ftri{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.ftri{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
 /* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 .overlay.on{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:24px;width:540px;max-width:95vw;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
-.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.mtitle{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
-.mclose{background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:4px 9px;border-radius:var(--radius-xs);transition:all .15s}
+.modal{background:var(--bg2);border:1px solid rgba(255,102,0,.35);border-top:2px solid var(--bb-orange);border-radius:2px;padding:22px;width:540px;max-width:95vw;max-height:92vh;overflow-y:auto}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.mtitle{font-size:13px;font-weight:700;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:1.5px}
+.mclose{background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:14px;line-height:1;padding:3px 8px;border-radius:2px;font-family:monospace}
 .mclose:hover{color:var(--text);background:rgba(255,255,255,.06)}
 
 /* TAX BOX */
-.taxbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-top:12px}
-.taxrow{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;color:var(--text2)}
-.taxrow.tot{border-top:1px solid var(--border2);margin-top:6px;padding-top:9px;font-weight:700;font-size:12px;color:var(--text)}
+.taxbox{background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:10px;margin-top:10px}
+.taxrow{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 0;color:var(--text2)}
+.taxrow.tot{border-top:1px solid var(--border2);margin-top:5px;padding-top:7px;font-weight:700;font-size:11px;color:var(--text)}
 
 /* TP */
-.tp{display:inline-flex;align-items:center;background:rgba(0,170,108,.1);border:1px solid rgba(0,170,108,.2);border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600;color:var(--sb-green)}
+.tp{display:inline-flex;align-items:center;background:var(--bg4);border:1px solid rgba(255,102,0,.25);border-radius:1px;padding:1px 7px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:var(--bb-orange);letter-spacing:.8px}
 
 /* PROGRESS */
-.prog{height:4px;background:rgba(255,255,255,.06);border-radius:50%;overflow:hidden;margin-top:4px}
-.progf{height:100%;border-radius:var(--radius-xs);transition:width .5s}
+.prog{height:3px;background:var(--bg5);border-radius:1px;overflow:hidden;margin-top:3px}
+.progf{height:100%;border-radius:1px;transition:width .5s}
 
 /* CHART */
 .cw{position:relative}
-.cdset{display:flex;flex-direction:column;gap:4px}.cdset span{font-size:11px;color:var(--text3)}.cdset input{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none}.cdset input:focus{border-color:var(--sb-green)}
+.cdset{display:flex;flex-direction:column;gap:3px}.cdset span{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-family:'IBM Plex Mono',monospace}.cdset input{background:var(--bg3);border:1px solid var(--border2);border-radius:2px;padding:5px 8px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:11px;outline:none}.cdset input:focus{border-color:var(--bb-orange)}
 
 /* PBTN */
-.pbtn{padding:4px 10px;border-radius:var(--radius-xs);font-size:11px;cursor:pointer;color:var(--text3);border:1px solid var(--border);background:transparent;font-family:'Inter',sans-serif;font-weight:500;transition:all .12s}
+.pbtn{padding:2px 8px;border-radius:1px;font-size:9px;cursor:pointer;color:var(--text3);border:1px solid var(--border);background:transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .12s}
 .pbtn:hover{color:var(--text);border-color:var(--border2)}
-.pbtn.on{background:rgba(0,170,108,.15);color:var(--sb-green);border-color:rgba(0,170,108,.3)}
+.pbtn.on{background:rgba(255,102,0,.2);color:var(--bb-orange);border-color:rgba(255,102,0,.5)}
 
 /* ALERT */
-.alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:12px;border:1px solid}
-.alert-info{background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.2);color:#60a5fa}
-.alert-warn{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2);color:var(--amber)}
-.alert-ok{background:rgba(0,170,108,.06);border-color:rgba(0,170,108,.2);color:var(--green)}
+.alert{padding:8px 12px;border-radius:2px;font-size:10px;margin-bottom:10px;border:1px solid;font-family:'IBM Plex Mono',monospace}
+.alert-info{background:rgba(0,136,255,.06);border-color:rgba(0,136,255,.2);color:#4da6ff}
+.alert-warn{background:rgba(255,187,0,.06);border-color:rgba(255,187,0,.2);color:var(--amber)}
+.alert-ok{background:rgba(0,212,170,.06);border-color:rgba(0,212,170,.2);color:var(--green)}
 
 /* RISK GAUGE */
-.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0}
-.gauge-label{font-size:11px;margin-top:8px;font-weight:600}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.gauge-label{font-size:10px;font-family:'IBM Plex Mono',monospace;margin-top:6px;font-weight:700}
 
 /* RDN ITEM */
-.rdn-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.rdn-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
 .rdn-row:last-child{border-bottom:none}
 
 /* SECTOR BADGE */
-.sec-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.sec-dot{width:7px;height:7px;border-radius:1px;flex-shrink:0;display:inline-block}
 
 /* SEPARATOR */
-.sep{height:1px;background:var(--border);margin:12px 0}
-
+.sep{height:1px;background:var(--border);margin:10px 0}
 /* Nav Dropdown */
 .nav-dropdown{position:relative;display:inline-flex;align-items:center}
-.nav-dd-btn{padding:6px 14px;border-radius:var(--radius-xs);font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);background:none;border:none;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
-.nav-dd-btn:hover{color:var(--text);background:rgba(255,255,255,.05)}
-.nav-dd-btn.on{color:var(--sb-green);font-weight:600}
-.nav-dd-menu{display:none;position:fixed;top:56px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:6px;min-width:175px;z-index:9999;box-shadow:0 16px 48px rgba(0,0,0,.6)}
+.nav-dd-btn{padding:4px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text3);background:none;border:1px solid transparent;font-family:'IBM Plex Mono',monospace;letter-spacing:.8px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.nav-dd-btn:hover{color:var(--bb-orange);background:rgba(255,102,0,.08);border-color:rgba(255,102,0,.3)}
+.nav-dd-btn.on{background:rgba(255,102,0,.15);color:var(--bb-orange);border-color:rgba(255,102,0,.5)}
+.nav-dd-menu{display:none;position:fixed;top:52px;background:var(--bg2);border:1px solid rgba(255,102,0,.35);border-top:2px solid var(--bb-orange);border-radius:2px;padding:4px;min-width:165px;z-index:9999;box-shadow:0 12px 40px rgba(0,0,0,.8)}
 .nav-dd-menu.open{display:flex;flex-direction:column}
-.nav-dd-menu button{padding:9px 14px;border-radius:var(--radius-xs);font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);background:none;border:none;font-family:'Inter',sans-serif;text-align:left;transition:all .12s;white-space:nowrap;width:100%}
-.nav-dd-menu button:hover{background:rgba(0,170,108,.08);color:var(--sb-green)}
+.nav-dd-menu button{padding:7px 12px;border-radius:1px;font-size:10px;font-weight:600;cursor:pointer;color:var(--text2);background:none;border:none;font-family:'IBM Plex Mono',monospace;text-align:left;transition:all .12s;white-space:nowrap;width:100%;text-transform:uppercase;letter-spacing:.5px}
+.nav-dd-menu button:hover{background:rgba(255,102,0,.12);color:var(--bb-orange)}
 
-.tab{padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);border:none;border-bottom:2px solid transparent;background:none;font-family:'Inter',sans-serif;white-space:nowrap;transition:all .12s}
+.tab{padding:5px 12px;font-size:9px;font-weight:700;cursor:pointer;color:var(--text3);border:none;border-bottom:2px solid transparent;background:none;font-family:'IBM Plex Mono',monospace;white-space:nowrap;transition:all .12s;text-transform:uppercase;letter-spacing:.8px}
 .tab:hover:not(.on){color:var(--text2)}
-.tab.on{color:var(--sb-green);border-bottom-color:var(--sb-green);font-weight:600}
-
+.tab.on{color:var(--bb-orange);border-bottom-color:var(--bb-orange)}
 /* FlowScan heatmap cell */
-.fs-hm-cell{border-radius:var(--radius-sm);padding:8px 7px;cursor:pointer;transition:transform .12s,box-shadow .12s;border:1px solid transparent}
-.fs-hm-cell:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.fs-hm-acc{background:rgba(0,170,108,.08);border-color:rgba(0,170,108,.2)}
-.fs-hm-dist{background:rgba(232,64,64,.08);border-color:rgba(232,64,64,.2)}
-.fs-hm-neut{background:var(--bg3);border-color:var(--border)}
-
+.fs-hm-cell{border-radius:2px;padding:7px 6px;cursor:pointer;transition:transform .12s;border:1px solid transparent}
+.fs-hm-cell:hover{transform:translateY(-2px)}
+.fs-hm-acc{background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.2)}
+.fs-hm-dist{background:rgba(255,34,68,.08);border-color:rgba(255,34,68,.2)}
+.fs-hm-neut{background:var(--bg2);border-color:var(--border)}
 /* FlowScan alert item */
-.al-item{display:flex;gap:12px;padding:11px 13px;background:var(--bg3);border-radius:var(--radius-sm);border:1px solid var(--border);align-items:flex-start}
-.al-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
-.al-a{background:rgba(0,170,108,.12);color:var(--green)}
-.al-d{background:rgba(232,64,64,.12);color:var(--red)}
-.al-n{background:rgba(59,130,246,.12);color:var(--blue)}
-
+.al-item{display:flex;gap:10px;padding:9px 11px;background:var(--bg3);border-radius:2px;border:1px solid var(--border);align-items:flex-start}
+.al-ico{width:24px;height:24px;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px}
+.al-a{background:rgba(0,212,170,.12);color:var(--green)}
+.al-d{background:rgba(255,34,68,.12);color:var(--red)}
+.al-n{background:rgba(0,136,255,.12);color:var(--blue)}
 /* WL item */
-.wl-chip{padding:5px 12px;border-radius:20px;font-size:11px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
-.wl-chip:hover{border-color:rgba(0,170,108,.4);color:var(--sb-green);background:rgba(0,170,108,.06)}
+.wl-chip{padding:3px 9px;border-radius:1px;font-size:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .12px;text-transform:uppercase;letter-spacing:.5px}
+.wl-chip:hover{border-color:rgba(255,102,0,.4);color:var(--bb-orange)}
 
 /* ══════════════ AUTH SYSTEM ══════════════ */
 #auth-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column}
 #auth-overlay.hidden{display:none}
-.auth-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:40px;width:400px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.auth-logo{font-size:22px;font-weight:800;color:#fff;text-align:center;margin-bottom:4px;letter-spacing:-.5px}
-.auth-logo span{color:var(--sb-green)}
-.auth-sub{text-align:center;font-size:12px;color:var(--text3);margin-bottom:28px}
-.auth-field{margin-bottom:16px}
-.auth-field label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.auth-field input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:11px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s}
-.auth-field input:focus{border-color:var(--sb-green);box-shadow:0 0 0 3px rgba(0,170,108,.12)}
-.auth-btn{width:100%;padding:12px;background:var(--sb-green);border:none;border-radius:var(--radius-sm);color:#fff;font-weight:700;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;margin-top:6px;letter-spacing:.1px}
-.auth-btn:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,170,108,.25)}
-.auth-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.auth-err{background:rgba(232,64,64,.08);border:1px solid rgba(232,64,64,.2);border-radius:var(--radius-sm);padding:10px 13px;font-size:12px;color:var(--red);margin-bottom:14px;display:none}
-.auth-info{text-align:center;font-size:11px;color:var(--text3);margin-top:18px;line-height:1.7}
-.auth-lock{text-align:center;padding:13px;background:rgba(232,64,64,.06);border:1px solid rgba(232,64,64,.15);border-radius:var(--radius-sm);color:var(--red);font-size:12px;margin-bottom:14px;display:none}
+.auth-box{background:var(--bg2);border:1px solid rgba(255,102,0,.4);border-top:3px solid var(--bb-orange);border-radius:2px;padding:36px 40px;width:380px;max-width:92vw;box-shadow:0 0 60px rgba(255,102,0,.1)}
+.auth-logo{font-size:22px;font-weight:700;color:var(--bb-orange);letter-spacing:4px;font-family:'IBM Plex Mono',monospace;text-align:center;margin-bottom:4px;text-transform:uppercase}
+.auth-logo span{color:var(--text3)}
+.auth-sub{text-align:center;font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:28px;letter-spacing:1px;text-transform:uppercase}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px;font-family:'IBM Plex Mono',monospace}
+.auth-field input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:10px 13px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;outline:none;box-sizing:border-box;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--bb-orange);box-shadow:0 0 0 2px rgba(255,102,0,.1)}
+.auth-btn{width:100%;padding:11px;background:rgba(255,102,0,.15);border:1px solid rgba(255,102,0,.5);border-radius:2px;color:var(--bb-orange);font-weight:700;font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;transition:all .15s;margin-top:6px;letter-spacing:1.5px;text-transform:uppercase}
+.auth-btn:hover{background:rgba(255,102,0,.25)}
+.auth-btn:disabled{opacity:.4;cursor:not-allowed}
+.auth-err{background:rgba(255,34,68,.1);border:1px solid rgba(255,34,68,.25);border-radius:2px;padding:8px 11px;font-size:10px;color:#ff6688;margin-bottom:12px;display:none;font-family:'IBM Plex Mono',monospace}
+.auth-info{text-align:center;font-size:10px;color:var(--text3);margin-top:16px;line-height:1.6;font-family:'IBM Plex Mono',monospace}
+.auth-lock{text-align:center;padding:12px;background:rgba(255,34,68,.08);border:1px solid rgba(255,34,68,.2);border-radius:2px;color:var(--red);font-size:11px;margin-bottom:14px;display:none;font-family:'IBM Plex Mono',monospace}
 /* Session info in topbar */
-#session-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)}
-#session-user{color:var(--text);font-weight:600}
-.auth-timeout-bar{height:3px;background:rgba(0,170,108,.1);border-radius:0;margin-top:10px;overflow:hidden}
-.auth-timeout-fill{height:100%;background:var(--sb-green);border-radius:0;transition:width 1s linear}
+#session-info{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace}
+#session-user{color:var(--accent);font-weight:600}
+.auth-timeout-bar{height:2px;background:rgba(255,102,0,.15);border-radius:0;margin-top:8px;overflow:hidden}
+.auth-timeout-fill{height:100%;background:var(--bb-orange);border-radius:0;transition:width 1s linear}
 
 </style>
 </head>
@@ -261,12 +254,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
      ══════════════════════════════════════════════ -->
 <div id="auth-overlay">
   <div class="auth-box">
-    <div class="auth-logo" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="2" width="20" height="20" rx="6" fill="#00AA6C" opacity=".15"/>
-        <rect x="2" y="2" width="20" height="20" rx="6" stroke="#00AA6C" stroke-width="1.5"/>
-        <path d="M7 14.5 L10 10.5 L13 13 L17 8" stroke="#00AA6C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="17" cy="8" r="2" fill="#00AA6C"/>
+    <div class="auth-logo" style="display:flex;align-items:center;justify-content:center;gap:10px">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="#00c8ff" stroke-width="1.5"/>
+        <path d="M7 14 L10 10 L13 13 L17 8" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="17" cy="8" r="1.5" fill="#00e5a0"/>
+        <path d="M7 17 H17" stroke="#00c8ff" stroke-width="1" stroke-dasharray="2 1.5" opacity="0.5"/>
       </svg>
       Money<span>Watch</span>
     </div>
@@ -292,6 +285,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="auth-info">
         Sesi aktif selama <strong style="color:var(--text2)">30 menit</strong> · Auto-logout jika tidak aktif<br>
         Lupa password? <span style="color:var(--accent);cursor:pointer" onclick="authShowReset()">Reset via kode</span>
+        · <span style="color:var(--accent);cursor:pointer" onclick="authShowSetup('Buat akun baru')">Buat Akun</span>
       </div>
     </div>
 
@@ -344,14 +338,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <!-- TOPBAR -->
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:14px">
-  <div class="logo" style="display:flex;align-items:center;gap:8px">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="20" height="20" rx="5" fill="#00AA6C" opacity=".15"/>
-      <rect x="2" y="2" width="20" height="20" rx="5" stroke="#00AA6C" stroke-width="1.5"/>
-      <path d="M7 14.5 L10 10.5 L13 13 L17 8" stroke="#00AA6C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="17" cy="8" r="1.8" fill="#00AA6C"/>
+  <div class="logo" style="display:flex;align-items:center;gap:7px">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="20" height="20" rx="2" stroke="#ff6600" stroke-width="1.5"/>
+      <path d="M7 14 L10 10 L13 13 L17 8" stroke="#00d4aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="17" cy="8" r="1.5" fill="#00d4aa"/>
     </svg>
-    <span class="logo">Money<span>Watch</span></span>
+    <span class="logo">MW<span style="color:rgba(255,102,0,.4)"> |</span> <span style="font-size:10px;letter-spacing:1px;color:var(--text3);font-weight:400">PRO</span></span>
   </div>
   <div class="nav-wrap">
     <div class="nav" id="nav">
@@ -421,9 +414,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
   <div class="topbar-right">
     <div style="display:flex;align-items:center;gap:6px">
-      <span id="save-status-bar" style="font-size:9px;font-family:'Inter',sans-serif;transition:opacity .5s;opacity:0;color:var(--green);letter-spacing:.1px"></span>
-      <button class="btn btn-ghost btn-xs" onclick="openBackupModal()" style="font-size:10px;gap:4px;display:flex;align-items:center;border-color:rgba(0,170,108,.2);color:var(--sb-green);letter-spacing:.8px">
-        💾 Backup
+      <span id="save-status-bar" style="font-size:9px;font-family:'IBM Plex Mono',monospace;transition:opacity .5s;opacity:0;color:var(--green);letter-spacing:.5px;text-transform:uppercase"></span>
+      <button class="btn btn-ghost btn-xs" onclick="openBackupModal()" style="font-size:10px;gap:4px;display:flex;align-items:center;border-color:rgba(255,102,0,.3);color:var(--bb-orange);letter-spacing:.8px">
+        💾 BACKUP
       </button>
     </div>
     <div class="rdn-bar">
@@ -431,23 +424,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <span class="rdn-val" id="tb-rdn">Rp 0</span>
     </div>
     <div class="ihsg-bar">
-      <span style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">IHSG</span>
+      <span style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace">IHSG</span>
       <span class="ibar-val" id="tb-ihsg">6.195,43</span>
       <span class="ibar-chg" id="tb-chg"></span>
     </div>
     <div class="live"><div class="dot"></div>LIVE</div>
     <!-- Finnhub status badge -->
     <div id="fh-badge" onclick="openFinnhubSettings()" title="Klik untuk status koneksi Yahoo Finance"
-      style="display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 7px;cursor:pointer;font-size:9px;font-family:'Inter',sans-serif;transition:all .15s;letter-spacing:.5px;text-transform:uppercase">
+      style="display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:1px;padding:2px 7px;cursor:pointer;font-size:9px;font-family:'IBM Plex Mono',monospace;transition:all .15s;letter-spacing:.5px;text-transform:uppercase">
       <span id="fh-dot" style="width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0"></span>
       <span id="fh-label">Simulasi</span>
     </div>
     <div class="clock" id="clock">--:--:--</div>
     <!-- Session info -->
-    <div id="session-info" style="display:none;align-items:center;gap:8px;font-size:12px;color:var(--text3)">
-      <span style="color:var(--sb-green)">◆</span>
+    <div id="session-info" style="display:none;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)">
+      <span style="color:var(--bb-orange)">◆</span>
       <span id="session-user" style="color:var(--text2)">—</span>
-      <button onclick="authLogout()" title="Logout" style="background:none;border:1px solid rgba(255,34,68,.3);color:var(--red);cursor:pointer;font-size:9px;padding:1px 6px;border-radius:3px;font-family:'Inter',sans-serif;letter-spacing:.5px">OUT</button>
+      <button onclick="authLogout()" title="Logout" style="background:none;border:1px solid rgba(255,34,68,.3);color:var(--red);cursor:pointer;font-size:9px;padding:1px 6px;border-radius:1px;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">OUT</button>
     </div>
   </div>
 </div><!-- /topbar-left-group -->
@@ -466,14 +459,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-dashboard" class="page on">
 
   <!-- ROW 1: Total AUM hero + 4 P&L cards -->
-  <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+  <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:9px;margin-bottom:11px">
     <!-- Hero: Total AUM -->
     <div class="metric" style="background:linear-gradient(135deg,#0c1e3a 0%,#0e2444 100%);border-color:rgba(0,200,255,.25);position:relative;overflow:hidden">
       <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(0,200,255,.07) 0%,transparent 60%);pointer-events:none"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <div class="mlabel" style="color:var(--accent);letter-spacing:1.5px">💼 TOTAL AUM DIKELOLA</div>
         <button onclick="toggleMetric('aum')" id="eye-aum" title="Sembunyikan nilai"
-          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:var(--radius-xs);transition:color .15s"
+          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:4px;transition:color .15s"
           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">👁</button>
       </div>
       <div class="mval lg" id="d-aum" style="color:var(--accent);font-size:26px">Rp 0</div>
@@ -484,7 +477,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <div class="mlabel">Unrealized P&amp;L</div>
         <button onclick="toggleMetric('unreal')" id="eye-unreal" title="Sembunyikan nilai"
-          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:var(--radius-xs);transition:color .15s"
+          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:4px;transition:color .15s"
           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">👁</button>
       </div>
       <div class="mval" id="d-unreal">Rp 0</div>
@@ -494,7 +487,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <div class="mlabel">Realized P&amp;L</div>
         <button onclick="toggleMetric('real')" id="eye-real" title="Sembunyikan nilai"
-          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:var(--radius-xs);transition:color .15s"
+          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:4px;transition:color .15s"
           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">👁</button>
       </div>
       <div class="mval" id="d-real">Rp 0</div>
@@ -504,7 +497,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <div class="mlabel">Saldo RDN</div>
         <button onclick="toggleMetric('rdn')" id="eye-rdn" title="Sembunyikan nilai"
-          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:var(--radius-xs);transition:color .15s"
+          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:4px;transition:color .15s"
           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">👁</button>
       </div>
       <div class="mval up" id="d-rdn">Rp 0</div>
@@ -514,7 +507,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
         <div class="mlabel">Total Dividen YTD</div>
         <button onclick="toggleMetric('div')" id="eye-div" title="Sembunyikan nilai"
-          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:var(--radius-xs);transition:color .15s"
+          style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px 5px;line-height:1;border-radius:4px;transition:color .15s"
           onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text3)'">👁</button>
       </div>
       <div class="mval" id="d-div">Rp 0</div>
@@ -523,11 +516,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- ROW 1b: Risiko + Strategi/Alokasi (kiri) · Saran AI news (kanan) -->
-  <div style="display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;margin-bottom:14px;align-items:stretch">
-    <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:11px;margin-bottom:11px;align-items:stretch">
+    <div style="display:flex;flex-direction:column;gap:11px;min-width:0">
       <div class="card" style="margin:0">
         <div class="cheader"><span class="ctitle">⚠️ Analisis Risiko Portofolio</span><button class="btn btn-ghost btn-xs" onclick="goPage('risiko')">Detail →</button></div>
-        <div id="d-risk-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px"></div>
+        <div id="d-risk-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px"></div>
       </div>
       <div class="card" style="margin:0;flex:1">
         <div class="cheader"><span class="ctitle">🎯 Strategi Trade &amp; Alokasi Aset</span><span class="badge b-gray">manual</span></div>
@@ -548,17 +541,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- ROW 2: 4 Asset Class Cards dengan bobot -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:11px">
     <!-- Saham IDX -->
     <div class="metric" style="border-color:rgba(0,229,160,.3);cursor:pointer" onclick="goPage('portofolio')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
-          <div style="font-size:10px;font-weight:700;color:var(--green);font-family:'Inter',sans-serif;letter-spacing:.5px">📈 SAHAM IDX</div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">📈 SAHAM IDX</div>
           <div class="mval" id="d-porto" style="color:var(--green);margin-top:4px">Rp 0</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:var(--green)" id="d-porto-bobot">0%</div>
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">dari AUM</div>
+          <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--green)" id="d-porto-bobot">0%</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace">dari AUM</div>
         </div>
       </div>
       <div class="prog"><div class="progf" id="d-porto-bar" style="width:0%;background:var(--green)"></div></div>
@@ -571,12 +564,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="metric" style="border-color:rgba(247,147,26,.3);cursor:pointer" onclick="goPage('crypto')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
-          <div style="font-size:10px;font-weight:700;color:#f7931a;font-family:'Inter',sans-serif;letter-spacing:.5px">🪙 CRYPTO</div>
+          <div style="font-size:10px;font-weight:700;color:#f7931a;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">🪙 CRYPTO</div>
           <div class="mval" id="d-crypto" style="color:#f7931a;margin-top:4px">Rp 0</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:#f7931a" id="d-crypto-bobot">0%</div>
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">dari AUM</div>
+          <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:#f7931a" id="d-crypto-bobot">0%</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace">dari AUM</div>
         </div>
       </div>
       <div class="prog"><div class="progf" id="d-crypto-bar" style="width:0%;background:#f7931a"></div></div>
@@ -589,12 +582,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="metric" style="border-color:rgba(0,200,255,.3);cursor:pointer" onclick="goPage('etf')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
-          <div style="font-size:10px;font-weight:700;color:var(--accent);font-family:'Inter',sans-serif;letter-spacing:.5px">📊 ETF AMERIKA</div>
+          <div style="font-size:10px;font-weight:700;color:var(--accent);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">📊 ETF AMERIKA</div>
           <div class="mval" id="d-etf" style="color:var(--accent);margin-top:4px">Rp 0</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:var(--accent)" id="d-etf-bobot">0%</div>
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">dari AUM</div>
+          <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--accent)" id="d-etf-bobot">0%</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace">dari AUM</div>
         </div>
       </div>
       <div class="prog"><div class="progf" id="d-etf-bar" style="width:0%;background:var(--accent)"></div></div>
@@ -607,12 +600,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="metric" style="border-color:rgba(167,139,250,.3);cursor:pointer" onclick="goPage('reksadana')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
-          <div style="font-size:10px;font-weight:700;color:var(--purple);font-family:'Inter',sans-serif;letter-spacing:.5px">🏦 REKSA DANA</div>
+          <div style="font-size:10px;font-weight:700;color:var(--purple);font-family:'IBM Plex Mono',monospace;letter-spacing:.5px">🏦 REKSA DANA</div>
           <div class="mval" id="d-rd" style="color:var(--purple);margin-top:4px">Rp 0</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:var(--purple)" id="d-rd-bobot">0%</div>
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">dari AUM</div>
+          <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--purple)" id="d-rd-bobot">0%</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace">dari AUM</div>
         </div>
       </div>
       <div class="prog"><div class="progf" id="d-rd-bar" style="width:0%;background:var(--purple)"></div></div>
@@ -624,15 +617,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- ROW 3: Chart AUM allocation + IHSG chart + Top movers -->
-  <div style="display:grid;grid-template-columns:260px 1fr 240px;gap:14px;margin-bottom:14px">
+  <div style="display:grid;grid-template-columns:260px 1fr 240px;gap:11px;margin-bottom:11px">
     <!-- Donut alokasi AUM -->
     <div class="card">
       <div class="cheader"><span class="ctitle">Alokasi AUM</span><span class="badge b-gray" id="d-aum-total-badge">Rp 0</span></div>
       <div style="position:relative;width:130px;height:130px;margin:0 auto 10px">
         <canvas id="aumDonut"></canvas>
         <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif">4 KELAS</div>
-          <div style="font-size:11px;font-weight:700;font-family:'Inter',sans-serif;color:var(--text)">ASET</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace">4 KELAS</div>
+          <div style="font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text)">ASET</div>
         </div>
       </div>
       <div id="aum-leg" style="display:flex;flex-direction:column;gap:5px"></div>
@@ -642,7 +635,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="cheader">
         <div style="display:flex;align-items:center;gap:10px">
           <span class="ctitle">Pergerakan IHSG</span>
-          <span style="font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--accent)" id="ihsg-close-disp">6.195,43</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--accent)" id="ihsg-close-disp">6.195,43</span>
           <span class="badge b-up" id="ihsg-chg-disp">▲ 68,05 (+1,11%)</span>
         </div>
         <div style="display:flex;gap:4px">
@@ -655,26 +648,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="cw" style="height:155px"><canvas id="ihsgChart"></canvas></div>
       <!-- IHSG Stats Bar — Data Real 2 Jun 2026 -->
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">Open</div><div id="ihsg-op" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600">6.210,00</div></div>
-        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">High</div><div id="ihsg-hi" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--green)">6.264,26</div></div>
-        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">Low</div><div id="ihsg-lo" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--red)">6.143,63</div></div>
-        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">Mkt Cap</div><div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600">11.020T</div></div>
-        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">PER</div><div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600">14,47</div></div>
-        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">PBV</div><div style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600">1,82</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">Open</div><div id="ihsg-op" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600">6.210,00</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">High</div><div id="ihsg-hi" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--green)">6.264,26</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">Low</div><div id="ihsg-lo" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--red)">6.143,63</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">Mkt Cap</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600">11.020T</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">PER</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600">14,47</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">PBV</div><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600">1,82</div></div>
       </div>
     </div>
     <!-- Top Movers -->
     <div class="card" style="display:flex;flex-direction:column">
       <div class="cheader" style="margin-bottom:6px"><span class="ctitle">Top Movers Saham</span></div>
-      <div style="font-size:9px;color:var(--green);font-family:'Inter',sans-serif;letter-spacing:1px;margin-bottom:3px">▲ GAINERS</div>
+      <div style="font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-bottom:3px">▲ GAINERS</div>
       <div id="gainers" style="flex:1"></div>
-      <div style="font-size:9px;color:var(--red);font-family:'Inter',sans-serif;letter-spacing:1px;margin-top:8px;margin-bottom:3px">▼ LOSERS</div>
+      <div style="font-size:9px;color:var(--red);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-top:8px;margin-bottom:3px">▼ LOSERS</div>
       <div id="losers"></div>
     </div>
   </div>
 
   <!-- ROW 4: Per-aset breakdown + Recent tx -->
-  <div style="display:grid;grid-template-columns:1fr 300px;gap:14px;margin-bottom:14px">
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:11px;margin-bottom:11px">
     <!-- Tabel ringkasan semua aset -->
     <div class="card">
       <div class="cheader"><span class="ctitle">Ringkasan Semua Aset</span><span class="badge b-gray" id="d-total-items">0 instrumen</span></div>
@@ -695,7 +688,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       </div>
     </div>
     <!-- Panel kanan: recent tx + kas -->
-    <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;flex-direction:column;gap:9px">
       <div class="card">
         <div class="cheader">
           <span class="ctitle">Transaksi Terakhir</span>
@@ -711,29 +704,29 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- ROW 5b: Bar Chart Modal vs Posisi -->
-  <div class="card" style="margin-bottom:14px">
+  <div class="card" style="margin-bottom:11px">
     <div class="cheader">
       <span class="ctitle">📊 Modal vs Posisi Saat Ini (per Saham)</span>
       <div style="display:flex;gap:8px;align-items:center">
-        <span style="font-size:9px;color:var(--green);font-family:'Inter',sans-serif">■ Nilai Pasar</span>
-        <span style="font-size:9px;color:var(--accent);font-family:'Inter',sans-serif">■ Modal</span>
-        <span style="font-size:9px;color:var(--red);font-family:'Inter',sans-serif">■ Rugi / </span>
-        <span style="font-size:9px;color:var(--amber);font-family:'Inter',sans-serif">■ Untung</span>
+        <span style="font-size:9px;color:var(--green);font-family:'IBM Plex Mono',monospace">■ Nilai Pasar</span>
+        <span style="font-size:9px;color:var(--accent);font-family:'IBM Plex Mono',monospace">■ Modal</span>
+        <span style="font-size:9px;color:var(--red);font-family:'IBM Plex Mono',monospace">■ Rugi / </span>
+        <span style="font-size:9px;color:var(--amber);font-family:'IBM Plex Mono',monospace">■ Untung</span>
       </div>
     </div>
     <div class="cw" style="height:220px"><canvas id="modalPosisiChart"></canvas></div>
   </div>
 
   <!-- ROW 5: Sektoral + Dividen -->
-  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px">
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:11px;margin-bottom:11px">
     <div class="card">
       <div class="cheader"><span class="ctitle">Alokasi Sektoral Saham</span><span class="badge b-gray">IDX • Nilai Modal</span></div>
       <div id="d-sectoral-detail"></div>
     </div>
     <div class="card">
       <div class="cheader"><span class="ctitle">Dividen Kumulatif 2018–2026</span></div>
-      <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:var(--green);margin-bottom:4px" id="d-div-total">Rp 0</div>
-      <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif;margin-bottom:8px" id="d-div-info"></div>
+      <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--green);margin-bottom:4px" id="d-div-total">Rp 0</div>
+      <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px" id="d-div-info"></div>
       <div id="d-dividen-list" style="max-height:130px;overflow-y:auto"></div>
     </div>
   </div>
@@ -743,7 +736,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-rdn" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">Rekening Dana Nasabah (RDN)</div>
+      <div class="ptitle">Rekening Dana Nasabah (RDN)</div>
       <div class="psub">Kelola arus kas masuk &amp; keluar ke rekening RDN sekuritas Anda</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -783,7 +776,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="cheader"><span class="ctitle">Ringkasan Saldo</span></div>
       <div id="rdn-summary"></div>
       <div class="sep"></div>
-      <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif;letter-spacing:1px;margin-bottom:8px">PENGATURAN SEKURITAS AKTIF</div>
+      <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-bottom:8px">PENGATURAN SEKURITAS AKTIF</div>
       <div id="rdn-sec-info"></div>
     </div>
   </div>
@@ -813,7 +806,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-transaksi" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">Transaksi Saham</div>
+      <div class="ptitle">Transaksi Saham</div>
       <div class="psub">Catat beli/jual saham dengan kalkulasi komisi &amp; pajak otomatis sesuai sekuritas</div>
     </div>
     <div style="display:flex;gap:8px">
@@ -859,7 +852,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-portofolio" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">Portofolio Saham</div>
+      <div class="ptitle">Portofolio Saham</div>
       <div class="psub">Posisi aktif, unrealized P&amp;L, alokasi dan sinyal teknikal</div>
     </div>
     <button class="btn btn-blue" id="btn-beli2">+ Beli Saham</button>
@@ -867,7 +860,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   <!-- Cash widget saham -->
   <div style="background:rgba(0,0,0,.15);border:1px solid #00e5a033;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="font-size:10px;font-weight:700;color:#00e5a0;letter-spacing:.8px;white-space:nowrap">💰 KAS AKUN SAHAM (RDN)</span>
-    <span style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:#00e5a0" id="cash-saham-disp">Rp 0</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#00e5a0" id="cash-saham-disp">Rp 0</span>
     <input type="number" id="cash-saham-input" placeholder="Set kas..." class="finput" style="width:140px;padding:4px 9px;font-size:11px">
     <button class="btn btn-ghost btn-xs" style="color:#00e5a0;border-color:#00e5a044" onclick="saveCashInput('saham')">💾 Simpan</button>
     <span style="font-size:10px;color:var(--text3);flex:1">Dana tersedia di rekening sekuritas untuk trading saham IDX</span>
@@ -897,7 +890,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-dividen" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">Dashboard Dividen</div>
+      <div class="ptitle">Dashboard Dividen</div>
       <div class="psub">Riwayat penerimaan dividen per tahun 2018–2026 · PPh 10% · Proyeksi 5 tahun ke depan</div>
     </div>
     <div style="display:flex;gap:7px">
@@ -915,7 +908,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="metric"><div class="mlabel">Dividend Yield (est.)</div><div class="mval" id="dv-yield">0,00%</div><div class="msub neu">dari portofolio</div></div>
   </div>
   <!-- Chart tabs: per tahun -->
-  <div class="g2c" style="margin-bottom:14px">
+  <div class="g2c" style="margin-bottom:11px">
     <div class="card">
       <div class="cheader">
         <span class="ctitle">Dividen Per Tahun (2018–2026)</span>
@@ -928,7 +921,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
   </div>
   <!-- Proyeksi 5 tahun -->
-  <div class="card" style="margin-bottom:14px">
+  <div class="card" style="margin-bottom:11px">
     <div class="cheader">
       <span class="ctitle">📈 Proyeksi Dividen 5 Tahun (2027–2031)</span>
       <div style="display:flex;gap:6px;align-items:center">
@@ -979,7 +972,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-divinvest" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">💹 Dividen Investing Dashboard</div>
+      <div class="ptitle">💹 Dividen Investing Dashboard</div>
       <div class="psub">Analisa DPR · Proyeksi Probabilistik · Rating Profesional · Rencana Dividen Tahun Depan</div>
     </div>
     <div style="display:flex;gap:7px;flex-wrap:wrap">
@@ -989,7 +982,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- Metric Row -->
-  <div class="row4" style="margin-bottom:14px">
+  <div class="row4" style="margin-bottom:11px">
     <div class="metric"><div class="mlabel">Total Realisasi (Net)</div><div class="mval up" id="di-total-net">Rp 0</div><div class="msub neu" id="di-total-sub">sejak 2019</div></div>
     <div class="metric"><div class="mlabel">Emiten Rutin Bayar</div><div class="mval" id="di-emiten-cnt">0</div><div class="msub neu" id="di-emiten-sub">dari portofolio</div></div>
     <div class="metric"><div class="mlabel">Proyeksi Next Year</div><div class="mval up" id="di-proj-next">Rp 0</div><div class="msub neu" id="di-proj-sub">estimasi probabilistik</div></div>
@@ -1021,14 +1014,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
     <!-- Batch input area -->
     <div id="di-batch-box" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Batch: Satu baris per pembayaran, format → <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:var(--radius-sm)">TICKER,YYYY-MM-DD,DPS,LEMBAR,HARGA_BELI</code></div>
-      <textarea class="finput" id="di-batch-text" rows="6" style="font-family:'Inter',sans-serif;font-size:11px;resize:vertical;width:100%" placeholder="BBCA,2023-06-15,150,10000,9500&#10;TLKM,2023-08-10,100,5000,3800&#10;BMRI,2022-07-01,200,3000,5500"></textarea>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Batch: Satu baris per pembayaran, format → <code style="background:rgba(255,255,255,.06);padding:2px 5px;border-radius:3px">TICKER,YYYY-MM-DD,DPS,LEMBAR,HARGA_BELI</code></div>
+      <textarea class="finput" id="di-batch-text" rows="6" style="font-family:'IBM Plex Mono',monospace;font-size:11px;resize:vertical;width:100%" placeholder="BBCA,2023-06-15,150,10000,9500&#10;TLKM,2023-08-10,100,5000,3800&#10;BMRI,2022-07-01,200,3000,5500"></textarea>
       <button class="btn btn-amber btn-xs" style="margin-top:6px" onclick="saveDivBatch()">📥 Import Semua</button>
     </div>
   </div>
 
   <!-- Rating Overview Cards -->
-  <div class="card" style="margin-bottom:14px">
+  <div class="card" style="margin-bottom:11px">
     <div class="cheader">
       <span class="ctitle">🏅 Rating Emiten Dividen (Analisa Profesional)</span>
       <div style="display:flex;gap:5px;align-items:center">
@@ -1042,11 +1035,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
         </select>
       </div>
     </div>
-    <div id="di-rating-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:4px"></div>
+    <div id="di-rating-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:9px;margin-top:4px"></div>
   </div>
 
   <!-- DPR Table per emiten -->
-  <div class="g2c" style="margin-bottom:14px">
+  <div class="g2c" style="margin-bottom:11px">
     <div class="card">
       <div class="cheader"><span class="ctitle">📊 Realisasi Pendapatan per Emiten</span></div>
       <div style="overflow-x:auto">
@@ -1063,7 +1056,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- Proyeksi Next Year Detail -->
-  <div class="card" style="margin-bottom:14px">
+  <div class="card" style="margin-bottom:11px">
     <div class="cheader">
       <span class="ctitle">🔮 Proyeksi Dividen Tahun Depan (Probabilistik)</span>
       <div style="display:flex;gap:6px;align-items:center">
@@ -1087,13 +1080,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       </div>
       <div style="text-align:right">
         <div style="font-size:10px;color:var(--text3)">Total Proyeksi (Net setelah PPh 10%)</div>
-        <div style="font-family:'Inter',sans-serif;font-size:16px;font-weight:700;color:var(--green)" id="di-total-proj-disp">Rp 0</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;color:var(--green)" id="di-total-proj-disp">Rp 0</div>
       </div>
     </div>
   </div>
 
   <!-- History chart per tahun per emiten -->
-  <div class="card" style="margin-bottom:14px">
+  <div class="card" style="margin-bottom:11px">
     <div class="cheader">
       <span class="ctitle">📅 History DPS per Tahun per Emiten</span>
       <select class="finput fsel" id="di-history-ticker" onchange="renderDivHistoryChart()" style="padding:3px 7px;font-size:10px"><option value="ALL">Semua Emiten</option></select>
@@ -1235,7 +1228,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="cheader"><span class="ctitle">Rincian Per Sekuritas</span></div>
       <div id="pj-by-sec"></div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;flex-direction:column;gap:11px">
       <!-- ⚙️ Pengaturan Tarif Pajak -->
       <div class="card" style="border-color:rgba(255,193,7,.3)">
         <div class="cheader">
@@ -1247,30 +1240,30 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           <div class="fg">
             <label class="flabel">PPN × Komisi (%)</label>
             <div style="display:flex;align-items:center;gap:7px">
-              <input class="finput" type="number" id="tax-ppn-input" step="1" min="0" max="20" style="font-family:'Inter',sans-serif" oninput="taxPreviewLive()" placeholder="12">
-              <span style="font-size:13px;font-weight:700;color:var(--amber);font-family:'Inter',sans-serif" id="tax-ppn-disp">12%</span>
+              <input class="finput" type="number" id="tax-ppn-input" step="1" min="0" max="20" style="font-family:'IBM Plex Mono',monospace" oninput="taxPreviewLive()" placeholder="12">
+              <span style="font-size:13px;font-weight:700;color:var(--amber);font-family:'IBM Plex Mono',monospace" id="tax-ppn-disp">12%</span>
             </div>
             <div style="font-size:9px;color:var(--text3);margin-top:3px">PMK 131/2024 — masukkan angka persen (mis: 12)</div>
           </div>
           <div class="fg">
             <label class="flabel">Levy BEI+KPEI+KSEI (%)</label>
             <div style="display:flex;align-items:center;gap:7px">
-              <input class="finput" type="number" id="tax-levy-input" step="0.001" min="0" max="1" style="font-family:'Inter',sans-serif" oninput="taxPreviewLive()" placeholder="0.043">
-              <span style="font-size:13px;font-weight:700;color:var(--cyan);font-family:'Inter',sans-serif" id="tax-levy-disp">0.043%</span>
+              <input class="finput" type="number" id="tax-levy-input" step="0.001" min="0" max="1" style="font-family:'IBM Plex Mono',monospace" oninput="taxPreviewLive()" placeholder="0.043">
+              <span style="font-size:13px;font-weight:700;color:var(--cyan);font-family:'IBM Plex Mono',monospace" id="tax-levy-disp">0.043%</span>
             </div>
             <div style="font-size:9px;color:var(--text3);margin-top:3px">Masukkan dalam % (mis: 0.043 = 0,043% = BEI 0,018%+KPEI 0,010%+KSEI 0,015%)</div>
           </div>
           <div class="fg">
             <label class="flabel">PPh Final Jual (%)</label>
             <div style="display:flex;align-items:center;gap:7px">
-              <input class="finput" type="number" id="tax-jual-input" step="0.01" min="0" max="5" style="font-family:'Inter',sans-serif" oninput="taxPreviewLive()" placeholder="0.10">
-              <span style="font-size:13px;font-weight:700;color:var(--red);font-family:'Inter',sans-serif" id="tax-jual-disp">0.10%</span>
+              <input class="finput" type="number" id="tax-jual-input" step="0.01" min="0" max="5" style="font-family:'IBM Plex Mono',monospace" oninput="taxPreviewLive()" placeholder="0.10">
+              <span style="font-size:13px;font-weight:700;color:var(--red);font-family:'IBM Plex Mono',monospace" id="tax-jual-disp">0.10%</span>
             </div>
             <div style="font-size:9px;color:var(--text3);margin-top:3px">PP 14/1997 — hanya atas penjualan saham</div>
           </div>
         </div>
         <div style="margin-top:10px">
-          <div style="font-size:10px;color:var(--text3);letter-spacing:.2px;margin-bottom:6px">Preset Regulasi</div>
+          <div style="font-size:10px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px">Preset Regulasi</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             <button class="btn btn-ghost btn-xs" onclick="applyTaxPreset(0.12,0.001,0.00043)" style="border-color:rgba(255,193,7,.4);color:var(--amber)">✅ PPN12% + PPh0,1% + Levy0,043% (Resmi)</button>
             <button class="btn btn-ghost btn-xs" onclick="applyTaxPreset(0.11,0.001,0.00043)">PPN11% (sebelum Jan 2025)</button>
@@ -1278,7 +1271,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           </div>
         </div>
         <div class="taxbox" style="margin-top:10px">
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif;margin-bottom:6px">PREVIEW TOTAL BIAYA (10 lot @ Rp 5.000, komisi Stockbit 0,15%/0,25%)</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:6px">PREVIEW TOTAL BIAYA (10 lot @ Rp 5.000, komisi Stockbit 0,15%/0,25%)</div>
           <div class="taxrow"><span>Total Biaya Beli</span><span class="mono amb" id="tax-prev-beli">Rp 0</span></div>
           <div class="taxrow"><span>Total Biaya Jual</span><span class="mono dn" id="tax-prev-jual">Rp 0</span></div>
           <div class="taxrow tot"><span>Total Keduanya</span><span class="mono" id="tax-prev-diff">Rp 0</span></div>
@@ -1288,7 +1281,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="card">
         <div class="cheader"><span class="ctitle">🏦 Tarif PPh per Sekuritas</span><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-xs" onclick="resetSekTax()">Reset</button><button class="btn btn-amber btn-xs" onclick="saveSekTax()">💾 Simpan</button></div></div>
         <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Override komisi per sekuritas jika berbeda dari SEKURITAS data. PPh Final (0,1%) dan Levy (0,043%) adalah tarif tetap — tidak bisa di-override per broker.</div>
-        <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:7px;font-size:9px;color:var(--text3);letter-spacing:.6px;font-family:'Inter',sans-serif;padding-bottom:4px;border-bottom:1px solid var(--border2)"><span>SEKURITAS</span><span>KOMISI BELI %</span><span>KOMISI JUAL %</span></div>
+        <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:7px;font-size:9px;color:var(--text3);letter-spacing:.6px;font-family:'IBM Plex Mono',monospace;padding-bottom:4px;border-bottom:1px solid var(--border2)"><span>SEKURITAS</span><span>KOMISI BELI %</span><span>KOMISI JUAL %</span></div>
         <div id="sek-tax-rows" style="max-height:230px;overflow-y:auto"></div>
       </div>
       <!-- Kalkulator Real-time -->
@@ -1303,14 +1296,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           <div class="fg"><label class="flabel">Harga/Lembar (Rp)</label><input class="finput" type="number" id="sim-price" placeholder="8900" oninput="simCalcTax()"></div>
         </div>
         <div class="taxbox">
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif;margin-bottom:7px">SIMULASI JUAL</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:7px">SIMULASI JUAL</div>
           <div class="taxrow"><span>Nilai Kotor</span><span class="mono" id="s-gross">Rp 0</span></div>
           <div class="taxrow"><span id="s-pph-label">PPh Jual</span><span class="mono dn" id="s-pph">-Rp 0</span></div>
           <div class="taxrow"><span id="s-kom-label">Komisi Jual</span><span class="mono amb" id="s-kom">-Rp 0</span></div>
           <div class="taxrow tot"><span>Diterima Bersih</span><span class="mono up" id="s-net">Rp 0</span></div>
         </div>
         <div class="taxbox" style="margin-top:7px">
-          <div style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif;margin-bottom:7px">SIMULASI BELI</div>
+          <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:7px">SIMULASI BELI</div>
           <div class="taxrow"><span>Nilai Beli</span><span class="mono" id="s-buy">Rp 0</span></div>
           <div class="taxrow"><span id="s-pph-beli-label">PPh/Levy Beli</span><span class="mono amb" id="s-pph-beli">-Rp 0</span></div>
           <div class="taxrow"><span id="s-bkom-label">Komisi Beli</span><span class="mono amb" id="s-bkom">-Rp 0</span></div>
@@ -1338,7 +1331,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-crypto" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">Portofolio Crypto</div>
+      <div class="ptitle">Portofolio Crypto</div>
       <div class="psub">Tracking aset kripto dengan harga dalam Rupiah (IDR) — real-time simulasi</div>
     </div>
     <div style="display:flex;gap:8px">
@@ -1349,7 +1342,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <!-- Cash widget crypto -->
   <div style="background:rgba(0,0,0,.15);border:1px solid #f7931a33;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="font-size:10px;font-weight:700;color:#f7931a;letter-spacing:.8px;white-space:nowrap">💰 KAS CRYPTO (WALLET/EXCHANGE)</span>
-    <span style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:#f7931a" id="cash-crypto-disp">Rp 0</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#f7931a" id="cash-crypto-disp">Rp 0</span>
     <input type="number" id="cash-crypto-input" placeholder="Set kas..." class="finput" style="width:140px;padding:4px 9px;font-size:11px">
     <button class="btn btn-ghost btn-xs" style="color:#f7931a;border-color:#f7931a44" onclick="saveCashInput('crypto')">💾 Simpan</button>
     <span style="font-size:10px;color:var(--text3);flex:1">Saldo IDR di exchange crypto (Indodax, Tokocrypto, dll)</span>
@@ -1402,7 +1395,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-etf" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">Portofolio ETF Amerika Serikat</div>
+      <div class="ptitle">Portofolio ETF Amerika Serikat</div>
       <div class="psub">Tracking ETF US dengan konversi harga USD → IDR otomatis</div>
     </div>
     <div style="display:flex;gap:8px">
@@ -1413,7 +1406,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <!-- Cash widget etf -->
   <div style="background:rgba(0,0,0,.15);border:1px solid #00c8ff33;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="font-size:10px;font-weight:700;color:#00c8ff;letter-spacing:.8px;white-space:nowrap">💰 KAS ETF (USD ACCOUNT)</span>
-    <span style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:#00c8ff" id="cash-etf-disp">$ 0</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#00c8ff" id="cash-etf-disp">$ 0</span>
     <input type="number" id="cash-etf-input" placeholder="Set kas..." class="finput" style="width:140px;padding:4px 9px;font-size:11px">
     <button class="btn btn-ghost btn-xs" style="color:#00c8ff;border-color:#00c8ff44" onclick="saveCashInput('etf')">💾 Simpan</button>
     <span style="font-size:10px;color:var(--text3);flex:1">Saldo USD di broker internasional (IBKR, dll)</span>
@@ -1466,14 +1459,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-reksadana" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">Reksa Dana</div>
+      <div class="ptitle">Reksa Dana</div>
       <div class="psub">Riwayat investasi reksa dana 2018–2026 — seluruh posisi sudah dicairkan</div>
     </div>
     <span class="badge b-amb" style="font-size:11px;padding:5px 12px;align-self:center">Posisi Aktif: 0 produk</span>
   </div>
 
   <!-- Info banner -->
-  <div style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.25);border-radius:10px;padding:20px 24px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+  <div style="background:rgba(255,193,7,.07);border:1px solid rgba(255,193,7,.25);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
     <span style="font-size:22px">📋</span>
     <div>
       <div style="font-size:12px;font-weight:700;color:var(--amber)">Semua reksa dana sudah dicairkan</div>
@@ -1486,12 +1479,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <!-- Cash widget reksadana -->
   <div style="background:rgba(0,0,0,.15);border:1px solid #a78bfa33;border-radius:9px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="font-size:10px;font-weight:700;color:#a78bfa;letter-spacing:.8px;white-space:nowrap">💰 KAS REKSA DANA (BIBIT/IPOT)</span>
-    <span style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:#a78bfa" id="cash-reksadana-disp">Rp 0</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;color:#a78bfa" id="cash-reksadana-disp">Rp 0</span>
     <input type="number" id="cash-reksadana-input" placeholder="Set kas..." class="finput" style="width:140px;padding:4px 9px;font-size:11px">
     <button class="btn btn-ghost btn-xs" style="color:#a78bfa;border-color:#a78bfa44" onclick="saveCashInput('reksadana')">💾 Simpan</button>
     <span style="font-size:10px;color:var(--text3);flex:1">Saldo IDR di platform reksa dana (Bibit, IPOT, POEMS)</span>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px">
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:11px">
     <div class="metric" style="border-color:rgba(0,229,160,.3)">
       <div class="mlabel">Total Gain Kumulatif</div>
       <div class="mval up" id="rd-total" style="font-size:18px">Rp 0</div>
@@ -1520,7 +1513,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- Charts -->
-  <div class="g2b" style="margin-bottom:14px">
+  <div class="g2b" style="margin-bottom:11px">
     <div class="card">
       <div class="cheader"><span class="ctitle">Gain per Kategori (Semua Platform)</span></div>
       <div class="cw" style="height:160px"><canvas id="rdPerfChart"></canvas></div>
@@ -1591,14 +1584,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-flowscan" class="page">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">🔬 FlowScan — Analisa Big Money</div>
+      <div class="ptitle">🔬 FlowScan — Analisa Big Money</div>
       <div class="psub">Deteksi akumulasi & distribusi institusional via volume flow analysis</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:4px 10px">
         <i class="ti ti-search" style="color:var(--text3);font-size:13px"></i>
         <input id="fs-ticker-input" placeholder="Cari kode saham..." value="BBCA"
-          style="background:none;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;text-transform:uppercase;width:140px;letter-spacing:.8px"
+          style="background:none;border:none;outline:none;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;width:140px;letter-spacing:.8px"
           onkeydown="if(event.key==='Enter')fsRunAnalysis()"/>
       </div>
       <div style="display:flex;gap:3px;background:var(--bg);border-radius:7px;padding:3px">
@@ -1631,7 +1624,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
   </div>
 
   <!-- OV -->
-  <div id="fs-prob" style="margin-bottom:14px"></div>
+  <div id="fs-prob" style="margin-bottom:11px"></div>
   <div id="fs-st-ov">
     <div class="g2b">
       <div class="card">
@@ -1742,10 +1735,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- Ranking -->
 <div id="page-ranking" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">🏆 Ranking 30 Saham Terbesar IHSG</div>
+  <div class="ptitle">🏆 Ranking 30 Saham Terbesar IHSG</div>
   <div class="psub">Diurutkan berdasarkan skor akumulasi big money • Klik Lihat untuk analisa detail</div>
   <div class="card" style="margin-top:11px">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:11px">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;flex:1" id="rk-sum"></div>
       <div style="display:flex;gap:7px">
         <select class="finput fsel" id="rk-sort" onchange="fsRenderRanking()" style="padding:4px 8px;font-size:11px">
@@ -1770,7 +1763,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- Heatmap -->
 <div id="page-heatmap" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">🌡 Heatmap — 30 Saham IHSG</div>
+  <div class="ptitle">🌡 Heatmap — 30 Saham IHSG</div>
   <div class="psub">Visualisasi skor akumulasi & distribusi seluruh saham sekaligus</div>
   <div class="card" style="margin-top:11px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -1781,16 +1774,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
     <div id="hm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:5px;margin-bottom:10px"></div>
     <div style="display:flex;gap:14px;font-size:11px;color:var(--text3);flex-wrap:wrap">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.3);border-radius:var(--radius-xs)"></span>Akumulasi</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,61,90,.12);border:1px solid rgba(255,61,90,.3);border-radius:var(--radius-xs)"></span>Distribusi</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-xs)"></span>Netral</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.3);border-radius:2px"></span>Akumulasi</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,61,90,.12);border:1px solid rgba(255,61,90,.3);border-radius:2px"></span>Distribusi</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--bg3);border:1px solid var(--border);border-radius:2px"></span>Netral</span>
     </div>
   </div>
 </div>
 
 <!-- Scanner -->
 <div id="page-scanner" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">📡 Big Money Scanner</div>
+  <div class="ptitle">📡 Big Money Scanner</div>
   <div class="psub">Filter saham dengan kriteria CMF, skor akumulasi, dan volume ratio</div>
   <div class="card" style="margin-top:11px">
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
@@ -1808,7 +1801,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- Alerts -->
 <div id="page-alerts" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">🔔 Signal Alerts</div>
+  <div class="ptitle">🔔 Signal Alerts</div>
   <div class="psub">Notifikasi otomatis: akumulasi kuat, distribusi, anomali volume</div>
   <div class="card" style="margin-top:11px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -1821,13 +1814,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- Watchlist -->
 <div id="page-watchlist" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">⭐ Watchlist Saya</div>
+  <div class="ptitle">⭐ Watchlist Saya</div>
   <div class="psub">Pantau saham pilihan dengan analisa big money real-time</div>
   <div class="card" style="margin-top:11px">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
       <div style="display:flex;gap:7px;align-items:center">
         <input id="wl-add-input" placeholder="Kode saham..."
-          style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:5px 10px;border-radius:7px;font-size:12px;outline:none;text-transform:uppercase;font-family:'Inter',sans-serif;width:120px"
+          style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:5px 10px;border-radius:7px;font-size:12px;outline:none;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;width:120px"
           onkeydown="if(event.key==='Enter')fsAddFromInput()"/>
         <button class="btn btn-blue" onclick="fsAddFromInput()" style="font-size:12px">+ Tambah</button>
       </div>
@@ -1851,7 +1844,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-hargawajar" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">💎 Harga Wajar — Valuasi MoS</div>
+      <div class="ptitle">💎 Harga Wajar — Valuasi MoS</div>
       <div class="psub">Input data keuangan historis → hitung Margin of Safety · metodologi: EPS-based IRR + Future Stock Price (9-step)</div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
@@ -1872,30 +1865,30 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           <div style="min-width:120px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Kode Saham</div>
             <input id="hw-ticker-input" type="text" placeholder="e.g. BBCA" maxlength="6"
-              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:5px 8px;width:100%;border-radius:var(--radius-xs);text-transform:uppercase"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px;text-transform:uppercase"
               oninput="this.value=this.value.toUpperCase()">
           </div>
           <div style="min-width:140px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Harga Saham Saat Ini (Rp)</div>
             <input id="hw-current-price" type="number" placeholder="e.g. 9500" step="50"
-              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:5px 8px;width:100%;border-radius:var(--radius-xs)"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
               >
           </div>
           <div style="min-width:120px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Min Return (%/thn)</div>
             <input id="hw-min-return" type="number" value="6" step="1" min="1" max="30"
-              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:5px 8px;width:100%;border-radius:var(--radius-xs)"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
               >
           </div>
           <div style="min-width:120px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Proyeksi (tahun)</div>
             <input id="hw-proj-years" type="number" value="5" step="1" min="1" max="15"
-              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:5px 8px;width:100%;border-radius:var(--radius-xs)"
+              style="background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:5px 8px;width:100%;border-radius:2px"
               >
           </div>
           <div style="display:flex;align-items:flex-end;padding-bottom:0">
             <button onclick="hw_recalc()" id="hw-hitung-btn"
-              style="height:38px;padding:0 22px;background:var(--sb-green);border:none;border-radius:var(--radius-xs);color:#0a0a0f;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.5px;white-space:nowrap;transition:opacity .15s"
+              style="height:38px;padding:0 22px;background:var(--bb-orange);border:none;border-radius:2px;color:#0a0a0f;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.5px;white-space:nowrap;transition:opacity .15s"
               onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
               ⚡ HITUNG
             </button>
@@ -1907,19 +1900,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="card" style="margin-bottom:10px">
         <div class="cheader">
           <span class="ctitle">📊 DATA KEUANGAN HISTORIS</span>
-          <button class="btn" onclick="hw_addYear()" style="font-size:9px;padding:3px 8px;border-color:rgba(0,170,108,.2);color:var(--sb-green)">+ Tambah Tahun</button>
+          <button class="btn" onclick="hw_addYear()" style="font-size:9px;padding:3px 8px;border-color:rgba(255,102,0,.3);color:var(--bb-orange)">+ Tambah Tahun</button>
         </div>
         <div style="overflow-x:auto">
           <table class="tbl" id="hw-data-table">
             <thead>
               <tr>
                 <th style="white-space:nowrap">Tahun</th>
-                <th style="white-space:nowrap">EPS <span style="color:var(--sb-green);font-weight:400">(Rp/saham)</span></th>
-                <th style="white-space:nowrap">Total Equity <span style="color:var(--sb-green);font-weight:400">(Miliar Rp)</span></th>
-                <th style="white-space:nowrap">Shares <span style="color:var(--sb-green);font-weight:400">(Juta lembar)</span></th>
-                <th style="white-space:nowrap">DPS <span style="color:var(--sb-green);font-weight:400">(Rp/saham)</span></th>
-                <th style="white-space:nowrap">PER <span style="color:var(--sb-green);font-weight:400">(kali)</span></th>
-                <th style="white-space:nowrap">Net Income <span style="color:var(--sb-green);font-weight:400">(Miliar Rp)</span></th>
+                <th style="white-space:nowrap">EPS <span style="color:var(--bb-orange);font-weight:400">(Rp/saham)</span></th>
+                <th style="white-space:nowrap">Total Equity <span style="color:var(--bb-orange);font-weight:400">(Miliar Rp)</span></th>
+                <th style="white-space:nowrap">Shares <span style="color:var(--bb-orange);font-weight:400">(Juta lembar)</span></th>
+                <th style="white-space:nowrap">DPS <span style="color:var(--bb-orange);font-weight:400">(Rp/saham)</span></th>
+                <th style="white-space:nowrap">PER <span style="color:var(--bb-orange);font-weight:400">(kali)</span></th>
+                <th style="white-space:nowrap">Net Income <span style="color:var(--bb-orange);font-weight:400">(Miliar Rp)</span></th>
                 <th></th>
               </tr>
             </thead>
@@ -1927,9 +1920,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           </table>
         </div>
         <!-- Panduan unit -->
-        <div style="margin-top:10px;background:var(--bg3);border-radius:var(--radius-xs);padding:10px 12px;border-left:3px solid rgba(0,170,108,.4)">
-          <div style="font-size:9px;color:var(--sb-green);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-weight:700">📌 PANDUAN INPUT — SATUAN WAJIB</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;font-size:9px;font-family:'Inter',sans-serif">
+        <div style="margin-top:10px;background:var(--bg3);border-radius:2px;padding:10px 12px;border-left:3px solid rgba(255,102,0,.5)">
+          <div style="font-size:9px;color:var(--bb-orange);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-weight:700">📌 PANDUAN INPUT — SATUAN WAJIB</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px 16px;font-size:9px;font-family:'IBM Plex Mono',monospace">
             <div><span style="color:var(--text3)">EPS &amp; DPS</span><br><b style="color:var(--text)">Rupiah per saham</b><br><span style="color:var(--text3)">contoh: 179 = Rp 179/saham</span></div>
             <div><span style="color:var(--text3)">Total Equity &amp; Net Income</span><br><b style="color:var(--text)">Miliar Rupiah</b><br><span style="color:var(--text3)">contoh: 150537 = Rp 150,5 Triliun</span></div>
             <div><span style="color:var(--text3)">Shares</span><br><b style="color:var(--text)">Juta lembar saham</b><br><span style="color:var(--text3)">contoh: 99062 = 99,06 miliar lembar</span></div>
@@ -1951,7 +1944,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
         <div class="cheader">
           <span class="ctitle">📈 TREND HISTORIS</span>
           <div style="display:flex;gap:4px">
-            <button id="hw-chart-btn-eps" onclick="hw_switchChart('eps')" class="btn" style="font-size:9px;padding:2px 7px;border-color:rgba(0,170,108,.4);color:var(--sb-green);background:rgba(0,170,108,.08)">EPS &amp; PER</button>
+            <button id="hw-chart-btn-eps" onclick="hw_switchChart('eps')" class="btn" style="font-size:9px;padding:2px 7px;border-color:rgba(255,102,0,.5);color:var(--bb-orange);background:rgba(255,102,0,.12)">EPS &amp; PER</button>
             <button id="hw-chart-btn-eq" onclick="hw_switchChart('eq')" class="btn" style="font-size:9px;padding:2px 7px">Equity &amp; NI</button>
           </div>
         </div>
@@ -1967,25 +1960,25 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="card" id="hw-verdict-card" style="margin-bottom:10px;border-top-width:2px;border-top-color:var(--text3)">
         <div style="text-align:center;padding:10px 0">
           <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">VALUASI</div>
-          <div id="hw-ticker-display" style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:var(--sb-green);margin-bottom:4px">—</div>
-          <div id="hw-verdict-badge" style="display:inline-block;padding:4px 14px;border-radius:var(--radius-xs);font-size:11px;font-weight:700;font-family:'Inter',sans-serif;background:var(--bg4);color:var(--text3);border:1px solid var(--border)">BELUM DIHITUNG</div>
+          <div id="hw-ticker-display" style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--bb-orange);margin-bottom:4px">—</div>
+          <div id="hw-verdict-badge" style="display:inline-block;padding:4px 14px;border-radius:2px;font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;background:var(--bg4);color:var(--text3);border:1px solid var(--border)">BELUM DIHITUNG</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
-          <div style="background:var(--bg3);border-radius:var(--radius-xs);padding:8px;text-align:center">
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
             <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Harga Wajar</div>
-            <div id="hw-fair-price" style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:var(--amber)">—</div>
+            <div id="hw-fair-price" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--amber)">—</div>
           </div>
-          <div style="background:var(--bg3);border-radius:var(--radius-xs);padding:8px;text-align:center">
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
             <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Harga Saat Ini</div>
-            <div id="hw-current-display" style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:var(--text)">—</div>
+            <div id="hw-current-display" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text)">—</div>
           </div>
-          <div style="background:var(--bg3);border-radius:var(--radius-xs);padding:8px;text-align:center">
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
             <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Margin of Safety</div>
-            <div id="hw-mos-pct" style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:var(--text3)">—</div>
+            <div id="hw-mos-pct" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text3)">—</div>
           </div>
-          <div style="background:var(--bg3);border-radius:var(--radius-xs);padding:8px;text-align:center">
+          <div style="background:var(--bg3);border-radius:2px;padding:8px;text-align:center">
             <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Initial IRR</div>
-            <div id="hw-irr-display" style="font-size:18px;font-weight:700;font-family:'Inter',sans-serif;color:var(--text3)">—</div>
+            <div id="hw-irr-display" style="font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text3)">—</div>
           </div>
         </div>
         <!-- MoS gauge bar -->
@@ -1993,14 +1986,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
           <div style="font-size:9px;color:var(--text3);margin-bottom:4px;display:flex;justify-content:space-between">
             <span>Diskon</span><span id="hw-mos-label" style="color:var(--text2)">—</span><span>Premium</span>
           </div>
-          <div style="background:var(--bg4);border-radius:3px;height:8px;overflow:hidden;position:relative">
-            <div id="hw-mos-bar" style="height:100%;width:50%;background:var(--text3);transition:all .5s;border-radius:3px"></div>
+          <div style="background:var(--bg4);border-radius:1px;height:8px;overflow:hidden;position:relative">
+            <div id="hw-mos-bar" style="height:100%;width:50%;background:var(--text3);transition:all .5s;border-radius:1px"></div>
           </div>
         </div>
         <!-- Kesimpulan -->
-        <div id="hw-conclusion" style="display:none;margin-top:12px;padding:10px;background:var(--bg3);border-radius:var(--radius-xs);border-left:3px solid var(--text3)">
+        <div id="hw-conclusion" style="display:none;margin-top:12px;padding:10px;background:var(--bg3);border-radius:2px;border-left:3px solid var(--text3)">
           <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">KESIMPULAN</div>
-          <div id="hw-conclusion-text" style="font-size:10px;color:var(--text2);font-family:'Inter',sans-serif;line-height:1.7"></div>
+          <div id="hw-conclusion-text" style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;line-height:1.7"></div>
         </div>
       </div>
 
@@ -2036,14 +2029,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 <div id="page-candle" class="page">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px">
     <div>
-      <div class="ptitle" style="letter-spacing:-.3px">🕯 Candle Analysis — Psikologi & Money Management</div>
+      <div class="ptitle">🕯 Candle Analysis — Psikologi & Money Management</div>
       <div class="psub">Klasifikasi psikologi candle, sinyal entry/exit zona, position sizing &amp; backtest equity · saham aktif: <b style="color:var(--accent)" id="cd-ticker">ADMR</b></div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:4px 10px">
         <i class="ti ti-search" style="color:var(--text3);font-size:13px"></i>
         <input id="cd-tk-input" placeholder="Kode saham..." value="ADMR"
-          style="background:none;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;text-transform:uppercase;width:110px;letter-spacing:.8px"
+          style="background:none;border:none;outline:none;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;width:110px;letter-spacing:.8px"
           onkeydown="if(event.key==='Enter')cdLoadInput()"/>
       </div>
       <button class="btn btn-blue" onclick="cdLoadInput()" style="font-size:12px">Muat ↗</button>
@@ -2052,14 +2045,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
   </div>
   <!-- Quick load: saham di portofolio -->
-  <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:14px">
-    <span style="font-size:10px;color:var(--text3);font-family:'Inter',sans-serif">QUICK:</span>
+  <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:11px">
+    <span style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace">QUICK:</span>
     <div id="cd-chips" style="display:flex;flex-wrap:wrap;gap:5px"></div>
   </div>
   <!-- Catatan sumber data -->
-  <div id="cd-src-note" style="display:flex;align-items:flex-start;gap:8px;background:rgba(77,166,255,.06);border:1px solid rgba(77,166,255,.2);border-radius:8px;padding:7px 12px;margin-bottom:14px;font-size:11px;color:var(--text2);line-height:1.5"></div>
-  <div class="row5" id="cd-head" style="margin-bottom:14px"></div>
-  <div class="card" style="margin-bottom:14px">
+  <div id="cd-src-note" style="display:flex;align-items:flex-start;gap:8px;background:rgba(77,166,255,.06);border:1px solid rgba(77,166,255,.2);border-radius:8px;padding:7px 12px;margin-bottom:11px;font-size:11px;color:var(--text2);line-height:1.5"></div>
+  <div class="row5" id="cd-head" style="margin-bottom:11px"></div>
+  <div class="card" style="margin-bottom:11px">
     <div class="cheader"><span class="ctitle">Parameter Money Management & Zona Harga</span>
       <span style="font-size:10px;color:var(--text3)">Ubah nilai lalu klik “Hitung Ulang”</span></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">
@@ -2078,7 +2071,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <label class="cdset"><span>TP 3</span><input id="cd-tp3" type="number"></label>
     </div>
   </div>
-  <div class="row4" id="cd-metrics" style="margin-bottom:14px"></div>
+  <div class="row4" id="cd-metrics" style="margin-bottom:11px"></div>
   <div class="g2c">
     <div class="card">
       <div class="cheader"><span class="ctitle">Harga Close + Zona (TP / Stop / Entry)</span></div>
@@ -2089,7 +2082,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
       <div class="cw" style="height:230px"><canvas id="cdEquity"></canvas></div>
     </div>
   </div>
-  <div class="card" style="margin-bottom:14px">
+  <div class="card" style="margin-bottom:11px">
     <div class="cheader"><span class="ctitle">Psikologi Candle — 3 Sesi Terakhir</span></div>
     <div id="cd-psyco" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"></div>
   </div>
@@ -2112,7 +2105,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- ===== BACKTESTER (from QuantTrader) ===== -->
 <div id="page-backtester" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">⚡ Backtester Strategi</div>
+  <div class="ptitle">⚡ Backtester Strategi</div>
   <div class="psub">Uji strategi MA Crossover / RSI / XGBoost Signal dengan data harga real Yahoo Finance. Data live jika koneksi aktif.</div>
   <div style="display:grid;grid-template-columns:300px 1fr;gap:12px;margin-top:12px">
     <!-- Sidebar config -->
@@ -2130,7 +2123,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
             <input class="finput" id="bt-ticker" value="BBCA" style="flex:1;text-transform:uppercase" placeholder="BBCA, TLKM...">
             <button class="btn btn-bb btn-xs" onclick="btFetchLive()" title="Ambil data live Yahoo Finance">📡</button>
           </div>
-          <div style="font-size:9px;color:var(--text3);margin-top:3px;font-family:'Inter',sans-serif">Tambahkan .JK otomatis · Tekan 📡 untuk data live</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:3px;font-family:'IBM Plex Mono',monospace">Tambahkan .JK otomatis · Tekan 📡 untuk data live</div>
         </div>
         <div class="fg" style="margin-bottom:8px">
           <div class="flabel">Periode Backtest</div>
@@ -2177,15 +2170,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
         </div>
         <button class="btn btn-blue" style="width:100%;justify-content:center" onclick="runBacktest()">▶ Jalankan Backtest</button>
         <!-- Data status -->
-        <div id="bt-data-status" style="margin-top:8px;font-size:9px;color:var(--text3);font-family:'Inter',sans-serif;text-align:center">Status: —</div>
+        <div id="bt-data-status" style="margin-top:8px;font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center">Status: —</div>
       </div>
 
       <!-- Live data panel -->
       <div class="card">
         <div class="cheader"><span class="ctitle">📡 Data Sumber</span></div>
-        <div id="bt-datasrc" style="font-size:10px;color:var(--text2);font-family:'Inter',sans-serif;line-height:1.8">
+        <div id="bt-datasrc" style="font-size:10px;color:var(--text2);font-family:'IBM Plex Mono',monospace;line-height:1.8">
           <div>Sumber: <span id="bt-src-label" style="color:var(--amber)">Simulasi</span></div>
-          <div>Ticker: <span id="bt-src-ticker" style="color:var(--sb-green)">BBCA.JK</span></div>
+          <div>Ticker: <span id="bt-src-ticker" style="color:var(--bb-orange)">BBCA.JK</span></div>
           <div>Data poin: <span id="bt-src-count" style="color:var(--text)">—</span></div>
           <div>Terbaru: <span id="bt-src-date" style="color:var(--text)">—</span></div>
           <div>Harga: <span id="bt-src-price" style="color:var(--green)">—</span></div>
@@ -2243,7 +2236,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- ===== SCREENER LQ45 ===== -->
 <div id="page-screener" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">🔍 Screener Saham LQ45</div>
+  <div class="ptitle">🔍 Screener Saham LQ45</div>
   <div class="psub">Filter saham LQ45 berdasarkan indikator teknikal · Data harga live dari Yahoo Finance</div>
   <div class="card" style="margin:12px 0 10px">
     <div class="cheader"><span class="ctitle">⚙️ Filter</span><button class="btn btn-bb btn-xs" onclick="scFetchAndRun()">📡 Ambil Data Live + Scan</button></div>
@@ -2261,7 +2254,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
     <div style="margin-top:8px">
       <button class="btn btn-green" onclick="scRunFilter()">🔍 Scan Sekarang</button>
-      <span style="font-size:9px;color:var(--text3);font-family:'Inter',sans-serif;margin-left:10px" id="sc-status">—</span>
+      <span style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-left:10px" id="sc-status">—</span>
     </div>
   </div>
   <div class="card">
@@ -2277,7 +2270,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- ===== PAIRS TRADING ===== -->
 <div id="page-pairs" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">🔀 Pairs Trading</div>
+  <div class="ptitle">🔀 Pairs Trading</div>
   <div class="psub">Temukan pasangan saham berkorelasi tinggi untuk strategi long-short. Data real Yahoo Finance.</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
     <div class="card">
@@ -2298,7 +2291,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     </div>
     <div class="card">
       <div class="cheader"><span class="ctitle">Statistik Pairs</span></div>
-      <div id="pt-stats" style="font-size:11px;color:var(--text2);font-family:'Inter',sans-serif;line-height:2">Belum dianalisa</div>
+      <div id="pt-stats" style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;line-height:2">Belum dianalisa</div>
     </div>
   </div>
   <div class="card" style="margin-top:10px">
@@ -2313,7 +2306,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- ===== FACTOR HEATMAP (QuantTrader) ===== -->
 <div id="page-factor-heatmap" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">📐 Factor Heatmap LQ45</div>
+  <div class="ptitle">📐 Factor Heatmap LQ45</div>
   <div class="psub">Visualisasi faktor RSI, Momentum, Volatilitas per saham LQ45</div>
   <div class="card" style="margin:12px 0 10px">
     <div class="cheader"><span class="ctitle">⚙️ Pengaturan</span><button class="btn btn-bb btn-xs" onclick="fhmRender()">🔄 Refresh</button></div>
@@ -2349,7 +2342,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- ===== CORRELATION MATRIX (QuantTrader) ===== -->
 <div id="page-correlation" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">📉 Correlation Matrix</div>
+  <div class="ptitle">📉 Correlation Matrix</div>
   <div class="psub">Matriks korelasi return antar saham Top 10 LQ45</div>
   <div class="card" style="margin:12px 0 10px">
     <div class="cheader"><span class="ctitle">⚙️ Pengaturan</span><button class="btn btn-bb btn-xs" onclick="corrRender()">🔄 Refresh</button></div>
@@ -2375,7 +2368,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
     <div class="cheader"><span class="ctitle">Correlation Matrix — Top 10 LQ45</span></div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:11px;color:var(--text3)">
       <span style="color:var(--red)">-1.0</span>
-      <div style="flex:1;height:8px;border-radius:var(--radius-xs);background:linear-gradient(to right,#ff2244,#1a1a2a,#00d4aa)"></div>
+      <div style="flex:1;height:8px;border-radius:4px;background:linear-gradient(to right,#ff2244,#1a1a2a,#00d4aa)"></div>
       <span style="color:var(--green)">+1.0</span>
     </div>
     <div id="corr-matrix"></div>
@@ -2388,7 +2381,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 
 <!-- ===== MONTHLY RETURNS (QuantTrader) ===== -->
 <div id="page-monthly-returns" class="page">
-  <div class="ptitle" style="letter-spacing:-.3px">📅 Monthly Return Calendar</div>
+  <div class="ptitle">📅 Monthly Return Calendar</div>
   <div class="psub">Pola return bulanan historis per saham. Hijau = positif, merah = negatif.</div>
   <div class="card" style="margin:12px 0 10px">
     <div class="cheader"><span class="ctitle">⚙️ Pilih Saham</span><button class="btn btn-bb btn-xs" onclick="mrFetch()">📡 Data Live</button></div>
@@ -2429,12 +2422,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter'
 </div>
 
 </div><!-- /pages --><!-- ===== BACKUP MODAL ===== -->
-<div id="backup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+<div id="backup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:20px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div>
         <div style="font-size:15px;font-weight:700;color:var(--accent)">💾 Backup &amp; Restore</div>
-        <div style="font-size:11px;color:var(--text3);font-family:'Inter',sans-serif;margin-top:2px">Kelola data jurnal investasimu</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px">Kelola data jurnal investasimu</div>
       </div>
       <button onclick="closeBackupModal()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:4px">✕</button>
     </div>
@@ -3527,7 +3520,7 @@ Object.assign(DB, {
   'POOL':{name:'Pool Advista Indonesia',base:100,sector:'Lainnya',beta:1.0},
   'PPRO':{name:'PP Properti',base:100,sector:'Lainnya',beta:1.0}
 });
-var COLORS = ['var(--sb-green)','#00d4aa','#0088ff','#ffbb00','#9b7fe8','#ff4466','#00b4c8','#ff8833','#44cc88','#dd8800','#6688ff','#22dd66'];
+var COLORS = ['#ff6600','#00d4aa','#0088ff','#ffbb00','#9b7fe8','#ff4466','#00b4c8','#ff8833','#44cc88','#dd8800','#6688ff','#22dd66'];
 
 // ============================================================
 // STATE
@@ -3720,16 +3713,16 @@ function openBackupModal(){
   el('backup-modal-body').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:var(--accent)">${txTotal}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.2px">Total Transaksi</div>
+        <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--accent)">${txTotal}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Total Transaksi</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:22px;font-weight:800;font-family:'Inter',sans-serif;color:var(--green)">${kbSize} KB</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.2px">Ukuran Data</div>
+        <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--green)">${kbSize} KB</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Ukuran Data</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:11px;font-weight:700;font-family:'Inter',sans-serif;color:var(--text2);line-height:1.4">${lastSave}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.2px">Terakhir Simpan</div>
+        <div style="font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text2);line-height:1.4">${lastSave}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Terakhir Simpan</div>
       </div>
     </div>
 
@@ -4343,7 +4336,7 @@ function openFinnhubSettings(){
       'Data harga realtime diambil langsung dari <strong style="color:var(--accent)">Yahoo Finance</strong> — tidak perlu API key.<br>'+
       'Request diteruskan via CORS proxy publik (allorigins → corsproxy.io → codetabs), otomatis pindah jika satu proxy gagal.'+
     '</div>'+
-    '<div style="background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.15);border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:11px;color:var(--text2);line-height:1.65">'+
+    '<div style="background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.15);border-radius:8px;padding:9px 12px;margin-bottom:11px;font-size:11px;color:var(--text2);line-height:1.65">'+
       '<div style="font-weight:700;color:var(--accent);margin-bottom:3px">📊 Data realtime:</div>'+
       '• IHSG — tiap 15 detik<br>'+
       '• Saham IDX portofolio — tiap 2 menit<br>'+
@@ -4445,9 +4438,9 @@ function buildTickerTape(){
 // CHARTS
 // ============================================================
 function kc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-var TC={color:'#8a90ad',font:{family:'Inter',size:9}};
-var GC='rgba(255,255,255,.05)';
-var TT={backgroundColor:'rgba(22,27,39,.96)',titleColor:'#b8bdd4',bodyColor:'#f5f5fa',borderColor:'rgba(0,170,108,.2)',borderWidth:1,titleFont:{family:'Inter'},bodyFont:{family:'Inter',size:11}};
+var TC={color:'#8a90ad',font:{family:'IBM Plex Mono',size:9}};
+var GC='rgba(255,102,0,.07)';
+var TT={backgroundColor:'#0a0a0f',titleColor:'#b8bdd4',bodyColor:'#f5f5fa',borderColor:'rgba(255,102,0,.25)',borderWidth:1,titleFont:{family:'IBM Plex Mono'},bodyFont:{family:'IBM Plex Mono',size:11}};
 
 function genIHSG(n){
   // Simulate realistic intraday IHSG from Open 6210 → Close 6195
@@ -4518,7 +4511,7 @@ function buildModalPosisiChart(porto){
 function buildIhsgChart(tf){
   kc('ihsg');var cv=el('ihsgChart');if(!cv)return;
   tf = tf||'1H';
-  var data,labels,lineColor='var(--sb-green)';
+  var data,labels,lineColor='#ff6600';
 
   function genIntra(nPts,baseVal,vol){
     baseVal = baseVal||6195;
@@ -4555,7 +4548,7 @@ function buildIhsgChart(tf){
       data=genIntra(60,ihsgCur,0.0006);
       labels=data.map(function(_,i){return '09:'+('0'+i).slice(-2);});
     }
-    lineColor='var(--sb-green)';
+    lineColor='#ff6600';
   } else if(tf==='3H'){
     if(ihsgHist.length>=2){
       data=ihsgHist.slice(-180);
@@ -4612,8 +4605,8 @@ function buildIhsgChart(tf){
     data:{labels:labels,datasets:[{data:data,borderColor:lineColor,borderWidth:1.5,backgroundColor:g,fill:true,tension:.35,pointRadius:0,pointHoverRadius:3,pointHoverBackgroundColor:lineColor}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:Object.assign({},TT,{mode:'index',intersect:false,callbacks:{label:function(c){return 'IHSG: '+c.parsed.y.toFixed(2).replace('.',',')}}})},
-      scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:Object.assign({},TC,{maxTicksLimit:8,color:'#8a90ad'})},
-              y:{grid:{color:'rgba(255,255,255,.05)'},ticks:Object.assign({},TC,{color:'#8a90ad',callback:function(v){return v.toLocaleString('id-ID')}}),position:'right'}}}});
+      scales:{x:{grid:{color:'rgba(255,102,0,.07)'},ticks:Object.assign({},TC,{maxTicksLimit:8,color:'#8a90ad'})},
+              y:{grid:{color:'rgba(255,102,0,.07)'},ticks:Object.assign({},TC,{color:'#8a90ad',callback:function(v){return v.toLocaleString('id-ID')}}),position:'right'}}}});
 }
 
 function buildDonut(porto){
@@ -4808,7 +4801,7 @@ function renderDashboard(){
   ];
   el('aum-leg').innerHTML=aumItems.map(function(it){
     return '<div style="display:flex;align-items:center;gap:6px">'+
-      '<div style="width:7px;height:7px;border-radius:var(--radius-xs);background:'+it.color+';flex-shrink:0"></div>'+
+      '<div style="width:7px;height:7px;border-radius:2px;background:'+it.color+';flex-shrink:0"></div>'+
       '<span style="font-size:10px;color:var(--text2);flex:1">'+it.label+'</span>'+
       '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;font-weight:600;color:'+it.color+'">'+it.pct.toFixed(1)+'%</span>'+
       '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:9px;color:var(--text3);min-width:60px;text-align:right">'+fmtK(it.val)+'</span>'+
@@ -4866,7 +4859,7 @@ function renderDashboard(){
                 r.lot||'—';
     return '<tr>'+
       '<td><div style="display:flex;align-items:center;gap:6px">'+
-        '<div style="width:3px;height:28px;border-radius:var(--radius-xs);background:'+r.color+'"></div>'+
+        '<div style="width:3px;height:28px;border-radius:2px;background:'+r.color+'"></div>'+
         '<div><div class="mono" style="font-size:11px;font-weight:600">'+r.name+'</div>'+
         '<div style="font-size:9px;color:var(--text3)">'+r.desc.slice(0,22)+(r.desc.length>22?'…':'')+'</div></div>'+
       '</div></td>'+
@@ -4877,8 +4870,8 @@ function renderDashboard(){
       '<td class="mono '+(r.pnl>=0?'up':'dn')+'">'+(r.pnl>=0?'+':'')+'Rp '+fmtK(r.pnl)+'</td>'+
       '<td class="mono '+(r.ret>=0?'up':'dn')+'">'+(r.ret>=0?'+':'')+r.ret.toFixed(2)+'%</td>'+
       '<td><div style="display:flex;align-items:center;gap:6px">'+
-        '<div style="width:50px;background:var(--bg5);height:3px;border-radius:var(--radius-xs)">'+
-          '<div style="width:'+Math.min(bobot/Math.max(wSaham,wCrypto,wEtf,wRd,1)*100,100).toFixed(0)+'%;height:100%;background:'+r.color+';border-radius:var(--radius-xs)"></div>'+
+        '<div style="width:50px;background:var(--bg5);height:3px;border-radius:2px">'+
+          '<div style="width:'+Math.min(bobot/Math.max(wSaham,wCrypto,wEtf,wRd,1)*100,100).toFixed(0)+'%;height:100%;background:'+r.color+';border-radius:2px"></div>'+
         '</div>'+
         '<span class="mono" style="font-size:10px;color:'+r.color+';font-weight:700">'+bobot.toFixed(1)+'%</span>'+
       '</div></td>'+
@@ -4952,8 +4945,8 @@ function renderDashboard(){
               ' <span style="color:var(--text3)">'+fmtK(e[1])+'</span>'+
             '</span>'+
           '</div>'+
-          '<div style="height:3px;background:var(--bg5);border-radius:var(--radius-xs)">'+
-            '<div style="width:'+Math.min(pct,100).toFixed(1)+'%;height:100%;background:'+col+';border-radius:var(--radius-xs)"></div>'+
+          '<div style="height:3px;background:var(--bg5);border-radius:2px">'+
+            '<div style="width:'+Math.min(pct,100).toFixed(1)+'%;height:100%;background:'+col+';border-radius:2px"></div>'+
           '</div></div>';
     }).join('')
     : '<div style="color:var(--text3);font-size:11px;padding:10px 0;text-align:center">Belum ada posisi — tambahkan transaksi beli saham</div>';
@@ -6008,7 +6001,7 @@ function renderCrypto(){
     charts['cryptoDonut'] = new Chart(cvD,{type:'doughnut',data:{labels:porto.map(function(p){return p.coin}),datasets:[{data:porto.map(function(p){return p.mv}),backgroundColor:cols,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.label+': Rp '+fmtK(c.parsed)}}})}}});
   }
   var totV = totalMV||1;
-  el('crypto-leg').innerHTML = porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:var(--radius-xs);background:'+(p.info.color||'#4a5e82')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.coin+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mv/totV)*100).toFixed(1)+'%</span></div>'}).join('');
+  el('crypto-leg').innerHTML = porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:2px;background:'+(p.info.color||'#4a5e82')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.coin+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mv/totV)*100).toFixed(1)+'%</span></div>'}).join('');
 
   // Price chart (BTC + ETH combined)
   kc('cryptoPrice');
@@ -6211,7 +6204,7 @@ function renderEtf(){
     charts['etfDonut']=new Chart(cvE,{type:'doughnut',data:{labels:porto.map(function(p){return p.ticker}),datasets:[{data:porto.map(function(p){return p.mvIdr}),backgroundColor:cols,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:Object.assign({},TT,{callbacks:{label:function(c){return c.label+': Rp '+fmtK(c.parsed)}}})}}});
   }
   var totV2=totalMVIdr||1;
-  el('etf-leg').innerHTML=porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:var(--radius-xs);background:'+(p.info.color||'#4a5e82')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.ticker+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mvIdr/totV2)*100).toFixed(1)+'%</span></div>'}).join('');
+  el('etf-leg').innerHTML=porto.slice(0,8).map(function(p){return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:8px;height:8px;border-radius:2px;background:'+(p.info.color||'#4a5e82')+';flex-shrink:0"></div><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.ticker+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px">'+((p.mvIdr/totV2)*100).toFixed(1)+'%</span></div>'}).join('');
 
   // Category breakdown
   var byCat={};porto.forEach(function(p){var cat=p.info.category;if(!byCat[cat])byCat[cat]={mv:0,cnt:0};byCat[cat].mv+=p.mvIdr;byCat[cat].cnt++;});
@@ -6401,7 +6394,7 @@ function renderReksaDana(){
   var totalPlatGain = gainBIBIT+gainIPOT+gainPOEMS||1;
   el('rd-leg').innerHTML = platData.map(function(p){
     return '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">'
-      +'<div style="width:8px;height:8px;border-radius:var(--radius-xs);background:'+p.color+';flex-shrink:0"></div>'
+      +'<div style="width:8px;height:8px;border-radius:2px;background:'+p.color+';flex-shrink:0"></div>'
       +'<span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--text2);flex:1">'+p.label+'</span>'
       +'<span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:'+p.color+';font-weight:700">'+(p.val/totalPlatGain*100).toFixed(1)+'%</span>'
       +'<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;color:var(--text3);min-width:55px;text-align:right">'+fmtK(p.val)+'</span>'
@@ -7229,7 +7222,7 @@ function renderStrategyPanel(){
   porto.forEach(function(p){var s=stratOf(p.ticker); agg[s]=(agg[s]||0)+p.mv;});
   var totalMV=sahamMV||1;
   var legend=TRADE_TYPES.map(function(n){var pct=agg[n]/totalMV*100;
-    return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="width:9px;height:9px;border-radius:var(--radius-xs);background:'+TRADE_COLOR[n]+'"></span><span style="font-size:11px;color:var(--text2);flex:1">'+n+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px"><b style="color:'+TRADE_COLOR[n]+'">'+pct.toFixed(1)+'%</b> <span style="color:var(--text3);font-size:9px">'+fmtK(agg[n])+'</span></span></div>';
+    return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="width:9px;height:9px;border-radius:2px;background:'+TRADE_COLOR[n]+'"></span><span style="font-size:11px;color:var(--text2);flex:1">'+n+'</span><span style="font-family:\'IBM Plex Mono\',monospace;font-size:11px"><b style="color:'+TRADE_COLOR[n]+'">'+pct.toFixed(1)+'%</b> <span style="color:var(--text3);font-size:9px">'+fmtK(agg[n])+'</span></span></div>';
   }).join('');
   var asset=function(lbl,v,c){return '<div style="display:flex;justify-content:space-between;font-size:10px;padding:2px 0"><span style="color:var(--text3)">'+lbl+'</span><span style="font-family:\'IBM Plex Mono\',monospace;color:'+c+'">Rp '+fmtK(v)+'</span></div>';};
   var ringkasan='<div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border2)"><div style="font-size:9px;color:var(--text3);letter-spacing:.6px;font-family:\'IBM Plex Mono\',monospace;margin-bottom:5px">RINGKASAN SEMUA ASET</div>'
@@ -7318,7 +7311,7 @@ function aiHeuristicHtml(ctx){
   var m=ctx.m;
   var retPct=(m.totalReturn*100);
   var c=retPct>=0?'#00e5a0':'#ff3d5a';
-  var sec=function(t,b){return '<div style="margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.05)"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">'+t+'</div><div style="font-size:12px;color:#c8d8ea;line-height:1.7">'+b+'</div></div>';};
+  var sec=function(t,b){return '<div style="margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid rgba(255,255,255,.05)"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">'+t+'</div><div style="font-size:12px;color:#c8d8ea;line-height:1.7">'+b+'</div></div>';};
   var perf='Total return portofolio <b style="color:'+c+'">'+(retPct>=0?'+':'')+retPct.toFixed(1)+'%</b> dari modal Rp '+fmtK(m.totalCost)+' (realized <b>'+(m.real>=0?'+':'')+'Rp '+fmtK(m.real)+'</b>, unrealized <b style="color:'+(m.unreal>=0?'#00e5a0':'#ff3d5a')+'">'+(m.unreal>=0?'+':'')+'Rp '+fmtK(m.unreal)+'</b>). Beta '+m.beta.toFixed(2)+' berarti portofolio bergerak '+(m.beta>1?'lebih agresif ('+((m.beta-1)*100).toFixed(0)+'% lebih kuat)':'lebih defensif')+' dibanding IHSG'+(ctx.ihsg?' (kini ~'+fmt(ctx.ihsg)+(ctx.ihsgChg?', '+ctx.ihsgChg:'')+')':'')+'. <i style="color:var(--text3)">Perbandingan return periode yang setara dengan IHSG perlu data return indeks — gunakan Konsultasi Claude (live) untuk angka terkini.</i>';
   var contrib='';
   if(ctx.best&&ctx.worst){
@@ -7445,8 +7438,8 @@ function fsRenderProb(a){
   var emo=p.dir==='BULLISH'?'▲':p.dir==='BEARISH'?'▼':'◆';
 
   function pBar(val,color){
-    return '<div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden">'
-      +'<div style="width:'+val+'%;height:100%;background:'+color+';border-radius:3px;transition:width .5s"></div></div>';
+    return '<div style="height:5px;background:rgba(255,255,255,.08);border-radius:1px;overflow:hidden">'
+      +'<div style="width:'+val+'%;height:100%;background:'+color+';border-radius:1px;transition:width .5s"></div></div>';
   }
   function indRow(label,score,detail){
     var col=score>=60?'var(--green)':score>=40?'var(--amber)':'var(--red)';
@@ -7465,19 +7458,19 @@ function fsRenderProb(a){
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">'
     // Signal box
     +'<div style="text-align:center;padding:8px 0">'
-    +'<div style="font-size:9px;color:var(--text3);letter-spacing:.2px;font-family:\'IBM Plex Mono\',monospace;margin-bottom:4px">ARAH SINYAL</div>'
+    +'<div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:\'IBM Plex Mono\',monospace;margin-bottom:4px">ARAH SINYAL</div>'
     +'<div style="font-size:22px;font-weight:800;color:'+c+';font-family:\'IBM Plex Mono\',monospace;letter-spacing:2px">'+emo+' '+p.dir+'</div>'
     +'<span class="badge '+(p.dir==='BULLISH'?'b-up':p.dir==='BEARISH'?'b-dn':'b-amb')+'" style="margin-top:3px">'+p.strg+'</span>'
     +'</div>'
     // Probability box
     +'<div style="text-align:center;padding:8px 0;border-left:1px solid var(--border);border-right:1px solid var(--border)">'
-    +'<div style="font-size:9px;color:var(--text3);letter-spacing:.2px;font-family:\'IBM Plex Mono\',monospace;margin-bottom:4px">PROB. BELI</div>'
+    +'<div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:\'IBM Plex Mono\',monospace;margin-bottom:4px">PROB. BELI</div>'
     +'<div style="font-size:26px;font-weight:800;color:'+c+';font-family:\'IBM Plex Mono\',monospace">'+probBuy+'<span style="font-size:14px">%</span></div>'
     +'<div style="font-size:9px;color:var(--text3);margin-top:2px">Keyakinan akumulasi</div>'
     +'</div>'
     // Score box
     +'<div style="text-align:center;padding:8px 0">'
-    +'<div style="font-size:9px;color:var(--text3);letter-spacing:.2px;font-family:\'IBM Plex Mono\',monospace;margin-bottom:4px">SKOR KOMPOSIT</div>'
+    +'<div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:\'IBM Plex Mono\',monospace;margin-bottom:4px">SKOR KOMPOSIT</div>'
     +'<div style="font-size:26px;font-weight:800;color:'+c+';font-family:\'IBM Plex Mono\',monospace">'+composite+'<span style="font-size:14px">/100</span></div>'
     +'<div style="font-size:9px;color:var(--text3);margin-top:2px">5-faktor weighted</div>'
     +'</div>'
@@ -7487,15 +7480,15 @@ function fsRenderProb(a){
     +'<div style="margin-bottom:12px">'
     +'<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:9px;font-family:\'IBM Plex Mono\',monospace">'
     +'<span style="color:var(--green)">BELI '+probBuy+'%</span><span style="color:var(--red)">JUAL '+probSell+'%</span></div>'
-    +'<div style="height:10px;background:rgba(255,34,68,.25);border-radius:3px;overflow:hidden">'
-    +'<div style="width:'+probBuy+'%;height:100%;background:var(--green);border-radius:3px;transition:width .6s"></div></div>'
+    +'<div style="height:10px;background:rgba(255,34,68,.25);border-radius:1px;overflow:hidden">'
+    +'<div style="width:'+probBuy+'%;height:100%;background:var(--green);border-radius:1px;transition:width .6s"></div></div>'
     +'<div style="font-size:9px;color:var(--text3);margin-top:3px">Probabilitas berdasarkan 5 indikator teknikal terbobot</div>'
     +'</div>'
 
     // ── Indicator breakdown ──
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">'
     +'<div>'
-    +'<div style="font-size:9px;color:var(--sb-green);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;font-family:\'IBM Plex Mono\',monospace;border-bottom:1px solid rgba(0,170,108,.15);padding-bottom:4px">BOBOT INDIKATOR</div>'
+    +'<div style="font-size:9px;color:var(--bb-orange);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;font-family:\'IBM Plex Mono\',monospace;border-bottom:1px solid rgba(255,102,0,.2);padding-bottom:4px">BOBOT INDIKATOR</div>'
     +indRow('CMF-20 (30%)',cmfScore,'CMF: '+(a.cl||0).toFixed?(a.cl*100).toFixed(1)+'%':'—')
     +indRow('RSI-14 (20%)',rsiScore,'RSI: '+(a.rl||50).toFixed(1)+' · '+(a.rl>70?'Overbought':a.rl<30?'Oversold':'Netral'))
     +indRow('MA Cross (20%)',maScore,'Harga vs MA20: '+(a.ma20&&a.ma20.length?(last.c>a.ma20[a.ma20.length-1]?'Above ▲':'Below ▼'):'—'))
@@ -7505,7 +7498,7 @@ function fsRenderProb(a){
 
     // ── Statistical analysis ──
     +'<div>'
-    +'<div style="font-size:9px;color:var(--sb-green);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;font-family:\'IBM Plex Mono\',monospace;border-bottom:1px solid rgba(0,170,108,.15);padding-bottom:4px">STATISTIK HARGA</div>'
+    +'<div style="font-size:9px;color:var(--bb-orange);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;font-family:\'IBM Plex Mono\',monospace;border-bottom:1px solid rgba(255,102,0,.2);padding-bottom:4px">STATISTIK HARGA</div>'
     +'<div style="display:flex;flex-direction:column;gap:5px">'
     +'<div style="display:flex;justify-content:space-between;font-family:\'IBM Plex Mono\',monospace;font-size:10px"><span style="color:var(--text3)">Volatilitas/th</span><span style="color:var(--amber)">'+volAnn+'%</span></div>'
     +'<div style="display:flex;justify-content:space-between;font-family:\'IBM Plex Mono\',monospace;font-size:10px"><span style="color:var(--text3)">Win Rate (% hari +)</span><span style="color:'+(parseInt(winRate)>=55?'var(--green)':'var(--text2)')+'">'+winRate+'%</span></div>'
@@ -7585,7 +7578,7 @@ function renderSekTaxPanel(){
     var jual=((o.jual!=null?o.jual:sf.sellFee)*100).toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
     var custom=(o.beli!=null||o.jual!=null);
     return '<div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:7px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)">'
-      +'<div style="display:flex;align-items:center;gap:6px;min-width:0"><span style="width:7px;height:7px;border-radius:var(--radius-xs);background:'+sf.color+';flex-shrink:0"></span><span style="font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s+'</span>'+(custom?' <span class="badge b-amb" style="font-size:8px">custom</span>':'')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;min-width:0"><span style="width:7px;height:7px;border-radius:2px;background:'+sf.color+';flex-shrink:0"></span><span style="font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s+'</span>'+(custom?' <span class="badge b-amb" style="font-size:8px">custom</span>':'')+'</div>'
       +'<input class="finput" type="number" step="0.001" min="0" max="5" id="sktx-b-'+btoa(s).replace(/=/g,'')+'" value="'+beli+'" style="padding:4px 7px;font-size:11px;font-family:\'IBM Plex Mono\',monospace">'
       +'<input class="finput" type="number" step="0.001" min="0" max="5" id="sktx-j-'+btoa(s).replace(/=/g,'')+'" value="'+jual+'" style="padding:4px 7px;font-size:11px;font-family:\'IBM Plex Mono\',monospace">'
       +'</div>';
@@ -8074,7 +8067,7 @@ function fsRenderCharts(){
 
   var GC2='rgba(255,255,255,.04)',TC2={color:'#4a5e82',font:{size:10}};
   var bo={responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(22,27,39,.96)',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#8fa3c8',bodyColor:'#dce8ff',bodyFont:{family:'Inter',size:11}}},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(6,11,23,.95)',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#8fa3c8',bodyColor:'#dce8ff',bodyFont:{family:'IBM Plex Mono',size:11}}},
     scales:{x:{ticks:Object.assign({maxTicksLimit:8,autoSkip:true},TC2),grid:{display:false},border:{display:false}},
             y:{ticks:TC2,grid:{color:GC2},border:{display:false}}}};
   function mo(extra){return Object.assign({},bo,extra);}
@@ -8128,8 +8121,8 @@ function fsRenderInd(){
       '<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">'+x.n+'</div>'+
       '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:16px;font-weight:500;margin-bottom:3px;color:'+x.c+'">'+x.v+'</div>'+
       '<div style="font-size:11px;color:var(--text2);line-height:1.45">'+x.d+'</div>'+
-      '<div style="height:3px;background:var(--bg5);border-radius:var(--radius-xs);margin-top:8px;overflow:hidden">'+
-        '<div style="width:'+x.p+'%;height:100%;border-radius:var(--radius-xs);background:'+x.c+'"></div></div></div>';
+      '<div style="height:3px;background:var(--bg5);border-radius:2px;margin-top:8px;overflow:hidden">'+
+        '<div style="width:'+x.p+'%;height:100%;border-radius:2px;background:'+x.c+'"></div></div></div>';
   }).join('');
 }
 
@@ -8204,8 +8197,8 @@ function fsRenderVWAP(){
   var cv1=document.getElementById('fsVwapChart');
   var boV={responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:true,position:'top',labels:{color:'#4a5e82',font:{size:9},boxWidth:16}},
-      tooltip:{backgroundColor:'rgba(22,27,39,.96)',borderColor:'rgba(255,255,255,.08)',borderWidth:1,
-        titleColor:'#8fa3c8',bodyColor:'#dce8ff',bodyFont:{family:'Inter',size:10},
+      tooltip:{backgroundColor:'rgba(6,11,23,.95)',borderColor:'rgba(255,255,255,.08)',borderWidth:1,
+        titleColor:'#8fa3c8',bodyColor:'#dce8ff',bodyFont:{family:'IBM Plex Mono',size:10},
         callbacks:{label:function(c){return c.dataset.label+': '+fsP(c.parsed.y);}}}},
     scales:{x:{ticks:{maxTicksLimit:8,autoSkip:true,color:'#4a5e82',font:{size:9}},grid:{display:false},border:{display:false}},
             y:{ticks:{color:'#4a5e82',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'},border:{display:false}}}};
@@ -8282,7 +8275,7 @@ function fsRenderRanking(){
             datasets:[{data:top.map(function(r){return r.a.sc;}),
               backgroundColor:top.map(function(r){return r.a.sig==='AKUMULASI'?'rgba(0,229,160,.75)':r.a.sig==='DISTRIBUSI'?'rgba(255,61,90,.75)':'rgba(60,75,95,.8)';}),borderWidth:0,borderRadius:3}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{ticks:{color:'#4a5e82',font:{family:'Inter',size:10}},grid:{display:false},border:{display:false}},
+        scales:{x:{ticks:{color:'#4a5e82',font:{family:'IBM Plex Mono',size:10}},grid:{display:false},border:{display:false}},
                 y:{min:0,max:100,ticks:{color:'#4a5e82',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},border:{display:false}}}}});
   }
 
@@ -8482,7 +8475,7 @@ function fsRunAI(){
     else if(mode==='deep') s5=(a.sig==='AKUMULASI'?'Pola stealth accumulation terdeteksi — institusi mengisi posisi diam-diam. Investor retail yang masuk sekarang berpotensi ikut tren institusional sejak awal.':a.sig==='DISTRIBUSI'?'Distribusi bertahap bisa berlangsung mingguan. Retail sering terjebak beli saat institusi justru jual.':'Institusi belum menunjukkan posisi jelas. Bisa berarti base building sebelum rally.');
     else s5=(a.sig==='AKUMULASI'?'Saham ini layak dipantau. Konfirmasi dengan fundamental sebelum masuk. Pantau CMF dan big vol sebagai konfirmasi.':a.sig==='DISTRIBUSI'?'Ekstra hati-hati. Tunggu reversal volume yang jelas sebelum entry.':'Bersabar. Gunakan capital untuk saham dengan sinyal lebih jelas.');
 
-    var html='<div style="display:flex;align-items:center;gap:12px;margin-bottom:13px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.05)">';
+    var html='<div style="display:flex;align-items:center;gap:9px;margin-bottom:13px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.05)">';
     html+=fsMkBdg(a.sig);
     html+='<span style="font-size:11px;color:var(--text2)">Skor: <span class="mono" style="color:'+fsScColor(a.sc)+'">'+a.sc+'/100</span></span>';
     html+='<span style="font-size:11px;color:var(--text2)">CMF: <span class="mono" style="color:'+(a.cl>0?'#00e5a0':'#ff3d5a')+'">'+(a.cl*100).toFixed(1)+'%</span></span>';
@@ -8616,12 +8609,70 @@ var AUTH = {
   _sesStart:  0,
 };
 
-// ── SHA-256 via SubtleCrypto (Web API, built-in browser) ──
+// ── SHA-256 — SubtleCrypto jika tersedia (HTTPS), fallback pure-JS (file://) ──
+function _sha256PureJS(msg){
+  // Pure JS SHA-256 implementation (works in file:// context)
+  function rightRotate(val,n){return (val>>>n)|(val<<(32-n));}
+  var h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
+          0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var k=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,
+          0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+          0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,
+          0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+          0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,
+          0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+          0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,
+          0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+          0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,
+          0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+          0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,
+          0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+          0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,
+          0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+          0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,
+          0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var bytes=[];
+  for(var i=0;i<msg.length;i++){
+    var c=msg.charCodeAt(i);
+    if(c<128) bytes.push(c);
+    else if(c<2048) bytes.push((c>>6)|192,(c&63)|128);
+    else bytes.push((c>>12)|224,((c>>6)&63)|128,(c&63)|128);
+  }
+  var bits=bytes.length*8;
+  bytes.push(0x80);
+  while(bytes.length%64!==56) bytes.push(0);
+  bytes.push(0,0,0,0,(bits>>>24)&255,(bits>>>16)&255,(bits>>>8)&255,bits&255);
+  var w=new Array(64);
+  var hh=h.slice();
+  for(var i=0;i<bytes.length;i+=64){
+    for(var j=0;j<16;j++) w[j]=(bytes[i+j*4]<<24)|(bytes[i+j*4+1]<<16)|(bytes[i+j*4+2]<<8)|bytes[i+j*4+3];
+    for(var j=16;j<64;j++){var s0=rightRotate(w[j-15],7)^rightRotate(w[j-15],18)^(w[j-15]>>>3);var s1=rightRotate(w[j-2],17)^rightRotate(w[j-2],19)^(w[j-2]>>>10);w[j]=(w[j-16]+s0+w[j-7]+s1)>>>0;}
+    var a=hh[0],b=hh[1],c2=hh[2],d=hh[3],e=hh[4],f=hh[5],g=hh[6],hx=hh[7];
+    for(var j=0;j<64;j++){
+      var S1=rightRotate(e,6)^rightRotate(e,11)^rightRotate(e,25);
+      var ch=(e&f)^(~e&g);
+      var t1=(hx+S1+ch+k[j]+w[j])>>>0;
+      var S0=rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22);
+      var maj=(a&b)^(a&c2)^(b&c2);
+      var t2=(S0+maj)>>>0;
+      hx=g;g=f;f=e;e=(d+t1)>>>0;d=c2;c2=b;b=a;a=(t1+t2)>>>0;
+    }
+    hh[0]=(hh[0]+a)>>>0;hh[1]=(hh[1]+b)>>>0;hh[2]=(hh[2]+c2)>>>0;hh[3]=(hh[3]+d)>>>0;
+    hh[4]=(hh[4]+e)>>>0;hh[5]=(hh[5]+f)>>>0;hh[6]=(hh[6]+g)>>>0;hh[7]=(hh[7]+hx)>>>0;
+  }
+  return hh.map(function(v){return ('00000000'+v.toString(16)).slice(-8);}).join('');
+}
+
 async function sha256(msg){
-  var buf = await crypto.subtle.digest('SHA-256',
-    new TextEncoder().encode(msg));
-  return Array.from(new Uint8Array(buf))
-    .map(b=>b.toString(16).padStart(2,'0')).join('');
+  // Prefer SubtleCrypto (HTTPS/localhost) — fallback to pure JS (file://)
+  if(typeof crypto!=='undefined' && crypto.subtle){
+    try{
+      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+      return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    }catch(e){}
+  }
+  // Pure JS fallback — works in file:// context
+  return Promise.resolve(_sha256PureJS(msg));
 }
 
 // ── Generate reset code ──
@@ -8712,16 +8763,16 @@ function authShowLogin(){
   el('auth-setup-form').style.display='none';
   el('auth-reset-form').style.display='none';
   el('auth-err').style.display='none';
+  var lk = el('auth-lock-msg'); if(lk) lk.style.display='none';
   var acc = authLoadAcc();
   if(!acc){
-    // Belum ada akun → otomatis ke setup
-    authShowSetup('Pertama kali? Buat username & password Anda.');
+    // Belum ada akun → langsung tampilkan setup (pertama kali)
+    authShowSetup('Selamat datang! Buat username & password untuk mulai.');
     return;
   }
   // Check lockout
   if(acc.lockedUntil && Date.now() < acc.lockedUntil){
     var mins = Math.ceil((acc.lockedUntil - Date.now())/60000);
-    var lk = el('auth-lock-msg');
     if(lk){ lk.style.display='block'; lk.textContent='🔒 Akun dikunci '+ mins +' menit lagi (terlalu banyak percobaan salah)'; }
   }
 }
@@ -8775,6 +8826,7 @@ function authDoLogin(){
       authSaveAcc(acc);
       authSaveSession(acc.username);
       var _pw=document.getElementById('auth-password'); if(_pw) _pw.value='';
+      if(btn) btn.disabled = false;
       authShowApp(acc.username);
     } else {
       // ❌ Gagal
@@ -8792,6 +8844,10 @@ function authDoLogin(){
       }
       if(btn) btn.disabled = false;
     }
+  }).catch(function(err){
+    if(btn) btn.disabled = false;
+    authShowErr('Error saat login. Coba refresh halaman. (' + (err&&err.message||'unknown') + ')');
+    console.error('sha256 error:', err);
   });
 }
 
@@ -8805,6 +8861,10 @@ function authDoSetup(){
   if(p.length < 8){ authShowErr('Password minimal 8 karakter.'); return; }
   if(p !== p2){ authShowErr('Password tidak cocok. Ulangi lagi.'); return; }
   if(!/[A-Z]/.test(p)&&!/[0-9]/.test(p)){ authShowErr('Password harus mengandung huruf kapital atau angka.'); return; }
+
+  // Disable button to prevent double-submit
+  var setupBtn = document.querySelector('#auth-setup-form .auth-btn:not([data-added])');
+  if(setupBtn){ setupBtn.disabled=true; setupBtn.textContent='Membuat akun...'; }
 
   var salt = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
   var resetCode = genResetCode();
@@ -8855,6 +8915,9 @@ function authDoSetup(){
       };
       sf.appendChild(btn2);
     }
+  }).catch(function(err){
+    authShowErr('Gagal membuat akun. Coba refresh halaman. (' + (err&&err.message||'unknown') + ')');
+    console.error('sha256 setup error:', err);
   });
 }
 
@@ -9240,7 +9303,7 @@ function renderDivInvest(){
       var histBars = ['2019','2020','2021','2022','2023','2024','2025','2026'].map(function(y){
         var dps = r.dpsByYear[y];
         return '<span title="'+y+(dps?' | DPS: Rp'+Math.round(dps):' | Tidak bayar')+'" '
-          +'style="display:inline-block;width:13px;height:18px;border-radius:var(--radius-xs);background:'
+          +'style="display:inline-block;width:13px;height:18px;border-radius:2px;background:'
           +(dps?r.ratingColor:'rgba(255,255,255,.07)')+';margin-right:1px;cursor:default;'
           +'font-size:7px;text-align:center;line-height:18px;color:rgba(0,0,0,.7)">'+(dps?'✓':'')+'</span>';
       }).join('');
@@ -9280,8 +9343,8 @@ function renderDivInvest(){
         +'<div style="border-top:1px solid var(--border);padding-top:8px">'
           +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
             +'<span style="font-size:9px;color:var(--text3)">Proyeksi '+(new Date().getFullYear()+1)+' (P='+Math.round(proj.probPay*100)+'%)</span>'
-            +'<div style="width:60px;height:4px;background:rgba(255,255,255,.08);border-radius:var(--radius-xs)">'
-              +'<div style="width:'+Math.round(proj.probPay*100)+'%;height:100%;background:'+r.ratingColor+';border-radius:var(--radius-xs)"></div>'
+            +'<div style="width:60px;height:4px;background:rgba(255,255,255,.08);border-radius:2px">'
+              +'<div style="width:'+Math.round(proj.probPay*100)+'%;height:100%;background:'+r.ratingColor+';border-radius:2px"></div>'
             +'</div>'
           +'</div>'
           +'<div style="font-family:\'IBM Plex Mono\',monospace;font-size:14px;font-weight:700;color:var(--green)">Rp '+fmtK(proj.expNet)+' <span style="font-size:10px;font-weight:400;color:var(--text3)">net</span></div>'
@@ -9306,8 +9369,8 @@ function renderDivInvest(){
         +'<td class="mono">Rp '+fmt(Math.round(r.avgDPS))+'</td>'
         +'<td class="mono amb">'+r.yoc.toFixed(2)+'%</td>'
         +'<td><div style="display:flex;align-items:center;gap:4px">'
-          +'<div style="width:56px;height:5px;background:rgba(255,255,255,.08);border-radius:var(--radius-sm)">'
-            +'<div style="width:'+Math.round(r.consistency*100)+'%;height:100%;background:'+r.ratingColor+';border-radius:var(--radius-sm)"></div>'
+          +'<div style="width:56px;height:5px;background:rgba(255,255,255,.08);border-radius:3px">'
+            +'<div style="width:'+Math.round(r.consistency*100)+'%;height:100%;background:'+r.ratingColor+';border-radius:3px"></div>'
           +'</div>'
           +'<span style="font-size:10px;font-family:\'IBM Plex Mono\',monospace">'+Math.round(r.consistency*100)+'%</span>'
         +'</div></td>'
@@ -9349,8 +9412,8 @@ function renderDivInvest(){
         +'<td><span class="tp">'+r.ticker+'</span><div style="font-size:9px;color:var(--text3)">'+r.compName+'</div></td>'
         +'<td class="mono">'+(r.currentShares>0?r.currentShares.toLocaleString('id-ID'):'<span style="color:var(--text3)">—</span>')+'</td>'
         +'<td><div style="display:flex;align-items:center;gap:4px">'
-          +'<div style="width:40px;height:4px;background:rgba(255,255,255,.08);border-radius:var(--radius-xs)">'
-            +'<div style="width:'+Math.round(proj.probPay*100)+'%;height:100%;background:'+r.ratingColor+';border-radius:var(--radius-xs)"></div>'
+          +'<div style="width:40px;height:4px;background:rgba(255,255,255,.08);border-radius:2px">'
+            +'<div style="width:'+Math.round(proj.probPay*100)+'%;height:100%;background:'+r.ratingColor+';border-radius:2px"></div>'
           +'</div>'
           +'<span class="mono" style="font-size:11px">'+Math.round(proj.probPay*100)+'%</span>'
         +'</div></td>'
@@ -9383,9 +9446,9 @@ function renderDivInvest(){
   if(histTbody){
     histTbody.innerHTML = filteredHist.map(function(d){
       var yoc = d.avgPrice>0&&d.dps>0 ? (d.dps/d.avgPrice*100).toFixed(2)+'%' : '—';
-      var srcBadge = d._src==='lampiran'?'<span style="font-size:8px;background:rgba(167,139,250,.15);color:var(--purple);padding:1px 4px;border-radius:var(--radius-sm)">lampiran</span>'
-                  : d._src==='manual'?'<span style="font-size:8px;background:rgba(255,193,7,.12);color:var(--amber);padding:1px 4px;border-radius:var(--radius-sm)">manual</span>'
-                  : '<span style="font-size:8px;background:rgba(0,229,160,.1);color:var(--green);padding:1px 4px;border-radius:var(--radius-sm)">porto</span>';
+      var srcBadge = d._src==='lampiran'?'<span style="font-size:8px;background:rgba(167,139,250,.15);color:var(--purple);padding:1px 4px;border-radius:3px">lampiran</span>'
+                  : d._src==='manual'?'<span style="font-size:8px;background:rgba(255,193,7,.12);color:var(--amber);padding:1px 4px;border-radius:3px">manual</span>'
+                  : '<span style="font-size:8px;background:rgba(0,229,160,.1);color:var(--green);padding:1px 4px;border-radius:3px">porto</span>';
       var deleteBtn = d._src==='manual'
         ? '<button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="delDivInvestEntry('+d.id+')" title="Hapus">✕</button>'
         : '<span style="font-size:10px;color:var(--text3)" title="Hapus dari tab Dividen">—</span>';
@@ -9478,7 +9541,7 @@ function hw_renderTable() {
   if (!hwData.rows || !hwData.rows.length) hwData.rows = hw_defaultRows();
   // Use DOM API to avoid any attribute escaping issues
   tbody.innerHTML = '';
-  var inpStyle = 'background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'Inter',sans-serif;font-size:11px;padding:3px 5px;border-radius:3px;box-sizing:border-box;width:100%';
+  var inpStyle = 'background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:"IBM Plex Mono",monospace;font-size:11px;padding:3px 5px;border-radius:1px;box-sizing:border-box;width:100%';
   var placeholders = {year:'e.g. 2024',eps:'e.g. 350',equity:'e.g. 150537',shares:'e.g. 99062',dps:'e.g. 168',per:'e.g. 16.5',netIncome:'e.g. 33948'};
   var widths = {year:'70px',eps:'100px',equity:'130px',shares:'120px',dps:'100px',per:'80px',netIncome:'130px'};
   // Validation rules: warn if value seems wrong unit
@@ -9641,7 +9704,7 @@ function hw_recalc() {
     if (!wEl) {
       wEl = document.createElement('div');
       wEl.id = 'hw-data-warnings';
-      wEl.style.cssText = 'margin-top:8px;padding:8px 12px;background:rgba(255,34,68,.08);border-left:3px solid var(--red);border-radius:var(--radius-xs);font-size:9px;font-family:'Inter',sans-serif';
+      wEl.style.cssText = 'margin-top:8px;padding:8px 12px;background:rgba(255,34,68,.08);border-left:3px solid var(--red);border-radius:2px;font-size:9px;font-family:"IBM Plex Mono",monospace';
       var tableCard = document.querySelector('#page-hargawajar .card:nth-child(2)');
       if (tableCard) tableCard.appendChild(wEl);
     }
@@ -9793,7 +9856,7 @@ function hw_recalc() {
       { label: 'Margin of Safety', val: mosPctDisplay, desc: mosPass ? 'Undervalued \u2014 saham di bawah nilai wajar' : 'Overvalued \u2014 saham di atas nilai wajar', ok: mosPass },
     ];
     stepsBody.innerHTML = steps.map(function(s) {
-      return '<div style="background:var(--bg3);border-radius:var(--radius-xs);padding:7px 9px;border-left:2px solid ' + (s.ok ? 'var(--green)' : 'var(--red)') + '">'
+      return '<div style="background:var(--bg3);border-radius:2px;padding:7px 9px;border-left:2px solid ' + (s.ok ? 'var(--green)' : 'var(--red)') + '">'
         + '<div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">' + s.label + '</div>'
         + '<div style="font-size:13px;font-weight:700;font-family:\'IBM Plex Mono\',monospace;color:var(--text);margin:2px 0">' + s.val + '</div>'
         + '<div style="font-size:9px;color:var(--text3)">' + s.desc + '</div>'
@@ -9847,9 +9910,9 @@ function hw_renderChart(rows) {
   if (!ctx) return;
   if (hwHistChart) { hwHistChart.destroy(); hwHistChart = null; }
   var labels = rows.map(function(r){ return r.year; });
-  var tickStyle = { color: '#b8bdd4', font: { size: 9, family: 'Inter' } };
+  var tickStyle = { color: '#b8bdd4', font: { size: 9, family: 'IBM Plex Mono' } };
   var gridStyle = { color: 'rgba(255,255,255,.05)' };
-  var legendOpts = { labels: { color: '#b8bdd4', font: { family: 'Inter', size: 9 }, boxWidth: 10, padding: 10 } };
+  var legendOpts = { labels: { color: '#b8bdd4', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 10, padding: 10 } };
 
   var datasets, scales;
   if (hwChartMode === 'eps') {
@@ -9861,7 +9924,7 @@ function hw_renderChart(rows) {
     ];
     scales = {
       x: { ticks: tickStyle, grid: gridStyle },
-      y: { position: 'left', ticks: Object.assign({}, tickStyle, { callback: function(v){ return v >= 1000 ? (v/1000).toFixed(1)+'k' : v; } }), grid: gridStyle, title: { display: true, text: 'EPS (Rp)', color: 'var(--sb-green)', font: { size: 8 } } },
+      y: { position: 'left', ticks: Object.assign({}, tickStyle, { callback: function(v){ return v >= 1000 ? (v/1000).toFixed(1)+'k' : v; } }), grid: gridStyle, title: { display: true, text: 'EPS (Rp)', color: '#ff6600', font: { size: 8 } } },
       y2: { position: 'right', ticks: tickStyle, grid: { display: false }, title: { display: true, text: 'PER (x)', color: '#0088ff', font: { size: 8 } } }
     };
   } else {
@@ -9889,13 +9952,13 @@ function hw_renderChart(rows) {
       plugins: {
         legend: legendOpts,
         tooltip: {
-          backgroundColor:'rgba(22,27,39,.95)',
-          titleColor: 'var(--sb-green)',
+          backgroundColor: 'rgba(10,10,20,.92)',
+          titleColor: '#ff6600',
           bodyColor: '#c0c0d8',
-          borderColor: 'rgba(0,170,108,.2)',
+          borderColor: 'rgba(255,102,0,.3)',
           borderWidth: 1,
-          titleFont: { family: 'Inter', size: 10 },
-          bodyFont: { family: 'Inter', size: 9 },
+          titleFont: { family: 'IBM Plex Mono', size: 10 },
+          bodyFont: { family: 'IBM Plex Mono', size: 9 },
           callbacks: {
             label: function(ctx) {
               var v = ctx.parsed.y;
@@ -9959,7 +10022,7 @@ function hw_renderHistoryList() {
       var mos = h.mosPct || 0;
       var col = mos > 20 ? 'var(--green)' : mos > 0 ? 'var(--amber)' : 'var(--red)';
       return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border);cursor:pointer" onclick="hw_loadHistory(this)" data-h=\''+JSON.stringify(h)+'\' style="transition:.1s" onmouseover="this.style.background=\'var(--bg3)\'" onmouseout="this.style.background=\'transparent\'">'
-        + '<div><span style="font-weight:700;font-family:\'IBM Plex Mono\',monospace;color:var(--sb-green);font-size:11px">'+h.ticker+'</span> <span style="font-size:9px;color:var(--text3)">'+h.date+'</span></div>'
+        + '<div><span style="font-weight:700;font-family:\'IBM Plex Mono\',monospace;color:var(--bb-orange);font-size:11px">'+h.ticker+'</span> <span style="font-size:9px;color:var(--text3)">'+h.date+'</span></div>'
         + '<div style="text-align:right"><div style="font-size:10px;color:var(--text);font-family:\'IBM Plex Mono\',monospace">Rp '+Math.round(h.fairValue||0).toLocaleString('id-ID')+'</div>'
         + '<div style="font-size:9px;color:'+col+'">'+(mos>=0?'+':'')+mos.toFixed(1)+'% MoS</div></div>'
         + '</div>';
@@ -10304,8 +10367,8 @@ function runBacktest(){
       grd.addColorStop(0,'rgba(0,212,170,.2)');grd.addColorStop(1,'rgba(0,212,170,0)');
       QT.btCharts['eq'] = new Chart(ctx,{type:'line',data:{labels:sampDates,datasets:[
         {label:'Strategi',data:sampEq,borderColor:'#00d4aa',borderWidth:2,fill:true,backgroundColor:grd,tension:.3,pointRadius:0},
-        {label:'Buy & Hold',data:sampBah,borderColor:'rgba(0,170,108,.6)',borderWidth:1.5,borderDash:[5,3],fill:false,tension:.3,pointRadius:0}
-      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'Inter',size:10}}},tooltip:{backgroundColor:'rgba(22,27,39,.95)',titleColor:'var(--sb-green)',bodyColor:'#c0c0d8'}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return 'Rp'+fmtK(v);}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+        {label:'Buy & Hold',data:sampBah,borderColor:'rgba(255,102,0,.6)',borderWidth:1.5,borderDash:[5,3],fill:false,tension:.3,pointRadius:0}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'IBM Plex Mono',size:10}}},tooltip:{backgroundColor:'rgba(10,10,20,.92)',titleColor:'#ff6600',bodyColor:'#c0c0d8'}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,102,0,.05)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return 'Rp'+fmtK(v);}},grid:{color:'rgba(255,102,0,.05)'}}}}});
     }
 
     // Drawdown chart
@@ -10314,7 +10377,7 @@ function runBacktest(){
     if(cvDd){
       var sampDD = ddFull.filter(function(_,i){return i%Math.max(1,Math.floor(dates.length/120))===0;});
       var sampDt = dates.filter(function(_,i){return i%Math.max(1,Math.floor(dates.length/120))===0;});
-      QT.btCharts['dd'] = new Chart(cvDd.getContext('2d'),{type:'line',data:{labels:sampDt,datasets:[{data:sampDD,borderColor:'#ff2244',borderWidth:1.5,fill:true,backgroundColor:'rgba(255,34,68,.1)',tension:.3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return v.toFixed(1)+'%'}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+      QT.btCharts['dd'] = new Chart(cvDd.getContext('2d'),{type:'line',data:{labels:sampDt,datasets:[{data:sampDD,borderColor:'#ff2244',borderWidth:1.5,fill:true,backgroundColor:'rgba(255,34,68,.1)',tension:.3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:8},grid:{color:'rgba(255,102,0,.05)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return v.toFixed(1)+'%'}},grid:{color:'rgba(255,102,0,.05)'}}}}});
     }
 
     // Candlestick SVG
@@ -10370,7 +10433,7 @@ function runBacktest(){
           var v=mrets[y]&&mrets[y][mk]!==undefined?mrets[y][mk]:null;
           var bg=v===null?'transparent':v>=0?'rgba(0,212,170,'+(0.15+Math.min(Math.abs(v)/10,0.7))+')':'rgba(255,34,68,'+(0.15+Math.min(Math.abs(v)/10,0.7))+')';
           var col=v===null?'var(--text3)':v>=0?'var(--green)':'var(--red)';
-          html+='<td style="background:'+bg+';color:'+col+';padding:4px 5px;text-align:center;border-radius:var(--radius-xs);min-width:38px">'+(v===null?'—':v.toFixed(1)+'%')+'</td>';
+          html+='<td style="background:'+bg+';color:'+col+';padding:4px 5px;text-align:center;border-radius:2px;min-width:38px">'+(v===null?'—':v.toFixed(1)+'%')+'</td>';
         }
         html+='</tr>';
       });
@@ -10476,7 +10539,7 @@ function scRenderTable(data2){
     var sigClass = s.rsi<30?'sig-buy':s.rsi>70?'sig-sell':'sig-hold';
     var scoreCol = s.score>70?'var(--green)':s.score>40?'var(--amber)':'var(--red)';
     return '<tr>'
-      +'<td style="color:var(--sb-green);font-weight:700">'+s.t+(s.live?'<span style="font-size:8px;color:var(--green);margin-left:4px">●</span>':'')+'</td>'
+      +'<td style="color:var(--bb-orange);font-weight:700">'+s.t+(s.live?'<span style="font-size:8px;color:var(--green);margin-left:4px">●</span>':'')+'</td>'
       +'<td style="color:var(--text2)">'+s.n+'</td>'
       +'<td><span class="badge b-gray">'+s.s+'</span></td>'
       +'<td>Rp '+Math.round(s.price).toLocaleString('id-ID')+'</td>'
@@ -10509,7 +10572,7 @@ function fhmRender(){
     if(factor==='rsi'){bg=v<30?'rgba(0,212,170,.6)':v>70?'rgba(255,34,68,.6)':'rgba(255,187,0,.2)';col=v<30?'#00d4aa':v>70?'#ff2244':'#ffbb00';}
     else if(factor==='vol'){bg='rgba(155,127,232,'+(0.15+norm*0.7)+')';col='var(--purple)';}
     else{bg=v>=0?'rgba(0,212,170,'+(0.15+norm*0.7)+')':'rgba(255,34,68,'+(0.15+(1-norm)*0.7)+')';col=v>=0?'var(--green)':'var(--red)';}
-    return '<div style="background:'+bg+';border-radius:var(--radius-sm);padding:8px 6px;border:1px solid rgba(255,255,255,.06)">'
+    return '<div style="background:'+bg+';border-radius:3px;padding:8px 6px;border:1px solid rgba(255,255,255,.06)">'
       +'<div style="font-size:11px;font-weight:700;color:var(--text);font-family:IBM Plex Mono,monospace">'+s.t+'</div>'
       +'<div style="font-size:12px;font-weight:600;color:'+col+';font-family:IBM Plex Mono,monospace;margin-top:2px">'+(factor!=='rsi'&&v>=0?'+':'')+v.toFixed(factor==='score'?0:1)+'</div>'
       +'</div>';
@@ -10560,7 +10623,7 @@ function corrRender(){
         if(i===j){bg='rgba(255,255,255,.08)';col='var(--text3)';}
         else if(v>0){var int2=Math.min(1,v/.8);bg='rgba(0,212,170,'+(0.15+int2*.65)+')';col='var(--green)';}
         else{var int3=Math.min(1,Math.abs(v)/.8);bg='rgba(255,34,68,'+(0.15+int3*.65)+')';col='var(--red)';}
-        h+='<div style="background:'+bg+';color:'+col+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border-radius:var(--radius-xs);height:30px;margin:1px;font-family:IBM Plex Mono,monospace" title="'+a+' vs '+b+': '+v.toFixed(3)+'">'+(i===j?'1.00':v.toFixed(2))+'</div>';
+        h+='<div style="background:'+bg+';color:'+col+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;border-radius:2px;height:30px;margin:1px;font-family:IBM Plex Mono,monospace" title="'+a+' vs '+b+': '+v.toFixed(3)+'">'+(i===j?'1.00':v.toFixed(2))+'</div>';
       });
     });
     h+='</div></div>';
@@ -10574,9 +10637,9 @@ function corrRender(){
     var top=pairs2.slice(0,5), bot=pairs2.slice(-5).reverse();
     pEl.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
       +'<div><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:8px">Korelasi Tertinggi — kandidat pairs trading</div>'
-      +top.map(function(p){return '<div style="display:flex;justify-content:space-between;padding:6px 9px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:4px;border:1px solid var(--border)"><span style="font-family:IBM Plex Mono,monospace;color:var(--text);font-size:12px">'+p.a+' / '+p.b+'</span><span style="color:var(--green);font-weight:700;font-family:IBM Plex Mono,monospace">+'+p.v.toFixed(3)+'</span></div>';}).join('')+'</div>'
+      +top.map(function(p){return '<div style="display:flex;justify-content:space-between;padding:6px 9px;background:var(--bg3);border-radius:2px;margin-bottom:4px;border:1px solid var(--border)"><span style="font-family:IBM Plex Mono,monospace;color:var(--text);font-size:12px">'+p.a+' / '+p.b+'</span><span style="color:var(--green);font-weight:700;font-family:IBM Plex Mono,monospace">+'+p.v.toFixed(3)+'</span></div>';}).join('')+'</div>'
       +'<div><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px">Korelasi Terendah — kandidat diversifikasi</div>'
-      +bot.map(function(p){return '<div style="display:flex;justify-content:space-between;padding:6px 9px;background:var(--bg3);border-radius:var(--radius-xs);margin-bottom:4px;border:1px solid var(--border)"><span style="font-family:IBM Plex Mono,monospace;color:var(--text);font-size:12px">'+p.a+' / '+p.b+'</span><span style="color:'+(p.v>=0?'var(--amber)':'var(--red)')+';font-weight:700;font-family:IBM Plex Mono,monospace">'+(p.v>=0?'+':'')+p.v.toFixed(3)+'</span></div>';}).join('')+'</div>'
+      +bot.map(function(p){return '<div style="display:flex;justify-content:space-between;padding:6px 9px;background:var(--bg3);border-radius:2px;margin-bottom:4px;border:1px solid var(--border)"><span style="font-family:IBM Plex Mono,monospace;color:var(--text);font-size:12px">'+p.a+' / '+p.b+'</span><span style="color:'+(p.v>=0?'var(--amber)':'var(--red)')+';font-weight:700;font-family:IBM Plex Mono,monospace">'+(p.v>=0?'+':'')+p.v.toFixed(3)+'</span></div>';}).join('')+'</div>'
       +'</div>';
   }
 }
@@ -10624,7 +10687,7 @@ function mrRender(){
         var v=monthRets[ym2];
         var bg=v===undefined?'transparent':v>=0?'rgba(0,212,170,'+(0.12+Math.min(Math.abs(v)/8,.7))+')':'rgba(255,34,68,'+(0.12+Math.min(Math.abs(v)/8,.7))+')';
         var col=v===undefined?'var(--text3)':v>=0?'var(--green)':'var(--red)';
-        h+='<td style="background:'+bg+';color:'+col+';padding:4px 5px;text-align:center;border-radius:var(--radius-xs);min-width:40px;border:1px solid var(--border)">'+(v===undefined?'—':v.toFixed(1)+'%')+'</td>';
+        h+='<td style="background:'+bg+';color:'+col+';padding:4px 5px;text-align:center;border-radius:2px;min-width:40px;border:1px solid var(--border)">'+(v===undefined?'—':v.toFixed(1)+'%')+'</td>';
         if(v!==undefined) ytd+=v;
       }
       h+='<td style="color:'+(ytd>=0?'var(--green)':'var(--red)')+';font-weight:700;padding:4px 8px;text-align:center">'+(ytd===0?'—':(ytd>=0?'+':'')+ytd.toFixed(1)+'%')+'</td>';
@@ -10647,10 +10710,10 @@ function mrRender(){
   if(QT.btCharts['mr-wr']){QT.btCharts['mr-wr'].destroy();}
   var cvAvg=el('mr-avg-chart'), cvWr=el('mr-wr-chart');
   if(cvAvg){
-    QT.btCharts['mr-avg']=new Chart(cvAvg.getContext('2d'),{type:'bar',data:{labels:QT_MONTHS,datasets:[{data:avg,backgroundColor:avg.map(function(v){return v>=0?'rgba(0,212,170,.6)':'rgba(255,34,68,.6)';}),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a90ad',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#555d6e',font:{size:9},callback:function(v){return v.toFixed(1)+'%';}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+    QT.btCharts['mr-avg']=new Chart(cvAvg.getContext('2d'),{type:'bar',data:{labels:QT_MONTHS,datasets:[{data:avg,backgroundColor:avg.map(function(v){return v>=0?'rgba(0,212,170,.6)':'rgba(255,34,68,.6)';}),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a90ad',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#555d6e',font:{size:9},callback:function(v){return v.toFixed(1)+'%';}},grid:{color:'rgba(255,102,0,.05)'}}}}});
   }
   if(cvWr){
-    QT.btCharts['mr-wr']=new Chart(cvWr.getContext('2d'),{type:'bar',data:{labels:QT_MONTHS,datasets:[{data:wr,backgroundColor:'rgba(74,158,255,.5)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a90ad',font:{size:10}},grid:{display:false}},y:{min:0,max:100,ticks:{color:'#555d6e',font:{size:9},callback:function(v){return v+'%';}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+    QT.btCharts['mr-wr']=new Chart(cvWr.getContext('2d'),{type:'bar',data:{labels:QT_MONTHS,datasets:[{data:wr,backgroundColor:'rgba(74,158,255,.5)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a90ad',font:{size:10}},grid:{display:false}},y:{min:0,max:100,ticks:{color:'#555d6e',font:{size:9},callback:function(v){return v+'%';}},grid:{color:'rgba(255,102,0,.05)'}}}}});
   }
 }
 
@@ -10690,7 +10753,7 @@ function pairsAnalyzeWith(a,b,dataA,dataB){
   var corr=qtPearson(A,B);
 
   el('pt-stats').innerHTML=[
-    'Pair: <b style="color:var(--sb-green)">'+a+' / '+b+'</b>',
+    'Pair: <b style="color:var(--bb-orange)">'+a+' / '+b+'</b>',
     'Korelasi: <b style="color:'+(corr>0.7?'var(--green)':corr>0.4?'var(--amber)':'var(--red)')+'">'+corr.toFixed(3)+'</b>',
     'Z-Score terakhir: <b style="color:'+(Math.abs(lastZ)>2?'var(--red)':Math.abs(lastZ)>1?'var(--amber)':'var(--green)')+'">'+lastZ.toFixed(2)+'</b>',
     'Spread Mean: <b>'+Math.round(spreadMean).toLocaleString('id-ID')+'</b>',
@@ -10718,7 +10781,7 @@ function pairsAnalyzeWith(a,b,dataA,dataB){
       {data:sampZ.map(function(){return 2;}),borderColor:'rgba(255,34,68,.4)',borderWidth:1,borderDash:[5,3],fill:false,pointRadius:0,label:'+2σ'},
       {data:sampZ.map(function(){return -2;}),borderColor:'rgba(0,212,170,.4)',borderWidth:1,borderDash:[5,3],fill:false,pointRadius:0,label:'-2σ'},
       {data:sampZ.map(function(){return 0;}),borderColor:'rgba(255,255,255,.15)',borderWidth:1,fill:false,pointRadius:0,label:'Mean'}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'Inter',size:9}}}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#8a90ad',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}}}}}); 
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'IBM Plex Mono',size:9}}}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,102,0,.05)'}},y:{ticks:{color:'#8a90ad',font:{size:9}},grid:{color:'rgba(255,102,0,.05)'}}}}}); 
   }
 
   // Price chart normalized
@@ -10729,8 +10792,8 @@ function pairsAnalyzeWith(a,b,dataA,dataB){
     var sNA=normA.filter(function(_,i){return i%sampStep2===0;}), sNB=normB.filter(function(_,i){return i%sampStep2===0;}), sD=dates.filter(function(_,i){return i%sampStep2===0;});
     QT.btCharts['pt-price']=new Chart(cvP.getContext('2d'),{type:'line',data:{labels:sD,datasets:[
       {data:sNA,borderColor:'#00d4aa',borderWidth:2,fill:false,tension:.3,pointRadius:0,label:a},
-      {data:sNB,borderColor:'var(--sb-green)',borderWidth:2,fill:false,tension:.3,pointRadius:0,label:b}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'Inter',size:10}}}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return v.toFixed(0);}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+      {data:sNB,borderColor:'#ff6600',borderWidth:2,fill:false,tension:.3,pointRadius:0,label:b}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#b8bdd4',font:{family:'IBM Plex Mono',size:10}}}},scales:{x:{ticks:{color:'#8a90ad',font:{size:9},maxTicksLimit:10},grid:{color:'rgba(255,102,0,.05)'}},y:{ticks:{color:'#8a90ad',font:{size:9},callback:function(v){return v.toFixed(0);}},grid:{color:'rgba(255,102,0,.05)'}}}}});
   }
 }
 
