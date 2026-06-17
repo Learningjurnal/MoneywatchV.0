@@ -1,10 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Money Watch — Jurnal & Analisa Investasi</title>
+<!-- ══ SUPABASE ══ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ── Supabase client (publishable key — aman di frontend) ──
+var SUPA_URL = 'https://rcyhwlclvlhwmzlmhfsp.supabase.co';
+var SUPA_KEY = 'sb_publishable_WsyRBvZ5luumOeNIXp2IAA_RR3QBi_o';
+var _supabase = supabase.createClient(SUPA_URL, SUPA_KEY);
+var _currentUser = null; // diisi setelah login berhasil
+</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -275,7 +283,7 @@ body::before{display:none}
     <div id="auth-login-form">
       <div class="auth-field">
         <label>Username</label>
-        <input type="text" id="auth-username" placeholder="Masukkan username..." autocomplete="username" onkeydown="if(event.key==='Enter')authDoLogin()">
+        <input type="email" id="auth-username" placeholder="Masukkan email..." autocomplete="email" onkeydown="if(event.key==='Enter')authDoLogin()">
       </div>
       <div class="auth-field">
         <label>Password</label>
@@ -296,7 +304,7 @@ body::before{display:none}
       </div>
       <div class="auth-field">
         <label>Username Baru</label>
-        <input type="text" id="auth-new-user" placeholder="username (min 4 karakter)" autocomplete="new-username">
+        <input type="email" id="auth-new-user" placeholder="email@domain.com" autocomplete="email">
       </div>
       <div class="auth-field">
         <label>Password Baru</label>
@@ -317,7 +325,7 @@ body::before{display:none}
       </div>
       <div class="auth-field">
         <label>Kode Reset</label>
-        <input type="text" id="auth-reset-code" placeholder="XXXX-XXXX-XXXX">
+        <input type="email" id="auth-reset-code" placeholder="email@domain.com">
       </div>
       <button class="auth-btn" onclick="authDoReset()">Verifikasi →</button>
       <div class="auth-info" style="cursor:pointer;color:var(--blue)" onclick="authShowLogin()">← Kembali ke login</div>
@@ -3548,69 +3556,281 @@ var rdnBalance = 0;
 var charts = {};
 
 // ============================================================
-// LOCALSTORAGE — PERSISTENSI DATA
+// SUPABASE DATA SYNC — simpan & load semua data per user
 // ============================================================
-var LS_KEY = 'ihsg_pro_master_v5'; // bump: start fresh, manual entry only
 
-var tradeStrategy = {};
-function saveData(){
-  if(typeof _invalidatePortoCache==='function') _invalidatePortoCache();
+// ── Simpan semua data ke Supabase (upsert settings + array tables) ──
+async function supaSaveAllData(){
+  if(!_currentUser) return;
+  var uid = _currentUser.id;
   try {
-    var payload = {
-      transactions: transactions,
-      dividends: dividends,
-      rdnMutations: rdnMutations,
-      activeSekuritas: activeSekuritas,
-      rdnBalance: rdnBalance,
-      nextTxId: nextTxId,
-      nextDivId: nextDivId,
-      nextRdnId: nextRdnId,
-      cryptoTx: cryptoTx,
-      etfTx: etfTx,
-      rdTx: rdTx,
-      nextCryptoId: nextCryptoId,
-      nextEtfId: nextEtfId,
-      nextRdId: nextRdId,
-      tradeStrategy: tradeStrategy,
-      sekTaxOverride: sekTaxOverride,
-      savedAt: new Date().toISOString()
-    };
-    localStorage.setItem(LS_KEY, JSON.stringify(payload));
-  } catch(e){ console.warn('localStorage save failed:', e); }
+    // 1. Upsert user_settings (satu row per user)
+    await _supabase.from('user_settings').upsert({
+      user_id: uid,
+      active_sekuritas: activeSekuritas,
+      rdn_balance: rdnBalance,
+      cash_accounts: CASH_ACCOUNTS,
+      tax_cfg: TAX_SETTINGS,
+      sek_tax_override: sekTaxOverride||{},
+      trade_strategy: tradeStrategy||{},
+      next_tx_id: nextTxId,
+      next_div_id: nextDivId,
+      next_rdn_id: nextRdnId,
+      next_crypto_id: nextCryptoId||1,
+      next_etf_id: nextEtfId||1,
+      next_rd_id: nextRdId||1,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+
+    // 2. Sync transactions (hapus semua lalu insert ulang — paling simpel untuk file tunggal)
+    await _supabase.from('transactions').delete().eq('user_id', uid);
+    if(transactions && transactions.length > 0){
+      var txRows = transactions.map(function(t){
+        return { user_id:uid, tx_id:t.id, date:t.date, action:t.action, ticker:t.ticker,
+          sekuritas:t.sekuritas, lot:t.lot, shares:t.shares, price:t.price,
+          gross:t.gross, commission:t.commission, tax:t.tax, net:t.net, pl:t.pl||0 };
+      });
+      await _supabase.from('transactions').insert(txRows);
+    }
+
+    // 3. Sync dividends
+    await _supabase.from('dividends').delete().eq('user_id', uid);
+    if(dividends && dividends.length > 0){
+      var divRows = dividends.map(function(d){
+        return { user_id:uid, div_id:d.id, date:d.date, ticker:d.ticker,
+          shares:d.shares, dps:d.dps, gross:d.gross, pph:d.pph, net:d.net, yield:d.yield||0 };
+      });
+      await _supabase.from('dividends').insert(divRows);
+    }
+
+    // 4. Sync RDN mutations
+    await _supabase.from('rdn_mutations').delete().eq('user_id', uid);
+    if(rdnMutations && rdnMutations.length > 0){
+      var rdnRows = rdnMutations.map(function(r){
+        return { user_id:uid, rdn_id:r.id, date:r.date, type:r.type,
+          description:r.description||'', amount_in:r.amountIn||0,
+          amount_out:r.amountOut||0, balance:r.balance||0 };
+      });
+      await _supabase.from('rdn_mutations').insert(rdnRows);
+    }
+
+    // 5. Sync crypto
+    await _supabase.from('crypto_tx').delete().eq('user_id', uid);
+    if(cryptoTx && cryptoTx.length > 0){
+      var cRows = cryptoTx.map(function(c){
+        return { user_id:uid, tx_id:c.id, date:c.date, action:c.action, coin:c.coin,
+          amount:c.amount, price_idr:c.priceIdr||c.price_idr||0,
+          total_idr:c.totalIdr||c.total_idr||0, pl:c.pl||0 };
+      });
+      await _supabase.from('crypto_tx').insert(cRows);
+    }
+
+    // 6. Sync ETF
+    await _supabase.from('etf_tx').delete().eq('user_id', uid);
+    if(etfTx && etfTx.length > 0){
+      var eRows = etfTx.map(function(e){
+        return { user_id:uid, tx_id:e.id, date:e.date, action:e.action, ticker:e.ticker,
+          shares:e.shares, price_usd:e.priceUsd||e.price_usd||0,
+          total_usd:e.totalUsd||e.total_usd||0, total_idr:e.totalIdr||e.total_idr||0,
+          kurs:e.kurs||0, pl_idr:e.pl||0 };
+      });
+      await _supabase.from('etf_tx').insert(eRows);
+    }
+
+    // 7. Sync reksa dana (user input saja)
+    var rdUserOnly = (rdTx||[]).filter(function(r){ return r._userInput===true; });
+    await _supabase.from('rd_tx').delete().eq('user_id', uid);
+    if(rdUserOnly.length > 0){
+      var rRows = rdUserOnly.map(function(r){
+        return { user_id:uid, tx_id:r.id, date:r.date, action:r.action, name:r.name||'',
+          platform:r.platform||'', units:r.units||0, nav:r.nav||0,
+          total_idr:r.total||0, pl:r.pl||0 };
+      });
+      await _supabase.from('rd_tx').insert(rRows);
+    }
+
+    // 8. Div invest (jsonb blob)
+    await _supabase.from('div_invest').upsert({
+      user_id: uid,
+      data: divInvestData||[],
+      next_id: _divInvestId||1,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+
+  } catch(err){
+    console.warn('Supabase save error:', err);
+  }
 }
 
-function loadData(){
+// ── saveData() — dipanggil di seluruh kode existing; sekarang sync ke Supabase ──
+function saveData(){
+  if(typeof _invalidatePortoCache==='function') _invalidatePortoCache();
+  // Tetap simpan ke localStorage sebagai cache lokal (offline fallback)
   try {
-    var raw = localStorage.getItem(LS_KEY);
+    var payload = {
+      transactions: transactions, dividends: dividends, rdnMutations: rdnMutations,
+      activeSekuritas: activeSekuritas, rdnBalance: rdnBalance,
+      nextTxId: nextTxId, nextDivId: nextDivId, nextRdnId: nextRdnId,
+      cryptoTx: cryptoTx, etfTx: etfTx, rdTx: rdTx,
+      nextCryptoId: nextCryptoId, nextEtfId: nextEtfId, nextRdId: nextRdId,
+      tradeStrategy: tradeStrategy, sekTaxOverride: sekTaxOverride,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem('ihsg_pro_master_v5', JSON.stringify(payload));
+  } catch(e){}
+  // Sync ke Supabase (async, tidak block UI)
+  if(_currentUser){ supaSaveAllData().catch(function(e){ console.warn('Supabase sync error:', e); }); }
+}
+
+// ── Load semua data dari Supabase setelah login ──
+async function supaLoadAllData(){
+  if(!_currentUser) return false;
+  var uid = _currentUser.id;
+  try {
+    // 1. Settings
+    var sRes = await _supabase.from('user_settings').select('*').eq('user_id', uid).single();
+    if(sRes.data){
+      var s = sRes.data;
+      activeSekuritas = s.active_sekuritas || 'Mirae Asset';
+      rdnBalance      = s.rdn_balance || 0;
+      if(s.cash_accounts) Object.assign(CASH_ACCOUNTS, s.cash_accounts);
+      if(s.tax_cfg) Object.assign(TAX_SETTINGS, s.tax_cfg);
+      if(s.sek_tax_override) sekTaxOverride = s.sek_tax_override;
+      if(s.trade_strategy) tradeStrategy = s.trade_strategy;
+      nextTxId     = s.next_tx_id || 1;
+      nextDivId    = s.next_div_id || 1;
+      nextRdnId    = s.next_rdn_id || 1;
+      nextCryptoId = s.next_crypto_id || 1;
+      nextEtfId    = s.next_etf_id || 1;
+      nextRdId     = s.next_rd_id || 1;
+    }
+
+    // 2. Transactions
+    var txRes = await _supabase.from('transactions').select('*').eq('user_id', uid).order('date', {ascending:true});
+    if(txRes.data && txRes.data.length > 0){
+      transactions = txRes.data.map(function(t){
+        return { id:t.tx_id, date:t.date, action:t.action, ticker:t.ticker,
+          sekuritas:t.sekuritas, lot:t.lot, shares:t.shares, price:t.price,
+          gross:t.gross, commission:t.commission, tax:t.tax, net:t.net, pl:t.pl };
+      });
+    }
+
+    // 3. Dividends
+    var divRes = await _supabase.from('dividends').select('*').eq('user_id', uid).order('date', {ascending:true});
+    if(divRes.data && divRes.data.length > 0){
+      dividends = divRes.data.map(function(d){
+        return { id:d.div_id, date:d.date, ticker:d.ticker, shares:d.shares,
+          dps:d.dps, gross:d.gross, pph:d.pph, net:d.net, yield:d.yield };
+      });
+    }
+
+    // 4. RDN
+    var rdnRes = await _supabase.from('rdn_mutations').select('*').eq('user_id', uid).order('date', {ascending:true});
+    if(rdnRes.data && rdnRes.data.length > 0){
+      rdnMutations = rdnRes.data.map(function(r){
+        return { id:r.rdn_id, date:r.date, type:r.type, description:r.description,
+          amountIn:r.amount_in, amountOut:r.amount_out, balance:r.balance };
+      });
+    }
+
+    // 5. Crypto
+    var cRes = await _supabase.from('crypto_tx').select('*').eq('user_id', uid).order('date', {ascending:true});
+    if(cRes.data && cRes.data.length > 0){
+      cryptoTx = cRes.data.map(function(c){
+        return { id:c.tx_id, date:c.date, action:c.action, coin:c.coin,
+          amount:c.amount, priceIdr:c.price_idr, totalIdr:c.total_idr, pl:c.pl };
+      });
+    }
+
+    // 6. ETF
+    var eRes = await _supabase.from('etf_tx').select('*').eq('user_id', uid).order('date', {ascending:true});
+    if(eRes.data && eRes.data.length > 0){
+      etfTx = eRes.data.map(function(e){
+        return { id:e.tx_id, date:e.date, action:e.action, ticker:e.ticker,
+          shares:e.shares, priceUsd:e.price_usd, totalUsd:e.total_usd,
+          totalIdr:e.total_idr, kurs:e.kurs, pl:e.pl_idr, _userInput:true };
+      });
+    }
+
+    // 7. Reksa dana
+    var rRes = await _supabase.from('rd_tx').select('*').eq('user_id', uid).order('date', {ascending:true});
+    if(rRes.data && rRes.data.length > 0){
+      var userRd = rRes.data.map(function(r){
+        return { id:r.tx_id, date:r.date, action:r.action, name:r.name,
+          platform:r.platform, units:r.units, nav:r.nav, total:r.total_idr,
+          pl:r.pl, _userInput:true };
+      });
+      rdTx = userRd;
+    }
+
+    // 8. Div invest
+    var diRes = await _supabase.from('div_invest').select('*').eq('user_id', uid).single();
+    if(diRes.data){
+      divInvestData = diRes.data.data || [];
+      _divInvestId  = diRes.data.next_id || 1;
+    }
+
+    return true;
+  } catch(err){
+    console.warn('Supabase load error:', err);
+    // Fallback ke localStorage jika ada
+    return loadDataFromLocalStorage();
+  }
+}
+
+// ── loadData() — sekarang hanya baca localStorage sebagai fallback/cache ──
+function loadDataFromLocalStorage(){
+  try {
+    var raw = localStorage.getItem('ihsg_pro_master_v5');
     if(!raw) return false;
     var d = JSON.parse(raw);
     if(!d || !d.transactions) return false;
-    transactions   = d.transactions   || [];
-    dividends      = d.dividends      || [];
-    rdnMutations   = d.rdnMutations   || [];
-    activeSekuritas= d.activeSekuritas || 'Mirae Asset';
-    rdnBalance     = d.rdnBalance     || 0;
-    nextTxId       = d.nextTxId       || (transactions.length + 1);
-    nextDivId      = d.nextDivId      || (dividends.length + 1);
-    nextRdnId      = d.nextRdnId      || (rdnMutations.length + 1);
-    cryptoTx       = d.cryptoTx       || [];
-    etfTx          = d.etfTx          || [];
-    // rdTx: selalu kosong — tidak ada reksa dana aktif dari XLSX
-    // Hanya simpan jika user memang input sendiri (bukan dari loadSampleRd lama)
-    rdTx           = (d.rdTx || []).filter(function(tx){ return tx._userInput === true; });
-    nextCryptoId   = d.nextCryptoId   || (cryptoTx.length + 1);
-    nextEtfId      = d.nextEtfId      || (etfTx.length + 1);
-    nextRdId       = d.nextRdId       || (rdTx.length + 1);
-    tradeStrategy  = d.tradeStrategy  || {};
-    sekTaxOverride = d.sekTaxOverride || {};
+    transactions    = d.transactions   || [];
+    dividends       = d.dividends      || [];
+    rdnMutations    = d.rdnMutations   || [];
+    activeSekuritas = d.activeSekuritas || 'Mirae Asset';
+    rdnBalance      = d.rdnBalance     || 0;
+    nextTxId        = d.nextTxId       || (transactions.length + 1);
+    nextDivId       = d.nextDivId      || (dividends.length + 1);
+    nextRdnId       = d.nextRdnId      || (rdnMutations.length + 1);
+    cryptoTx        = d.cryptoTx       || [];
+    etfTx           = d.etfTx          || [];
+    rdTx            = (d.rdTx || []).filter(function(tx){ return tx._userInput === true; });
+    nextCryptoId    = d.nextCryptoId   || (cryptoTx.length + 1);
+    nextEtfId       = d.nextEtfId      || (etfTx.length + 1);
+    nextRdId        = d.nextRdId       || (rdTx.length + 1);
+    tradeStrategy   = d.tradeStrategy  || {};
+    sekTaxOverride  = d.sekTaxOverride || {};
     return true;
-  } catch(e){ console.warn('localStorage load failed:', e); return false; }
+  } catch(e){ return false; }
+}
+
+var tradeStrategy = {};
+
+// loadData() — dipanggil saat DOMContentLoaded, sebelum user login
+// Cukup return false agar app mulai kosong; data diload dari Supabase setelah auth
+function loadData(){
+  return loadDataFromLocalStorage();
 }
 
 function clearData(){
   if(!confirm('⚠️ Hapus SEMUA data transaksi tersimpan dan mulai dari awal?\n\nTindakan ini tidak bisa dibatalkan!')) return;
-  localStorage.removeItem(LS_KEY);
-  location.reload();
+  if(_currentUser){
+    var uid = _currentUser.id;
+    Promise.all([
+      _supabase.from('transactions').delete().eq('user_id',uid),
+      _supabase.from('dividends').delete().eq('user_id',uid),
+      _supabase.from('rdn_mutations').delete().eq('user_id',uid),
+      _supabase.from('crypto_tx').delete().eq('user_id',uid),
+      _supabase.from('etf_tx').delete().eq('user_id',uid),
+      _supabase.from('rd_tx').delete().eq('user_id',uid),
+      _supabase.from('user_settings').delete().eq('user_id',uid),
+      _supabase.from('div_invest').delete().eq('user_id',uid),
+    ]).then(function(){ localStorage.removeItem('ihsg_pro_master_v5'); location.reload(); });
+  } else {
+    localStorage.removeItem('ihsg_pro_master_v5');
+    location.reload();
+  }
 }
 
 // ── EXPORT: download file JSON berisi semua data ──
@@ -3702,12 +3922,8 @@ function importData(){
 
 // ── BACKUP MODAL ──
 function openBackupModal(){
-  var lsSize = 0;
-  try { lsSize = new Blob([localStorage.getItem(LS_KEY)||'']).size; } catch(e){}
-  var kbSize = (lsSize/1024).toFixed(1);
   var txTotal = transactions.length + dividends.length + cryptoTx.length + etfTx.length + rdTx.length;
-  var lastSave = '—';
-  try { var d=JSON.parse(localStorage.getItem(LS_KEY)||'{}'); if(d.savedAt) lastSave=new Date(d.savedAt).toLocaleString('id-ID'); } catch(e){}
+  var userEmail = _currentUser ? _currentUser.email : '—';
 
   el('backup-modal').style.display = 'flex';
   el('backup-modal-body').innerHTML = `
@@ -3717,12 +3933,12 @@ function openBackupModal(){
         <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Total Transaksi</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:22px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--green)">${kbSize} KB</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Ukuran Data</div>
+        <div style="font-size:18px;font-weight:800;font-family:'IBM Plex Mono',monospace;color:var(--green)">☁️ Cloud</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Storage</div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-        <div style="font-size:11px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text2);line-height:1.4">${lastSave}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Terakhir Simpan</div>
+        <div style="font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace;color:var(--text2);line-height:1.4;word-break:break-all">${userEmail}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.8px;text-transform:uppercase">Akun Aktif</div>
       </div>
     </div>
 
@@ -3741,10 +3957,10 @@ function openBackupModal(){
       </button>
     </div>
 
-    <div style="background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.2);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.7">
-      <div style="font-weight:700;color:var(--amber);margin-bottom:4px">⚠️ Penting — Backup Berkala</div>
-      Data tersimpan di browser lokal (localStorage). Jika browser di-clear atau buka di device lain, data hilang.
-      <strong style="color:var(--text)">Download backup JSON minimal seminggu sekali</strong> dan simpan di Google Drive atau email ke diri sendiri.
+    <div style="background:rgba(8,153,129,.08);border:1px solid rgba(8,153,129,.2);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.7">
+      <div style="font-weight:700;color:var(--green);margin-bottom:4px">✅ Data tersimpan di Supabase Cloud</div>
+      Data Anda aman di server Supabase dan bisa diakses dari device manapun setelah login.
+      <strong style="color:var(--text)">Tetap disarankan download backup JSON berkala</strong> sebagai cadangan offline.
     </div>
 
     <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
@@ -8594,126 +8810,34 @@ function fsInit(){
 
 
 // ╔══════════════════════════════════════════════════════════╗
-// ║                   AUTH SYSTEM                           ║
-// ║  SHA-256 hash · session token · brute-force guard       ║
+// ║              AUTH SYSTEM — Supabase                     ║
+// ║  Email+password via Supabase Auth · RLS per user        ║
 // ╚══════════════════════════════════════════════════════════╝
 
 var AUTH = {
-  LS_ACC:     'ihsg_auth_v1',       // localStorage key akun
-  LS_SES:     'ihsg_session_v1',    // localStorage key session
-  SESSION_MS: 30 * 60 * 1000,       // 30 menit timeout
-  MAX_TRIES:  5,                    // max login gagal
-  LOCK_MS:    15 * 60 * 1000,       // lockout 15 menit
+  SESSION_MS: 30 * 60 * 1000,
   _sesTimer:  null,
   _barTimer:  null,
   _sesStart:  0,
 };
 
-// ── SHA-256 — SubtleCrypto jika tersedia (HTTPS), fallback pure-JS (file://) ──
-function _sha256PureJS(msg){
-  // Pure JS SHA-256 implementation (works in file:// context)
-  function rightRotate(val,n){return (val>>>n)|(val<<(32-n));}
-  var h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
-          0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
-  var k=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,
-          0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
-          0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,
-          0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
-          0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,
-          0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
-          0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,
-          0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
-          0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,
-          0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
-          0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,
-          0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
-          0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,
-          0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
-          0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,
-          0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
-  var bytes=[];
-  for(var i=0;i<msg.length;i++){
-    var c=msg.charCodeAt(i);
-    if(c<128) bytes.push(c);
-    else if(c<2048) bytes.push((c>>6)|192,(c&63)|128);
-    else bytes.push((c>>12)|224,((c>>6)&63)|128,(c&63)|128);
-  }
-  var bits=bytes.length*8;
-  bytes.push(0x80);
-  while(bytes.length%64!==56) bytes.push(0);
-  bytes.push(0,0,0,0,(bits>>>24)&255,(bits>>>16)&255,(bits>>>8)&255,bits&255);
-  var w=new Array(64);
-  var hh=h.slice();
-  for(var i=0;i<bytes.length;i+=64){
-    for(var j=0;j<16;j++) w[j]=(bytes[i+j*4]<<24)|(bytes[i+j*4+1]<<16)|(bytes[i+j*4+2]<<8)|bytes[i+j*4+3];
-    for(var j=16;j<64;j++){var s0=rightRotate(w[j-15],7)^rightRotate(w[j-15],18)^(w[j-15]>>>3);var s1=rightRotate(w[j-2],17)^rightRotate(w[j-2],19)^(w[j-2]>>>10);w[j]=(w[j-16]+s0+w[j-7]+s1)>>>0;}
-    var a=hh[0],b=hh[1],c2=hh[2],d=hh[3],e=hh[4],f=hh[5],g=hh[6],hx=hh[7];
-    for(var j=0;j<64;j++){
-      var S1=rightRotate(e,6)^rightRotate(e,11)^rightRotate(e,25);
-      var ch=(e&f)^(~e&g);
-      var t1=(hx+S1+ch+k[j]+w[j])>>>0;
-      var S0=rightRotate(a,2)^rightRotate(a,13)^rightRotate(a,22);
-      var maj=(a&b)^(a&c2)^(b&c2);
-      var t2=(S0+maj)>>>0;
-      hx=g;g=f;f=e;e=(d+t1)>>>0;d=c2;c2=b;b=a;a=(t1+t2)>>>0;
-    }
-    hh[0]=(hh[0]+a)>>>0;hh[1]=(hh[1]+b)>>>0;hh[2]=(hh[2]+c2)>>>0;hh[3]=(hh[3]+d)>>>0;
-    hh[4]=(hh[4]+e)>>>0;hh[5]=(hh[5]+f)>>>0;hh[6]=(hh[6]+g)>>>0;hh[7]=(hh[7]+hx)>>>0;
-  }
-  return hh.map(function(v){return ('00000000'+v.toString(16)).slice(-8);}).join('');
-}
+// ── (SHA-256 lokal tidak diperlukan — Supabase Auth handle password) ──
 
-async function sha256(msg){
-  // Prefer SubtleCrypto (HTTPS/localhost) — fallback to pure JS (file://)
-  if(typeof crypto!=='undefined' && crypto.subtle){
-    try{
-      var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
-      return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
-    }catch(e){}
-  }
-  // Pure JS fallback — works in file:// context
-  return Promise.resolve(_sha256PureJS(msg));
-}
+// ── Load account (tidak dipakai, diganti Supabase session) ──
+function authLoadAcc(){ return null; }
+function authSaveAcc(obj){}
 
-// ── Generate reset code ──
-function genResetCode(){
-  var a=()=>Math.random().toString(36).slice(2,6).toUpperCase();
-  return a()+'-'+a()+'-'+a();
-}
-
-// ── Load account ──
-function authLoadAcc(){
-  try{ return JSON.parse(localStorage.getItem(AUTH.LS_ACC)||'null'); }catch(e){ return null; }
-}
-
-// ── Save account ──
-function authSaveAcc(obj){
-  try{ localStorage.setItem(AUTH.LS_ACC, JSON.stringify(obj)); }catch(e){}
-}
-
-// ── Session management ──
-function authSaveSession(username){
-  var token = Math.random().toString(36).slice(2)+Date.now().toString(36);
-  var ses = { token:token, user:username, exp: Date.now()+AUTH.SESSION_MS };
-  try{ localStorage.setItem(AUTH.LS_SES, JSON.stringify(ses)); }catch(e){}
-  return ses;
-}
+// ── Session management via Supabase ──
+function authSaveSession(username){ return {}; }
 function authLoadSession(){
-  try{
-    var s = JSON.parse(localStorage.getItem(AUTH.LS_SES)||'null');
-    if(!s||!s.token||Date.now()>s.exp) return null;
-    return s;
-  }catch(e){ return null; }
+  // Supabase session dikelola internal SDK — cek via _currentUser
+  return _currentUser ? { user: _currentUser.email } : null;
 }
 function authClearSession(){
-  try{ localStorage.removeItem(AUTH.LS_SES); }catch(e){}
+  _currentUser = null;
 }
-// Extend session on activity
 function authBumpSession(){
-  try{
-    var s = JSON.parse(localStorage.getItem(AUTH.LS_SES)||'null');
-    if(s){ s.exp=Date.now()+AUTH.SESSION_MS; localStorage.setItem(AUTH.LS_SES,JSON.stringify(s)); AUTH._sesStart=Date.now(); }
-  }catch(e){}
+  // Supabase auto-refresh token, tidak perlu manual bump
 }
 
 // ── Show / Hide app ──
@@ -8764,17 +8888,6 @@ function authShowLogin(){
   el('auth-reset-form').style.display='none';
   el('auth-err').style.display='none';
   var lk = el('auth-lock-msg'); if(lk) lk.style.display='none';
-  var acc = authLoadAcc();
-  if(!acc){
-    // Belum ada akun → langsung tampilkan setup (pertama kali)
-    authShowSetup('Selamat datang! Buat username & password untuk mulai.');
-    return;
-  }
-  // Check lockout
-  if(acc.lockedUntil && Date.now() < acc.lockedUntil){
-    var mins = Math.ceil((acc.lockedUntil - Date.now())/60000);
-    if(lk){ lk.style.display='block'; lk.textContent='🔒 Akun dikunci '+ mins +' menit lagi (terlalu banyak percobaan salah)'; }
-  }
 }
 
 function authShowSetup(msg){
@@ -8799,170 +8912,140 @@ function authShowErr(msg){
   e.style.display='block'; e.textContent='⚠️ '+msg;
 }
 
-// ── Login ──
+// ── Login via Supabase ──
 function authDoLogin(){
   var uInput = (el('auth-username')&&el('auth-username').value||'').trim();
   var pInput = (el('auth-password')&&el('auth-password').value||'');
-  var acc = authLoadAcc();
-
-  if(!acc){ authShowSetup('Belum ada akun. Buat terlebih dahulu.'); return; }
-
-  // Lockout check
-  if(acc.lockedUntil && Date.now() < acc.lockedUntil){
-    var mins = Math.ceil((acc.lockedUntil-Date.now())/60000);
-    authShowErr('Akun dikunci. Coba lagi dalam '+mins+' menit.');
-    return;
-  }
+  if(!uInput||!pInput){ authShowErr('Isi email dan password.'); return; }
 
   var btn = el('auth-login-btn');
-  if(btn) btn.disabled = true;
+  if(btn){ btn.disabled=true; btn.textContent='Masuk...'; }
 
-  sha256(pInput + acc.salt).then(function(hash){
-    if(uInput.toLowerCase() === acc.username.toLowerCase() && hash === acc.pHash){
-      // ✅ Login berhasil
-      acc.failCount = 0;
-      acc.lockedUntil = null;
-      acc.lastLogin = new Date().toISOString();
-      authSaveAcc(acc);
-      authSaveSession(acc.username);
-      var _pw=document.getElementById('auth-password'); if(_pw) _pw.value='';
-      if(btn) btn.disabled = false;
-      authShowApp(acc.username);
-    } else {
-      // ❌ Gagal
-      acc.failCount = (acc.failCount||0) + 1;
-      if(acc.failCount >= AUTH.MAX_TRIES){
-        acc.lockedUntil = Date.now() + AUTH.LOCK_MS;
-        acc.failCount = 0;
-        authSaveAcc(acc);
-        authShowErr('Akun dikunci 15 menit — terlalu banyak percobaan salah.');
-        var lk=el('auth-lock-msg'); if(lk){ lk.style.display='block'; lk.textContent='🔒 Akun dikunci 15 menit.'; }
-      } else {
-        authSaveAcc(acc);
-        var left = AUTH.MAX_TRIES - acc.failCount;
-        authShowErr('Username atau password salah. Sisa percobaan: '+left);
+  _supabase.auth.signInWithPassword({ email: uInput, password: pInput })
+    .then(function(result){
+      if(btn){ btn.disabled=false; btn.textContent='Masuk →'; }
+      if(result.error){
+        authShowErr('Email atau password salah. Coba lagi.');
+        return;
       }
-      if(btn) btn.disabled = false;
-    }
-  }).catch(function(err){
-    if(btn) btn.disabled = false;
-    authShowErr('Error saat login. Coba refresh halaman. (' + (err&&err.message||'unknown') + ')');
-    console.error('sha256 error:', err);
-  });
+      _currentUser = result.data.user;
+      var displayName = _currentUser.user_metadata && _currentUser.user_metadata.display_name
+        ? _currentUser.user_metadata.display_name
+        : (_currentUser.email || 'User');
+      // Load data dari Supabase lalu tampilkan app
+      supaLoadAllData().then(function(){
+        authShowApp(displayName);
+      });
+    })
+    .catch(function(err){
+      if(btn){ btn.disabled=false; btn.textContent='Masuk →'; }
+      authShowErr('Gagal login: ' + (err&&err.message||'unknown'));
+    });
 }
 
-// ── Setup akun baru ──
+// ── Daftar akun baru via Supabase ──
 function authDoSetup(){
   var u = (el('auth-new-user')&&el('auth-new-user').value||'').trim();
   var p = (el('auth-new-pass')&&el('auth-new-pass').value||'');
   var p2= (el('auth-new-pass2')&&el('auth-new-pass2').value||'');
 
-  if(u.length < 4){ authShowErr('Username minimal 4 karakter.'); return; }
+  if(!u || !u.includes('@')){ authShowErr('Gunakan alamat email yang valid sebagai username.'); return; }
   if(p.length < 8){ authShowErr('Password minimal 8 karakter.'); return; }
   if(p !== p2){ authShowErr('Password tidak cocok. Ulangi lagi.'); return; }
-  if(!/[A-Z]/.test(p)&&!/[0-9]/.test(p)){ authShowErr('Password harus mengandung huruf kapital atau angka.'); return; }
 
-  // Disable button to prevent double-submit
   var setupBtn = document.querySelector('#auth-setup-form .auth-btn:not([data-added])');
   if(setupBtn){ setupBtn.disabled=true; setupBtn.textContent='Membuat akun...'; }
 
-  var salt = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-  var resetCode = genResetCode();
-
-  sha256(p + salt).then(function(hash){
-    var acc = {
-      username: u,
-      pHash: hash,
-      salt: salt,
-      resetCode: resetCode,
-      failCount: 0,
-      lockedUntil: null,
-      createdAt: new Date().toISOString(),
-      lastLogin: null,
-    };
-    authSaveAcc(acc);
-
-    // Tampilkan reset code — user HARUS catat!
-    var msg = el('auth-setup-msg');
-    if(msg){
-      msg.style.color='var(--green)';
-      msg.style.background='rgba(0,229,160,.08)';
-      msg.style.border='1px solid rgba(0,229,160,.2)';
-      msg.innerHTML =
-        '✅ Akun berhasil dibuat!<br><br>'+
-        '🔑 <strong>Kode Reset Darurat:</strong><br>'+
-        '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:18px;font-weight:800;color:var(--accent);letter-spacing:3px;margin:8px 0;text-align:center">'+resetCode+'</div>'+
-        '<div style="font-size:10px;color:var(--amber)">⚠️ Catat kode ini sekarang! Digunakan jika lupa password. Tidak bisa dilihat lagi.</div>';
-    }
-    // Sembunyikan form, tampilkan tombol lanjut
-    var nuf=el('auth-new-user'),npf=el('auth-new-pass'),np2f=el('auth-new-pass2');
-    if(nuf) nuf.style.display='none';
-    if(npf) npf.style.display='none';
-    if(np2f) np2f.parentElement.style.display='none';
-    nuf&&(nuf.parentElement.style.display='none');
-    npf&&(npf.parentElement.style.display='none');
-
-    // Tambah tombol login
-    var sf=el('auth-setup-form');
-    if(sf){
-      var btn2=document.createElement('button');
-      btn2.className='auth-btn'; btn2.style.marginTop='12px';
-      btn2.textContent='Masuk sekarang →';
-      btn2.onclick=function(){
-        // Auto login
-        authSaveSession(u);
-        authShowApp(u);
-      };
-      sf.appendChild(btn2);
-    }
-  }).catch(function(err){
-    authShowErr('Gagal membuat akun. Coba refresh halaman. (' + (err&&err.message||'unknown') + ')');
-    console.error('sha256 setup error:', err);
-  });
+  _supabase.auth.signUp({ email: u, password: p })
+    .then(function(result){
+      if(setupBtn){ setupBtn.disabled=false; setupBtn.textContent='Buat Akun →'; }
+      if(result.error){
+        authShowErr('Gagal buat akun: ' + result.error.message);
+        return;
+      }
+      var msg = el('auth-setup-msg');
+      if(msg){
+        msg.style.color='var(--green)';
+        msg.style.background='rgba(0,229,160,.08)';
+        msg.style.border='1px solid rgba(0,229,160,.2)';
+        msg.innerHTML =
+          '✅ Akun berhasil dibuat!<br><br>'+
+          'Silakan login dengan email dan password yang baru dibuat.<br>'+
+          '<div style="font-size:10px;color:var(--amber);margin-top:8px">⚠️ Jika diminta konfirmasi email, cek inbox terlebih dahulu.</div>';
+      }
+      // Tombol kembali ke login
+      var sf=el('auth-setup-form');
+      if(sf){
+        var btn2=document.createElement('button');
+        btn2.className='auth-btn'; btn2.style.marginTop='12px';
+        btn2.textContent='Ke halaman login →';
+        btn2.setAttribute('data-added','1');
+        btn2.onclick=function(){ authShowLogin(); };
+        sf.appendChild(btn2);
+      }
+    })
+    .catch(function(err){
+      if(setupBtn){ setupBtn.disabled=false; setupBtn.textContent='Buat Akun →'; }
+      authShowErr('Gagal membuat akun. (' + (err&&err.message||'unknown') + ')');
+    });
 }
 
-// ── Reset password ──
+// ── Reset password via Supabase ──
 function authDoReset(){
-  var code = (el('auth-reset-code')&&el('auth-reset-code').value||'').trim().toUpperCase();
-  var acc = authLoadAcc();
-  if(!acc){ authShowErr('Belum ada akun.'); return; }
-  if(code !== acc.resetCode){ authShowErr('Kode reset salah.'); return; }
-  // Hapus akun lama, buat baru
-  authSaveAcc(null);
-  try{ localStorage.removeItem(AUTH.LS_ACC); }catch(e){}
-  authShowSetup('Kode benar! Buat password baru sekarang.');
+  var email = (el('auth-reset-code')&&el('auth-reset-code').value||'').trim();
+  if(!email||!email.includes('@')){ authShowErr('Masukkan alamat email yang terdaftar.'); return; }
+  _supabase.auth.resetPasswordForEmail(email)
+    .then(function(result){
+      if(result.error){ authShowErr('Gagal kirim reset: ' + result.error.message); return; }
+      var e=el('auth-err');
+      if(e){ e.style.display='block'; e.style.color='var(--green)'; e.textContent='✅ Link reset password dikirim ke email Anda.'; }
+    });
 }
 
 // ── Logout ──
 function authLogout(){
   if(!confirm('Yakin ingin logout?')) return;
-  authClearSession();
-  if(AUTH._sesTimer){ clearInterval(AUTH._sesTimer); AUTH._sesTimer=null; }
-  if(AUTH._barTimer){ clearInterval(AUTH._barTimer); AUTH._barTimer=null; }
-  var app=document.getElementById('main-app');
-  var overlay=document.getElementById('auth-overlay');
-  if(app) app.style.display='none';
-  if(overlay) overlay.classList.remove('hidden');
-  var si=el('session-info'); if(si) si.style.display='none';
-  // Clear input fields
-  ['auth-username','auth-password'].forEach(function(id){ var e=el(id); if(e) e.value=''; });
-  el('auth-err').style.display='none';
-  authShowLogin();
+  _supabase.auth.signOut().then(function(){
+    _currentUser = null;
+    if(AUTH._sesTimer){ clearInterval(AUTH._sesTimer); AUTH._sesTimer=null; }
+    if(AUTH._barTimer){ clearInterval(AUTH._barTimer); AUTH._barTimer=null; }
+    var app=document.getElementById('main-app');
+    var overlay=document.getElementById('auth-overlay');
+    if(app) app.style.display='none';
+    if(overlay) overlay.classList.remove('hidden');
+    var si=el('session-info'); if(si) si.style.display='none';
+    ['auth-username','auth-password'].forEach(function(id){ var e=el(id); if(e) e.value=''; });
+    el('auth-err').style.display='none';
+    authShowLogin();
+  });
 }
 
-// ── Init auth on page load ──
+// ── Init auth on page load — cek Supabase session ──
 function authInit(){
-  var ses = authLoadSession();
-  if(ses){
-    // Session masih valid
-    var acc = authLoadAcc();
-    var uname = acc ? acc.username : ses.user;
-    authShowApp(uname);
-  } else {
-    // Perlu login
-    authClearSession();
+  _supabase.auth.getSession().then(function(result){
+    var session = result.data && result.data.session;
+    if(session && session.user){
+      _currentUser = session.user;
+      var displayName = _currentUser.user_metadata && _currentUser.user_metadata.display_name
+        ? _currentUser.user_metadata.display_name
+        : (_currentUser.email || 'User');
+      // Load data user dari Supabase lalu tampilkan app
+      supaLoadAllData().then(function(){
+        authShowApp(displayName);
+      });
+    } else {
+      authShowLogin();
+    }
+  }).catch(function(){
     authShowLogin();
-  }
+  });
+
+  // Auto-refresh session Supabase (handle token expiry)
+  _supabase.auth.onAuthStateChange(function(event, session){
+    if(event === 'SIGNED_OUT' || !session){
+      if(_currentUser){ authLogout(); }
+    }
+  });
 }
 
 // ============================================================
