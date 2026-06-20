@@ -8629,13 +8629,18 @@ function fsInit(){
 
 var AUTH = { SESSION_MS: 30 * 60 * 1000, _sesTimer: null, _barTimer: null, _sesStart: 0, };
 
-// ── Auth stubs — Supabase handles everything ──
+// ── Auth helpers — Supabase owns identity; local timer tracks inactivity ──
 function authLoadAcc(){ return null; }
 function authSaveAcc(obj){}
-function authSaveSession(u){ return {}; }
-function authLoadSession(){ return _currentUser?{user:_currentUser.email}:null; }
-function authClearSession(){ _currentUser=null; }
-function authBumpSession(){}
+function authSaveSession(u){ AUTH._sesStart = Date.now(); return {user:u, exp: AUTH._sesStart + AUTH.SESSION_MS}; }
+function authLoadSession(){
+  if(!_currentUser) return null;
+  var exp = AUTH._sesStart + AUTH.SESSION_MS;
+  if(Date.now() > exp) return null;
+  return {user:_currentUser.email, exp:exp};
+}
+function authClearSession(){ _currentUser=null; AUTH._sesStart=0; }
+function authBumpSession(){ if(_currentUser) AUTH._sesStart = Date.now(); }
 
 
 // ── Show / Hide app ──
