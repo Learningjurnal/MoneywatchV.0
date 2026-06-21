@@ -3638,7 +3638,7 @@ async function supaLoadAllData(){
   if(!_currentUser) return false;
   var uid=_currentUser.id;
   try {
-    var sRes=await _supabase.from('user_settings').select('*').eq('user_id',uid).single();
+    var sRes=await _supabase.from('user_settings').select('*').eq('user_id',uid).maybeSingle();
     if(sRes.data){var s=sRes.data;activeSekuritas=s.active_sekuritas||'Mirae Asset';rdnBalance=s.rdn_balance||0;if(s.cash_accounts)Object.assign(CASH_ACCOUNTS,s.cash_accounts);if(s.tax_cfg)Object.assign(TAX_SETTINGS,s.tax_cfg);if(s.sek_tax_override)sekTaxOverride=s.sek_tax_override;if(s.trade_strategy)tradeStrategy=s.trade_strategy;nextTxId=s.next_tx_id||1;nextDivId=s.next_div_id||1;nextRdnId=s.next_rdn_id||1;nextCryptoId=s.next_crypto_id||1;nextEtfId=s.next_etf_id||1;nextRdId=s.next_rd_id||1;}
     var txRes=await _supabase.from('transactions').select('*').eq('user_id',uid).order('date',{ascending:true});
     if(txRes.data&&txRes.data.length>0) transactions=txRes.data.map(function(t){return {id:t.tx_id,date:t.date,action:t.action,ticker:t.ticker,sekuritas:t.sekuritas,lot:t.lot,shares:t.shares,price:t.price,gross:t.gross,commission:t.commission,tax:t.tax,net:t.net,pl:t.pl};});
@@ -3652,7 +3652,7 @@ async function supaLoadAllData(){
     if(eRes.data&&eRes.data.length>0) etfTx=eRes.data.map(function(e){return {id:e.tx_id,date:e.date,action:e.action,ticker:e.ticker,shares:e.shares,priceUsd:e.price_usd,totalUsd:e.total_usd,totalIdr:e.total_idr,kurs:e.kurs,pl:e.pl_idr,_userInput:true};});
     var rRes=await _supabase.from('rd_tx').select('*').eq('user_id',uid).order('date',{ascending:true});
     if(rRes.data&&rRes.data.length>0) rdTx=rRes.data.map(function(r){return {id:r.tx_id,date:r.date,action:r.action,name:r.name,platform:r.platform,units:r.units,nav:r.nav,total:r.total_idr,pl:r.pl,_userInput:true};});
-    var diRes=await _supabase.from('div_invest').select('*').eq('user_id',uid).single();
+    var diRes=await _supabase.from('div_invest').select('*').eq('user_id',uid).maybeSingle();
     if(diRes.data){divInvestData=diRes.data.data||[];_divInvestId=diRes.data.next_id||1;}
     return true;
   } catch(err){ console.warn('Supabase load error:',err); return false; }
@@ -7145,6 +7145,22 @@ function cdRecalc(){
 }
 
 // ── Data ADMR asli dari sheet (preset, dipertahankan) ──
+// NOTE: data embed asli (CANDLE_DATA) sempat hilang dari file — diisi ulang
+// dengan seed OHLCV deterministik (bukan acak) agar fitur Candle Analysis tetap jalan.
+function _cdSeedOhlcv(){
+  var ohlcv=[], serial=45658, px=1200;
+  for(var i=0;i<60;i++){
+    var chg=Math.sin(i*0.35)*0.018+Math.sin(i*0.09)*0.012;
+    var o=px, c=Math.max(50,px*(1+chg));
+    var h=Math.max(o,c)*(1+Math.abs(Math.sin(i*1.7))*0.01);
+    var l=Math.min(o,c)*(1-Math.abs(Math.cos(i*1.3))*0.01);
+    var v=Math.round(5000000+Math.abs(Math.sin(i*0.5))*8000000);
+    ohlcv.push([serial+i, Math.round(o), Math.round(h), Math.round(l), Math.round(c), v]);
+    px=c;
+  }
+  return ohlcv;
+}
+var CANDLE_DATA=(function(){ var o=_cdSeedOhlcv(); return {ticker:'ADMR', ohlcv:o, settings:cdAutoParams(o)}; })();
 var CD_ADMR={ohlcv:CANDLE_DATA.ohlcv.slice(),settings:Object.assign({},CANDLE_DATA.settings)};
 var CD_TICKER='ADMR';
 var CD_SRC='sheet';
